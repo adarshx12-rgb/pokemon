@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Cormorant_Garamond, Inter, Press_Start_2P } from 'next/font/google';
 import { SmoothScroll } from '@/components/motion/SmoothScroll';
 import { Cursor } from '@/components/motion/Cursor';
+import { MarbleBackground } from '@/components/motion/MarbleBackground';
 import { SiteNav } from '@/components/SiteNav';
 import './globals.css';
 
@@ -17,7 +18,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${cormorant.variable} ${inter.variable} ${pixel.variable}`}>
-      <body className="min-h-screen bg-ink text-cream antialiased">
+      {/* No body background: the html element paints ink, so the fixed marble layer (z -10) shows through. */}
+      <body className="min-h-screen text-cream antialiased">
+        <MarbleBackground />
         <SmoothScroll>
           <Cursor />
           <SiteNav />

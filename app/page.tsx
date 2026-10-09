@@ -24,9 +24,9 @@ export default async function Home() {
   return (
     <main>
       <Hero card={card} />
-      <section className="grid gap-px border-y border-line bg-line md:grid-cols-2">
+      <section className="grid gap-px border-y border-line bg-line/60 md:grid-cols-2">
         {FEATURES.map(f => (
-          <Reveal key={f.href} className="bg-ink">
+          <Reveal key={f.href} className="bg-ink/75 backdrop-blur-sm">
             <Link href={f.href} className="group block p-10 md:p-16">
               <p className="eyebrow">{f.eyebrow}</p>
               <h2 className="mt-6 font-serif text-5xl transition group-hover:text-gold-light md:text-6xl">{f.title}</h2>

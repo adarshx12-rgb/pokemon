@@ -1,8 +1,11 @@
-/** fetch that retries 5xx responses and network errors (the public Pokémon APIs fail intermittently). */
+/**
+ * fetch that retries 5xx responses and network errors with linear backoff.
+ * The public Pokémon TCG API fails ~40% of calls, so the default allows 6 retries (~6s worst case).
+ */
 export async function fetchWithRetry(
   url: string,
   init: RequestInit,
-  { retries = 3, delayMs = 400 }: { retries?: number; delayMs?: number } = {},
+  { retries = 6, delayMs = 300 }: { retries?: number; delayMs?: number } = {},
 ): Promise<Response> {
   for (let attempt = 0; ; attempt++) {
     const last = attempt === retries;
@@ -12,6 +15,6 @@ export async function fetchWithRetry(
     } catch (err) {
       if (last) throw err;
     }
-    await new Promise(r => setTimeout(r, delayMs * 2 ** attempt));
+    await new Promise(r => setTimeout(r, delayMs * (attempt + 1)));
   }
 }

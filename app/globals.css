@@ -48,7 +48,7 @@ body { font-family: var(--font-sans); }
 /* Holographic foil overlay used by TiltCard */
 .foil-overlay {
   position: absolute; inset: 0; border-radius: 4.5%; pointer-events: none;
-  mix-blend-mode: color-dodge; opacity: 0.35;
+  mix-blend-mode: color-dodge; opacity: 0.22;
   background:
     radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.55), transparent 45%),
     repeating-linear-gradient(115deg, #f5d77a 0%, #ff7eb3 8%, #7afcff 16%, #feff9c 24%, #f5d77a 32%);

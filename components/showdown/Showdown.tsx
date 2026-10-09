@@ -3,7 +3,9 @@ import { useReducer, useState } from 'react';
 import type { EndEvent, Side } from '@/lib/battle/types';
 import { loadMember } from '@/lib/showdown/loadMember';
 import { EMPTY_TEAMS, randomFillCount, teamsReducer } from '@/lib/showdown/teams';
+import { BattleScreen } from './BattleScreen';
 import { MatchupPreview } from './MatchupPreview';
+import { ResultScreen } from './ResultScreen';
 import { TeamPanel } from './TeamPanel';
 
 type Phase = 'build' | 'battle' | 'result';
@@ -74,10 +76,24 @@ export function Showdown({ names }: { names: string[] }) {
       )}
 
       {phase === 'battle' && (
-        <div data-testid="battle-placeholder" data-seed={seed}>Battle screen — Task 14</div>
+        <BattleScreen
+          key={seed}
+          teamA={teams.A}
+          teamB={teams.B}
+          seed={seed}
+          onFinish={end => { setResult(end); setPhase('result'); }}
+        />
       )}
 
-      {phase === 'result' && result && <div>Result — Task 14</div>}
+      {phase === 'result' && result && (
+        <ResultScreen
+          result={result}
+          teamA={teams.A}
+          teamB={teams.B}
+          onRematch={startBattle}
+          onEdit={() => setPhase('build')}
+        />
+      )}
 
       {toast && (
         <div role="alert" className="border-gold-frame fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-4 rounded-full bg-surface px-6 py-3 text-sm">

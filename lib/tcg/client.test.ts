@@ -39,14 +39,31 @@ describe('getCards', () => {
 });
 
 describe('getCard', () => {
-  it('returns null for a 404 without consulting the snapshot', async () => {
-    fetchWithRetry.mockResolvedValue(json(404, {}));
+  it('returns the live card from the search endpoint', async () => {
+    fetchWithRetry.mockResolvedValue(json(200, { data: [raw('base1-4', 'Live Charizard')] }));
+    expect((await getCard('base1-4'))?.name).toBe('Live Charizard');
+    expect(fetchWithRetry.mock.calls[0][0]).toContain('/cards?q=');
+  });
+
+  it('returns null when the API finds no card, without consulting the snapshot', async () => {
+    fetchWithRetry.mockResolvedValue(json(200, { data: [] }));
     expect(await getCard('base1-4')).toBeNull();
+  });
+
+  it('returns null for malformed ids without calling the API', async () => {
+    expect(await getCard('x OR name:pikachu')).toBeNull();
+    expect(await getCard('')).toBeNull();
+    expect(fetchWithRetry).not.toHaveBeenCalled();
   });
 
   it('falls back to the snapshot on a 5xx', async () => {
     fetchWithRetry.mockResolvedValue(json(502, {}));
     expect((await getCard('base1-4'))?.name).toBe('Snapshot Charizard');
+  });
+
+  it('returns null (not an error) when the API is down and the snapshot lacks the id', async () => {
+    fetchWithRetry.mockResolvedValue(json(500, {}));
+    expect(await getCard('unknown-1')).toBeNull();
   });
 
   it('falls back to the snapshot on a network error', async () => {

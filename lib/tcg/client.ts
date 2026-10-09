@@ -29,17 +29,20 @@ function fromSnapshot(ids: string[], err: unknown): Card[] {
   return cards;
 }
 
+const CARD_ID = /^[a-z0-9][a-z0-9.-]*$/i;
+
+// Uses the search endpoint: the single-card endpoint answers 5xx for unknown ids, so "not found" can't be told apart from an outage.
 export async function getCard(id: string): Promise<Card | null> {
-  let res: Response;
+  if (!CARD_ID.test(id)) return null;
+  let raws: RawCard[];
   try {
-    res = await fetchWithRetry(`${API}/cards/${encodeURIComponent(id)}`, { headers: headers(), next: { revalidate: REVALIDATE } });
+    raws = await fetchRawCards([id]);
   } catch (err) {
-    return fromSnapshot([id], err)[0];
+    // Only showcase cards are linked, so an id the snapshot lacks is treated as not found.
+    return SNAPSHOT.some(c => c.id === id) ? fromSnapshot([id], err)[0] : null;
   }
-  if (res.status === 404) return null;
-  if (!res.ok) return fromSnapshot([id], new Error(`Pokémon TCG API returned ${res.status} for ${id}`))[0];
-  const json = (await res.json()) as { data: RawCard };
-  return normalizeCard(json.data);
+  const raw = raws.find(c => c.id === id);
+  return raw ? normalizeCard(raw) : null;
 }
 
 export async function getCards(ids: string[]): Promise<Card[]> {

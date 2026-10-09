@@ -1,8 +1,9 @@
 import { SHOWCASE } from '../data/showcase';
-import { getCards } from '../lib/tcg/client';
+import { fetchRawCards } from '../lib/tcg/client';
+import { normalizeCard } from '../lib/tcg/normalize';
 
 async function main() {
-  const cards = await getCards(SHOWCASE.map(s => s.id));
+  const cards = (await fetchRawCards(SHOWCASE.map(s => s.id))).map(normalizeCard);
   const found = new Map(cards.map(c => [c.id, c]));
   let problems = 0;
   for (const { id } of SHOWCASE) {

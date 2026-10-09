@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useReducedMotion } from 'framer-motion';
+import { CHAR_MS } from '@/lib/battle/pacing';
 
 // The parent remounts this with key={messageId}, so every new message types out from the start.
 export function TextBox({ message, speed }: { message: string; speed: number }) {
@@ -9,7 +10,7 @@ export function TextBox({ message, speed }: { message: string; speed: number }) 
 
   useEffect(() => {
     if (shown >= message.length) return;
-    const t = setTimeout(() => setShown(s => s + 1), (reduce ? 8 : 28) / speed);
+    const t = setTimeout(() => setShown(s => s + 1), (reduce ? 8 : CHAR_MS) / speed);
     return () => clearTimeout(t);
   }, [shown, message, speed, reduce]);
 

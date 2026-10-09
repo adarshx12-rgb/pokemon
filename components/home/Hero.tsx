@@ -8,9 +8,9 @@ import type { Card } from '@/lib/tcg/types';
 
 function SplitText({ text, charClassName = '' }: { text: string; charClassName?: string }) {
   return (
-    <span className="inline-block overflow-hidden pb-[0.1em] align-bottom" aria-label={text}>
+    <span className="inline-block overflow-hidden pb-[0.1em] align-bottom" aria-hidden>
       {[...text].map((c, i) => (
-        <span key={i} data-char aria-hidden className={`inline-block ${charClassName}`}>{c === ' ' ? ' ' : c}</span>
+        <span key={i} data-char className={`inline-block ${charClassName}`}>{c === ' ' ? ' ' : c}</span>
       ))}
     </span>
   );
@@ -38,6 +38,7 @@ export function Hero({ card }: { card: Card | null }) {
         <div>
           <p data-hero-fade className="eyebrow mb-6">The collector’s vault, since 1996</p>
           <h1 className="font-serif text-6xl leading-[0.95] md:text-8xl lg:text-9xl">
+            <span className="sr-only">Rare by design.</span>
             <SplitText text="Rare by" />
             <br />
             <SplitText text="design." charClassName="text-gold-gradient italic" />

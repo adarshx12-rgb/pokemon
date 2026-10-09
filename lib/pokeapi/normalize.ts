@@ -30,7 +30,20 @@ const STAT_KEYS: Record<string, keyof StatBlock> = {
   hp: 'hp', attack: 'atk', defense: 'def', 'special-attack': 'spa', 'special-defense': 'spd', speed: 'spe',
 };
 
+// Moves whose drawback (self-KO, recharge, charge turn, first-turn-only, sleeping target, delayed hit)
+// the engine does not simulate; left in, the best-move AI would pick them every turn for free.
+const EXCLUDED_MOVES = new Set([
+  'explosion', 'self-destruct', 'misty-explosion', 'mind-blown', 'steel-beam', 'chloroblast',
+  'hyper-beam', 'giga-impact', 'blast-burn', 'hydro-cannon', 'frenzy-plant', 'rock-wrecker', 'roar-of-time',
+  'prismatic-laser', 'eternabeam', 'meteor-assault',
+  'solar-beam', 'solar-blade', 'sky-attack', 'skull-bash', 'razor-wind', 'fly', 'dig', 'dive', 'bounce',
+  'phantom-force', 'shadow-force', 'meteor-beam', 'freeze-shock', 'ice-burn', 'electro-shot',
+  'focus-punch', 'dream-eater', 'fake-out', 'first-impression', 'future-sight', 'doom-desire',
+  'last-resort', 'belch', 'snore', 'synchronoise', 'burn-up', 'double-shock',
+]);
+
 export function normalizeMove(raw: RawMove): Move | null {
+  if (EXCLUDED_MOVES.has(raw.name)) return null;
   const cls = raw.damage_class.name;
   if (cls !== 'physical' && cls !== 'special') return null;
   if (!raw.power || raw.power <= 0) return null;

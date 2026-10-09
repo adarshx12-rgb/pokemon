@@ -2,7 +2,10 @@ import { test, expect } from '@playwright/test';
 
 test('home renders the hero', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Rare by');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName('Rare by design.');
+  // aria-label on a generic <span> is prohibited in ARIA 1.2, so the name must come from real (sr-only) text.
+  await expect(page.locator('h1 .sr-only')).toHaveText('Rare by design.');
+  await expect(page.locator('h1 [aria-label]')).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'Enter the Vault' })).toBeVisible();
 });
 

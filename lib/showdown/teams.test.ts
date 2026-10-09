@@ -33,6 +33,13 @@ describe('teamsReducer', () => {
   });
 });
 
+describe('fillRandom with no members', () => {
+  it('leaves a full team untouched instead of emptying it', () => {
+    const s = teamsReducer({ A: [], B: six }, { type: 'fillRandom', side: 'B', members: [] });
+    expect(s.B).toHaveLength(6);
+  });
+});
+
 describe('randomFillCount', () => {
   it('fills empties, or the whole team when full', () => {
     expect(randomFillCount([])).toBe(6);

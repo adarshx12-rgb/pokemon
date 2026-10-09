@@ -31,6 +31,12 @@ describe('normalizeMove', () => {
   });
 });
 
+describe('normalizeMove exclusions', () => {
+  it.each(['explosion', 'self-destruct', 'hyper-beam', 'giga-impact', 'blast-burn', 'focus-punch', 'dream-eater', 'solar-beam', 'fake-out', 'future-sight'])('drops %s (its drawback is not simulated)', name => {
+    expect(normalizeMove(rawMove(name, 'normal', 150, 'physical'))).toBeNull();
+  });
+});
+
 describe('normalizePokemon', () => {
   it('maps stats, slot-ordered types, sprites with fallbacks, and a deduped move pool', () => {
     const p = normalizePokemon(raw, [rawMove('flamethrower', 'fire', 90, 'special'), rawMove('flamethrower', 'fire', 90, 'special'), rawMove('roost', 'flying', null, 'status')]);

@@ -28,6 +28,7 @@ export function teamsReducer(state: Teams, action: TeamsAction): Teams {
           i === action.index ? { ...m, moves: m.moves.map((mv, s) => (s === action.slot ? action.move : mv)) } : m),
       };
     case 'fillRandom': {
+      if (action.members.length === 0) return state;
       const base = team.length >= MAX_TEAM ? [] : team;
       return { ...state, [action.side]: [...base, ...action.members].slice(0, MAX_TEAM) };
     }

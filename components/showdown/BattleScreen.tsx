@@ -2,12 +2,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TYPE_COLORS } from '@/data/typeColors';
 import { simulate } from '@/lib/battle/engine';
+import { eventDelay } from '@/lib/battle/pacing';
 import type { BattleEvent, EndEvent, Side, TeamMember } from '@/lib/battle/types';
 import { applyEvent, initView, teamNames, type BattleView } from '@/lib/battle/view';
 import { HpPanel } from './HpPanel';
 import { TextBox } from './TextBox';
 
-const DURATION: Record<BattleEvent['kind'], number> = { switchIn: 1200, useMove: 900, miss: 900, damage: 1100, faint: 1000, end: 1600 };
 const SPEEDS = [1, 2, 4] as const;
 
 type Fx = { key: number; kind: 'enter' | 'lunge' | 'hit' | 'faint'; side: Side; color?: string; strong?: boolean };
@@ -46,7 +46,7 @@ export function BattleScreen({ teamA, teamB, seed, onFinish }: Props) {
 
   useEffect(() => {
     if (!playing || index >= events.length) return;
-    const delay = index === 0 ? 300 : DURATION[events[index - 1].kind] / speed;
+    const delay = index === 0 ? 300 : eventDelay(events[index - 1].kind, view.message, speed);
     const t = setTimeout(() => {
       setView(v => applyEvent(v, events[index], names));
       const next = fxFor(events, index);
@@ -55,7 +55,7 @@ export function BattleScreen({ teamA, teamB, seed, onFinish }: Props) {
       setIndex(i => i + 1);
     }, delay);
     return () => clearTimeout(t);
-  }, [playing, index, speed, events, names]);
+  }, [playing, index, speed, events, names, view.message]);
 
   useEffect(() => {
     if (index < events.length) return;

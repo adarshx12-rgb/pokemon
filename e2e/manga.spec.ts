@@ -61,3 +61,11 @@ test('vault has no horizontal scroll at 375px', async ({ page }) => {
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(0);
 });
+
+test('card detail uses an ink frame and a speech-bubble note', async ({ page }) => {
+  await page.goto('/cards');
+  await page.getByTestId('card-tile').first().click();
+  await expect(page.getByRole('heading', { name: /identify value/i })).toBeVisible();
+  await expect(page.locator('main [data-ink-panel]').first()).toBeVisible();
+  await expect(page.locator('main blockquote')).toHaveCount(0);
+});

@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { TiltCard } from '@/components/TiltCard';
+import { InkPanel } from '@/components/manga/InkPanel';
 import { guideFor } from '@/data/identifyGuide';
 import type { Card } from '@/lib/tcg/types';
 
@@ -12,15 +13,17 @@ export function CardInspector({ card, children }: { card: Card; children: React.
   return (
     <div className="grid gap-16 lg:grid-cols-[minmax(0,28rem)_1fr]">
       <div className="mx-auto w-full max-w-md lg:sticky lg:top-32 lg:h-fit">
-        <TiltCard src={card.images.large} alt={`${card.name} — ${card.setName}`} width={734} height={1024} foil priority sizes="(min-width: 1024px) 448px, 90vw">
-          {region && (
-            <div
-              aria-hidden
-              className="pointer-events-none absolute rounded-md border-2 border-gold-light shadow-[0_0_0_9999px_rgba(10,10,10,0.55),0_0_24px_rgba(245,215,122,0.8)] transition-all duration-300"
-              style={{ left: `${region.x}%`, top: `${region.y}%`, width: `${region.w}%`, height: `${region.h}%` }}
-            />
-          )}
-        </TiltCard>
+        <InkPanel className="screentone p-6">
+          <TiltCard src={card.images.large} alt={`${card.name} — ${card.setName}`} width={734} height={1024} foil priority sizes="(min-width: 1024px) 448px, 90vw">
+            {region && (
+              <div
+                aria-hidden
+                className="pointer-events-none absolute rounded-md border-2 border-gold-light shadow-[0_0_0_9999px_rgba(10,10,10,0.55),0_0_24px_rgba(245,215,122,0.8)] transition-all duration-300"
+                style={{ left: `${region.x}%`, top: `${region.y}%`, width: `${region.w}%`, height: `${region.h}%` }}
+              />
+            )}
+          </TiltCard>
+        </InkPanel>
       </div>
       <div className="space-y-12">
         {children}

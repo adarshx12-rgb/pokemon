@@ -25,7 +25,7 @@ export default async function CardsPage() {
           <div aria-hidden className="halftone-fade absolute inset-0" />
           <div className="relative max-w-3xl">
             <p className="caption-box">Ranked rarest to most common</p>
-            <h1 className="mt-4 font-display text-7xl uppercase md:text-9xl">The <span className="text-gold-gradient emph">Vault</span></h1>
+            <h1 className="mt-4 font-display text-6xl uppercase sm:text-7xl md:text-9xl">The <span className="text-gold-gradient emph">Vault</span></h1>
             <p className="mt-6 max-w-xl text-muted">
               Estimated market prices from TCGplayer (USD) and Cardmarket (EUR), refreshed daily. Raw, ungraded copies. Graded copies can sell for many times more.
             </p>

@@ -15,7 +15,7 @@ export function FeaturePanels() {
         <PanelReveal key={f.href} dir={f.dir}>
           <InkPanel shape={f.shape} className="group h-full">
             <div aria-hidden className="speed-lines absolute inset-0 scale-90 opacity-0 transition duration-500 group-hover:scale-100 group-hover:opacity-100" />
-            <Link href={f.href} className="relative block p-10 transition duration-500 group-hover:scale-[1.02] md:p-16">
+            <Link href={f.href} className="relative block p-10 focus-visible:outline-2 focus-visible:-outline-offset-8 focus-visible:outline-gold-light transition duration-500 group-hover:scale-[1.02] md:p-16">
               <p className="caption-box">{f.eyebrow}</p>
               <h2 className="mt-6 font-display text-4xl transition group-hover:text-gold-light md:text-5xl">{f.title}</h2>
               <p className="mt-6 max-w-md text-muted">{f.body}</p>

@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import sharp from 'sharp';
 import { DECOR } from '../lib/manga/decor';
@@ -19,6 +19,10 @@ async function main() {
     const info = await sharp(src).resize({ width: MAX_WIDTH[name], withoutEnlargement: true }).webp({ quality: 70 }).toFile(join(OUT, `${name}.webp`));
     console.log(`${name}.webp ${Math.round(info.size / 1024)} KB`);
   }
+  // decorSrc() reads this manifest instead of checking public/ at runtime.
+  const available = DECOR.filter(name => existsSync(join(OUT, `${name}.webp`)));
+  writeFileSync(join(process.cwd(), 'lib', 'manga', 'decor-manifest.json'), `${JSON.stringify(available)}
+`);
 }
 
 main();

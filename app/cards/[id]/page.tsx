@@ -34,7 +34,7 @@ export default async function CardPage({ params }: Params) {
         <CardInspector card={card}>
           <header>
             <p className="caption-box">{TIER_META[card.tier].label} tier, {card.rarity ?? 'unknown rarity'}</p>
-            <h1 className="mt-4 font-display text-6xl md:text-7xl">{card.name}</h1>
+            <h1 className="mt-4 font-display text-4xl break-words sm:text-6xl md:text-7xl">{card.name}</h1>
             <p className="mt-2 text-muted">{card.setName} ({card.setSeries}), #{card.number}, {card.releaseDate.slice(0, 4)}</p>
           </header>
           <PricePanel price={card.price} />

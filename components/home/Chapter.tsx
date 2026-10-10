@@ -44,13 +44,14 @@ export function Chapter({ vaultDoorSrc, arenaSrc }: { vaultDoorSrc: string | nul
       // Zoom through the last panel, then fade it so it never spills over the next section.
       tl.to(last, { scale: 2.4, zIndex: 30, duration: 1.2, ease: 'power2.in' }, '+=0.3');
       tl.to(panels.slice(0, -1), { opacity: 0, duration: 0.6 }, '<');
-      tl.to(last, { opacity: 0, duration: 0.5 }, '-=0.5');
+      // autoAlpha also sets visibility:hidden, so the scaled-up panel can't block clicks or keep focus.
+      tl.to(last, { autoAlpha: 0, duration: 0.5 }, '-=0.5');
     });
     return () => mm.revert();
   }, []);
 
   return (
-    <section ref={root} data-testid="chapter" aria-label="How the vault works" className="relative px-4 py-16 md:flex md:h-screen md:items-center md:px-10 md:py-0">
+    <section ref={root} data-testid="chapter" aria-label="How the vault works" className="relative overflow-x-clip px-4 py-16 md:flex md:h-screen md:items-center md:px-10 md:py-0">
       <div className="grid w-full gap-3 md:h-[86vh] md:grid-cols-6 md:grid-rows-2">
         <div data-chapter-panel className="min-h-64 md:col-span-3">
           <InkPanel shape={SHAPES.tiltL} as="article" className="h-full">
@@ -63,11 +64,11 @@ export function Chapter({ vaultDoorSrc, arenaSrc }: { vaultDoorSrc: string | nul
         </div>
         <div data-chapter-panel className="min-h-64 md:col-span-3">
           <InkPanel shape={SHAPES.tiltR} as="article" className="screentone h-full">
-            <div className="flex h-full flex-col justify-between p-8">
-              <h2 className="font-display text-4xl md:text-5xl">Ranked by <span className="emph text-gold-gradient">rarity</span></h2>
-              <ol className="mt-6 space-y-1 font-display text-lg uppercase">
+            <div className="flex h-full flex-col justify-between p-6 2xl:p-8">
+              <h2 className="font-display text-3xl 2xl:text-5xl">Ranked by <span className="emph text-gold-gradient">rarity</span></h2>
+              <ol className="mt-4 grid grid-cols-2 gap-x-4 gap-y-0.5 font-display text-sm uppercase 2xl:text-lg">
                 {TIER_ORDER.map((t, i) => (
-                  <li key={t} style={{ opacity: 1 - i * 0.13 }}>
+                  <li key={t} style={{ opacity: 1 - i * 0.06 }}>
                     <span className="mr-3 text-gold">{String(i + 1).padStart(2, '0')}</span>{TIER_META[t].label}
                   </li>
                 ))}

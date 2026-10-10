@@ -38,7 +38,7 @@ export function TierBand({ tier, cards, rank, backdropSrc = null }: { tier: Tier
           {TONE[tier] && <div aria-hidden className={`${TONE[tier]} absolute inset-0`} />}
           <div className="relative">
             <p className="caption-box">Tier {String(rank).padStart(2, '0')}</p>
-            <h2 className={`mt-4 font-display text-6xl uppercase md:text-8xl ${ACCENT[tier]}`}>{meta.label}</h2>
+            <h2 className={`mt-4 font-display text-4xl uppercase sm:text-6xl md:text-8xl ${ACCENT[tier]}`}>{meta.label}</h2>
           </div>
           <p className="relative max-w-sm text-sm text-muted">{meta.blurb}</p>
         </InkPanel>

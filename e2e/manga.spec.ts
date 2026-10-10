@@ -75,3 +75,63 @@ test('does not preload every CJK font slice', async ({ page }) => {
   await page.goto('/');
   expect(await page.locator('link[rel="preload"][as="font"]').count()).toBeLessThanOrEqual(6);
 });
+
+// ---- Final-review fixes ----
+
+const overflowX = (page: import('@playwright/test').Page) =>
+  page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+
+/** Headings whose text is wider than their own box (clipped by an overflow-hidden panel). */
+const clippedHeadings = (page: import('@playwright/test').Page) =>
+  page.evaluate(() => [...document.querySelectorAll('h1, h2')]
+    .filter(h => !h.closest('.sr-only') && h.scrollWidth > h.clientWidth + 1)
+    .map(h => h.textContent));
+
+for (const path of ['/cards', '/cards/base1-46', '/cards/base1-24', '/showdown']) {
+  test(`headings fit at 375px on ${path}`, async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto(path);
+    await page.waitForLoadState('networkidle');
+    expect(await overflowX(page)).toBeLessThanOrEqual(0);
+    expect(await clippedHeadings(page)).toEqual([]);
+  });
+}
+
+test('after the chapter zoom, nothing overflows or blocks the feature links', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  await page.mouse.move(700, 450);
+  for (let i = 0; i < 12; i++) { await page.mouse.wheel(0, 600); await page.waitForTimeout(250); }
+  await page.waitForTimeout(1500);
+  expect(await overflowX(page)).toBeLessThanOrEqual(0);
+  const link = page.getByRole('link', { name: /Six against six/ });
+  await link.scrollIntoViewIfNeeded();
+  const box = (await link.boundingBox())!;
+  const hit = await page.evaluate(([x, y]) => !!document.elementFromPoint(x, y)?.closest('a[href="/showdown"]'), [box.x + 30, box.y + box.height / 2]);
+  expect(hit).toBe(true);
+});
+
+test('feature panel links show a visible focus ring inside the panel', async ({ page }) => {
+  await page.goto('/');
+  const link = page.locator('a[href="/showdown"]').filter({ hasText: 'Six against six' });
+  await link.focus();
+  const style = await link.evaluate(el => { const s = getComputedStyle(el); return { w: parseFloat(s.outlineWidth), o: parseFloat(s.outlineOffset), st: s.outlineStyle }; });
+  expect(style.st).not.toBe('none');
+  expect(style.w).toBeGreaterThanOrEqual(2);
+  expect(style.o).toBeLessThan(0);
+});
+
+test.describe('short desktop viewport', () => {
+  test.use({ reducedMotion: 'reduce', viewport: { width: 1280, height: 600 } });
+  test('chapter panel content is not clipped', async ({ page }) => {
+    await page.goto('/');
+    const clipped = await page.getByTestId('chapter').locator('[data-ink-panel]').evaluateAll(els => els.filter(e => e.scrollHeight > e.clientHeight + 1).length);
+    expect(clipped).toBe(0);
+  });
+});
+
+test('chapter tier list keeps AA-level opacity', async ({ page }) => {
+  await page.goto('/');
+  const opacities = await page.getByTestId('chapter').locator('ol li').evaluateAll(els => els.map(e => parseFloat(getComputedStyle(e).opacity)));
+  expect(Math.min(...opacities)).toBeGreaterThanOrEqual(0.7);
+});

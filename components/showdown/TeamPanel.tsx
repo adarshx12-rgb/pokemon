@@ -22,7 +22,7 @@ export function TeamPanel({ side, title, team, names, loading, dispatch, onAdd, 
   return (
     <section className="border-gold-frame rounded-3xl bg-surface/60 p-6 md:p-8">
       <div className="mb-6 flex items-center justify-between gap-4">
-        <h2 className="font-display text-4xl">{title}</h2>
+        <h2 className="font-display text-2xl sm:text-4xl">{title}</h2>
         {onRandomize && (
           <button type="button" data-testid="randomize" onClick={onRandomize} disabled={loading} className="btn-ghost !px-5 !py-2 text-xs">
             🎲 Randomize

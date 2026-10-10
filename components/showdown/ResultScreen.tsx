@@ -29,7 +29,7 @@ export function ResultScreen({ result, teamA, teamB, onRematch, onEdit }: Props)
 
   return (
     <div className="mx-auto max-w-4xl text-center">
-      <h2 data-testid="result-banner" className={`font-display text-7xl italic sm:text-8xl md:text-[10rem] ${won ? 'text-gold-gradient' : 'text-muted'}`}>
+      <h2 data-testid="result-banner" className={`font-display text-5xl italic sm:text-8xl md:text-[10rem] ${won ? 'text-gold-gradient' : 'text-muted'}`}>
         {won ? 'VICTORY' : 'DEFEAT'}
       </h2>
       {result.reason === 'turnCap' && <p className="text-sm text-muted">Decided on remaining HP after the 500-turn limit.</p>}

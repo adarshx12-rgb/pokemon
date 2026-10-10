@@ -16,8 +16,8 @@ export function InkPanel({ shape = RECT, className = '', style, children, as: Ta
       {children}
       <svg aria-hidden className="pointer-events-none absolute inset-0 z-20 size-full [filter:url(#ink-rough)]" viewBox="0 0 100 100" preserveAspectRatio="none">
         {/* Strokes are centred on the clip edge, so only the inner half shows: 6px gold band under a 3px cream line. */}
-        <polygon data-ink-stroke points={points} pathLength={1} strokeDasharray={1} fill="none" stroke="var(--color-gold)" strokeOpacity={0.5} strokeWidth={12} vectorEffect="non-scaling-stroke" />
-        <polygon data-ink-stroke points={points} pathLength={1} strokeDasharray={1} fill="none" stroke="var(--color-cream)" strokeWidth={6} vectorEffect="non-scaling-stroke" />
+        <polygon data-ink-stroke points={points} fill="none" stroke="var(--color-gold)" strokeOpacity={0.5} strokeWidth={12} vectorEffect="non-scaling-stroke" />
+        <polygon data-ink-stroke points={points} fill="none" stroke="var(--color-cream)" strokeWidth={6} vectorEffect="non-scaling-stroke" />
       </svg>
     </Tag>
   );

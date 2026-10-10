@@ -3,6 +3,7 @@ import { Hero } from '@/components/home/Hero';
 import { PanelReveal } from '@/components/manga/PanelReveal';
 import { FEATURED_CARD_ID } from '@/data/showcase';
 import { getCard } from '@/lib/tcg/client';
+import { decorSrc } from '@/lib/manga/decor';
 
 export const revalidate = 86400;
 
@@ -23,7 +24,7 @@ export default async function Home() {
   const card = await featuredCard();
   return (
     <main>
-      <Hero card={card} />
+      <Hero card={card} handSrc={decorSrc('hero-hand')} />
       <section className="grid gap-px border-y border-line bg-line/60 md:grid-cols-2">
         {FEATURES.map(f => (
           <PanelReveal key={f.href} className="bg-ink/75 backdrop-blur-sm">

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Hero } from '@/components/home/Hero';
-import { Reveal } from '@/components/motion/Reveal';
+import { PanelReveal } from '@/components/manga/PanelReveal';
 import { FEATURED_CARD_ID } from '@/data/showcase';
 import { getCard } from '@/lib/tcg/client';
 
@@ -26,14 +26,14 @@ export default async function Home() {
       <Hero card={card} />
       <section className="grid gap-px border-y border-line bg-line/60 md:grid-cols-2">
         {FEATURES.map(f => (
-          <Reveal key={f.href} className="bg-ink/75 backdrop-blur-sm">
+          <PanelReveal key={f.href} className="bg-ink/75 backdrop-blur-sm">
             <Link href={f.href} className="group block p-10 md:p-16">
               <p className="eyebrow">{f.eyebrow}</p>
               <h2 className="mt-6 font-display text-5xl transition group-hover:text-gold-light md:text-6xl">{f.title}</h2>
               <p className="mt-6 max-w-md text-muted">{f.body}</p>
               <span className="mt-10 inline-block border-b border-gold/40 pb-1 text-sm text-gold transition group-hover:border-gold">Explore</span>
             </Link>
-          </Reveal>
+          </PanelReveal>
         ))}
       </section>
       <footer className="px-6 py-16 text-center text-xs text-muted md:px-16">

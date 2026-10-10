@@ -10,7 +10,7 @@ export function CardTile({ card }: { card: Card }) {
       <TiltCard src={card.images.small} alt={`${card.name} — ${card.setName}`} width={245} height={342} foil={foil} sizes="(min-width: 1024px) 240px, 45vw" />
       <div className="mt-4 flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
         <div className="min-w-0">
-          <h3 className="font-serif text-xl leading-tight transition group-hover:text-gold-light">{card.name}</h3>
+          <h3 className="font-display text-xl leading-tight transition group-hover:text-gold-light">{card.name}</h3>
           <p className="truncate text-xs text-muted">{card.setName}, #{card.number}</p>
         </div>
         <div className="shrink-0 sm:text-right">

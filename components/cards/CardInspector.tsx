@@ -25,7 +25,7 @@ export function CardInspector({ card, children }: { card: Card; children: React.
       <div className="space-y-12">
         {children}
         <section>
-          <h2 className="font-serif text-4xl">How to <span className="text-gold-gradient italic">identify value</span></h2>
+          <h2 className="font-display text-4xl">How to <span className="text-gold-gradient emph">identify value</span></h2>
           <p className="mt-2 text-sm text-muted">Hover or focus each point to see where to look on the card.</p>
           <ol className="mt-8 divide-y divide-line border-y border-line">
             {items.map((item, i) => (
@@ -38,7 +38,7 @@ export function CardInspector({ card, children }: { card: Card; children: React.
                   onBlur={() => setActive(null)}
                   className={`flex w-full gap-6 py-6 text-left transition focus-visible:outline focus-visible:outline-gold ${active === item.key ? 'text-gold-light' : ''}`}
                 >
-                  <span className="font-serif text-2xl text-gold">{i + 1}</span>
+                  <span className="font-display text-2xl text-gold">{i + 1}</span>
                   <span>
                     <span className="block font-semibold">{item.title}</span>
                     <span className="mt-1 block text-sm text-muted">{item.body}</span>

@@ -12,7 +12,7 @@ export function ResultScreen({ result, teamA, teamB, onRematch, onEdit }: Props)
     return (
       <div className="border-gold-frame rounded-3xl bg-surface/60 p-6">
         <p className="text-sm text-muted">{title}</p>
-        <p className="mt-2 font-serif text-3xl">MVP: <span className="text-gold-gradient italic">{displayName(team[mvp].pokemon.name)}</span></p>
+        <p className="mt-2 font-display text-3xl">MVP: <span className="text-gold-gradient italic">{displayName(team[mvp].pokemon.name)}</span></p>
         <ul className="mt-6 space-y-3">
           {team.map((m, i) => (
             <li key={i} className="text-sm">
@@ -29,7 +29,7 @@ export function ResultScreen({ result, teamA, teamB, onRematch, onEdit }: Props)
 
   return (
     <div className="mx-auto max-w-4xl text-center">
-      <h2 data-testid="result-banner" className={`font-serif text-7xl italic sm:text-8xl md:text-[10rem] ${won ? 'text-gold-gradient' : 'text-muted'}`}>
+      <h2 data-testid="result-banner" className={`font-display text-7xl italic sm:text-8xl md:text-[10rem] ${won ? 'text-gold-gradient' : 'text-muted'}`}>
         {won ? 'VICTORY' : 'DEFEAT'}
       </h2>
       {result.reason === 'turnCap' && <p className="text-sm text-muted">Decided on remaining HP after the 500-turn limit.</p>}

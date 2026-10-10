@@ -12,7 +12,7 @@ export function MatchupPreview({ a, b }: { a: TeamMember[]; b: TeamMember[] }) {
       {rows.map(r => (
         <div key={r.label}>
           <p className="text-sm text-muted">{r.label}</p>
-          <p className="mt-2 font-serif text-4xl">
+          <p className="mt-2 font-display text-4xl">
             <span className="text-gold-gradient">{r.value}</span>
             <span className="text-muted"> / {r.of}</span>
           </p>

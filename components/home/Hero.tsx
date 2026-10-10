@@ -37,11 +37,11 @@ export function Hero({ card }: { card: Card | null }) {
       <div className="relative z-10 grid w-full items-center gap-16 md:grid-cols-[1.2fr_1fr]">
         <div>
           <p data-hero-fade className="eyebrow mb-6">The collector’s vault, since 1996</p>
-          <h1 className="font-serif text-6xl leading-[0.95] md:text-8xl lg:text-9xl">
+          <h1 className="font-display text-6xl leading-[0.95] md:text-8xl lg:text-9xl">
             <span className="sr-only">Rare by design.</span>
             <SplitText text="Rare by" />
             <br />
-            <SplitText text="design." charClassName="text-gold-gradient italic" />
+            <span className="emph"><SplitText text="design." charClassName="text-gold-gradient" /></span>
           </h1>
           <p data-hero-fade className="mt-8 max-w-md text-lg text-muted">
             Pokémon cards ranked from grail to common, with live estimated prices and a guide to what makes each one valuable.

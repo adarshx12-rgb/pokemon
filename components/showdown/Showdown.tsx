@@ -56,7 +56,7 @@ export function Showdown({ names }: { names: string[] }) {
     <main className="px-6 pb-32 pt-36 md:px-16">
       <header className="mb-16 max-w-3xl">
         <p className="eyebrow">Stats, speed and type matchups</p>
-        <h1 className="mt-4 font-serif text-7xl md:text-9xl"><span className="text-gold-gradient italic">Showdown</span></h1>
+        <h1 className="mt-4 font-display text-7xl md:text-9xl"><span className="text-gold-gradient italic">Showdown</span></h1>
         <p className="mt-6 max-w-xl text-muted">Build two teams of up to six. Every Pokémon fights at level 50 and always uses its strongest move against the current opponent.</p>
       </header>
 

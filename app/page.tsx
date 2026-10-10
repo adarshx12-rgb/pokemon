@@ -29,7 +29,7 @@ export default async function Home() {
           <Reveal key={f.href} className="bg-ink/75 backdrop-blur-sm">
             <Link href={f.href} className="group block p-10 md:p-16">
               <p className="eyebrow">{f.eyebrow}</p>
-              <h2 className="mt-6 font-serif text-5xl transition group-hover:text-gold-light md:text-6xl">{f.title}</h2>
+              <h2 className="mt-6 font-display text-5xl transition group-hover:text-gold-light md:text-6xl">{f.title}</h2>
               <p className="mt-6 max-w-md text-muted">{f.body}</p>
               <span className="mt-10 inline-block border-b border-gold/40 pb-1 text-sm text-gold transition group-hover:border-gold">Explore</span>
             </Link>

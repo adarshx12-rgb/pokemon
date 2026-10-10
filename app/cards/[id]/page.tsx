@@ -33,11 +33,11 @@ export default async function CardPage({ params }: Params) {
         <CardInspector card={card}>
           <header>
             <p className="eyebrow">{TIER_META[card.tier].label} tier, {card.rarity ?? 'unknown rarity'}</p>
-            <h1 className="mt-4 font-serif text-6xl md:text-7xl">{card.name}</h1>
+            <h1 className="mt-4 font-display text-6xl md:text-7xl">{card.name}</h1>
             <p className="mt-2 text-muted">{card.setName} ({card.setSeries}), #{card.number}, {card.releaseDate.slice(0, 4)}</p>
           </header>
           <PricePanel price={card.price} />
-          {note && <blockquote className="border-l-2 border-gold pl-6 font-serif text-2xl italic text-cream/90">{note}</blockquote>}
+          {note && <blockquote className="border-l-2 border-gold pl-6 font-display text-2xl italic text-cream/90">{note}</blockquote>}
         </CardInspector>
       </div>
     </main>

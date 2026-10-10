@@ -19,7 +19,7 @@ export function TierBand({ tier, cards, rank }: { tier: Tier; cards: Card[]; ran
       <Reveal className="mb-12 flex flex-col gap-4 border-b border-line pb-8 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="eyebrow">Tier {String(rank).padStart(2, '0')}</p>
-          <h2 className={`font-serif text-6xl italic md:text-8xl ${ACCENT[tier]}`}>{meta.label}</h2>
+          <h2 className={`font-display text-6xl md:text-8xl ${ACCENT[tier]}`}>{meta.label}</h2>
         </div>
         <p className="max-w-sm text-sm text-muted">{meta.blurb}</p>
       </Reveal>

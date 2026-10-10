@@ -19,15 +19,15 @@ export function TierIndex({ tiers }: { tiers: Tier[] }) {
 
   return (
     <nav aria-label="Rarity tiers" className="sticky top-32 hidden h-fit w-40 shrink-0 lg:block">
-      <ol className="space-y-3">
+      <ol className="space-y-2">
         {tiers.map(t => (
           <li key={t}>
             <a
               href={`#tier-${t}`}
               aria-current={active === t ? 'true' : undefined}
-              className={`flex items-center gap-3 text-xs uppercase tracking-[0.3em] transition ${active === t ? 'text-gold-light' : 'text-muted hover:text-cream'}`}
+              className={`flex items-center gap-3 border-2 px-3 py-2 font-display text-xs uppercase tracking-widest transition ${active === t ? 'border-cream bg-gold text-ink' : 'border-line text-muted hover:border-cream hover:text-cream'}`}
             >
-              <span className={`h-px transition-all ${active === t ? 'w-8 bg-gold' : 'w-4 bg-line'}`} />
+              <span className={active === t ? 'text-ink' : 'text-gold'}>{String(tiers.indexOf(t) + 1).padStart(2, '0')}</span>
               {TIER_META[t].label}
             </a>
           </li>

@@ -46,3 +46,18 @@ test.describe('reduced motion', () => {
     }
   });
 });
+
+test('vault tiers are manga pages with at most one splash each', async ({ page }) => {
+  await page.goto('/cards');
+  const bands = page.getByTestId('tier-band');
+  await expect(bands.first().locator('[data-ink-panel]').first()).toBeVisible();
+  const splashCounts = await bands.evaluateAll(els => els.map(e => e.querySelectorAll('[data-splash]').length));
+  for (const n of splashCounts) expect(n).toBeLessThanOrEqual(1);
+});
+
+test('vault has no horizontal scroll at 375px', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/cards');
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(0);
+});

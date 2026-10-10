@@ -26,3 +26,23 @@ test('no failed decor requests and no horizontal scroll at 375px', async ({ page
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(0);
 });
+
+test('home chapter shows five panels', async ({ page }) => {
+  await page.goto('/');
+  const chapter = page.getByTestId('chapter');
+  await chapter.scrollIntoViewIfNeeded();
+  await expect(chapter.locator('[data-chapter-panel]')).toHaveCount(5);
+});
+
+test.describe('reduced motion', () => {
+  test.use({ reducedMotion: 'reduce' });
+  test('every chapter panel is visible without scrolling animation', async ({ page }) => {
+    await page.goto('/');
+    const panels = page.getByTestId('chapter').locator('[data-chapter-panel]');
+    for (let i = 0; i < 5; i++) {
+      await panels.nth(i).scrollIntoViewIfNeeded();
+      await expect(panels.nth(i)).toBeVisible();
+      expect(await panels.nth(i).evaluate(el => getComputedStyle(el).opacity)).toBe('1');
+    }
+  });
+});

@@ -97,9 +97,6 @@ body { font-family: var(--font-sans); }
   }
 }
 
-@media (pointer: fine) {
-  body.has-cursor, body.has-cursor * { cursor: none; }
-}
 
 /* Holographic foil overlay used by TiltCard */
 .foil-overlay {

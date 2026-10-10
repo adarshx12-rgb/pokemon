@@ -135,3 +135,14 @@ test('chapter tier list keeps AA-level opacity', async ({ page }) => {
   const opacities = await page.getByTestId('chapter').locator('ol li').evaluateAll(els => els.map(e => parseFloat(getComputedStyle(e).opacity)));
   expect(Math.min(...opacities)).toBeGreaterThanOrEqual(0.7);
 });
+
+test('uses the default system cursor', async ({ page }) => {
+  // Headless Chrome reports no fine pointer, so the custom cursor never mounts here; check the CSS that hid the real one instead.
+  await page.goto('/');
+  const hidesCursor = await page.evaluate(() => {
+    const walk = (rules: CSSRuleList): boolean => [...rules].some(r =>
+      (r instanceof CSSStyleRule && r.style.cursor === 'none') || ('cssRules' in r && walk((r as CSSGroupingRule).cssRules)));
+    return [...document.styleSheets].some(sheet => { try { return walk(sheet.cssRules); } catch { return false; } });
+  });
+  expect(hidesCursor).toBe(false);
+});

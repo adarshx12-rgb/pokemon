@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { Dela_Gothic_One, Press_Start_2P, Zen_Kaku_Gothic_New } from 'next/font/google';
 import { SmoothScroll } from '@/components/motion/SmoothScroll';
-import { Cursor } from '@/components/motion/Cursor';
 import { MarbleBackground } from '@/components/motion/MarbleBackground';
 import { InkDefs } from '@/components/manga/InkDefs';
 import { SiteNav } from '@/components/SiteNav';
@@ -26,7 +25,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <InkDefs />
         <MarbleBackground />
         <SmoothScroll>
-          <Cursor />
           <SiteNav />
           {children}
         </SmoothScroll>

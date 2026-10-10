@@ -7,8 +7,10 @@ import { InkDefs } from '@/components/manga/InkDefs';
 import { SiteNav } from '@/components/SiteNav';
 import './globals.css';
 
-const dela = Dela_Gothic_One({ subsets: ['latin'], weight: '400', variable: '--font-dela' });
-const zenKaku = Zen_Kaku_Gothic_New({ subsets: ['latin'], weight: ['400', '500', '700'], variable: '--font-zen-kaku' });
+// Japanese fonts ship ~120 unicode-range slices each and next/font would preload every one (~3 MB before
+// first paint). Without preload, the browser fetches only the slices a page actually uses.
+const dela = Dela_Gothic_One({ subsets: ['latin'], weight: '400', variable: '--font-dela', preload: false });
+const zenKaku = Zen_Kaku_Gothic_New({ subsets: ['latin'], weight: ['400', '500', '700'], variable: '--font-zen-kaku', preload: false });
 const pixel = Press_Start_2P({ subsets: ['latin'], weight: '400', variable: '--font-press-start' });
 
 export const metadata: Metadata = {

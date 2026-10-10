@@ -69,3 +69,9 @@ test('card detail uses an ink frame and a speech-bubble note', async ({ page }) 
   await expect(page.locator('main [data-ink-panel]').first()).toBeVisible();
   await expect(page.locator('main blockquote')).toHaveCount(0);
 });
+
+test('does not preload every CJK font slice', async ({ page }) => {
+  // Dela Gothic One and Zen Kaku ship ~120 unicode-range slices each; preloading them all cost ~3 MB before first paint.
+  await page.goto('/');
+  expect(await page.locator('link[rel="preload"][as="font"]').count()).toBeLessThanOrEqual(6);
+});

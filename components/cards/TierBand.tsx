@@ -34,6 +34,7 @@ export function TierBand({ tier, cards, rank, backdropSrc = null }: { tier: Tier
       <PanelReveal dir={rank % 2 ? 'left' : 'right'} className="mb-3">
         <InkPanel shape={rank % 2 ? SHAPES.tiltL : SHAPES.tiltR} className="flex min-h-56 flex-col justify-end gap-4 p-8 md:flex-row md:items-end md:justify-between md:p-12">
           {backdropSrc && <Image src={backdropSrc} alt="" fill sizes="100vw" className="object-cover opacity-60" />}
+          {backdropSrc && <div aria-hidden className="absolute inset-0 bg-linear-to-r from-ink/80 via-transparent to-ink/90" />}
           {TONE[tier] && <div aria-hidden className={`${TONE[tier]} absolute inset-0`} />}
           <div className="relative">
             <p className="caption-box">Tier {String(rank).padStart(2, '0')}</p>

@@ -7,11 +7,16 @@ const SRC = join(process.cwd(), 'design-assets', 'decor');
 const OUT = join(process.cwd(), 'public', 'decor');
 mkdirSync(OUT, { recursive: true });
 
+/** Widest each image is ever shown (CSS px × 2 for retina, capped); the hero inset is small. */
+const MAX_WIDTH: Record<(typeof DECOR)[number], number> = {
+  'hero-hand': 1100, 'vault-door': 1600, arena: 1600, 'vault-shelves': 1920, 'grail-spotlight': 1600,
+};
+
 async function main() {
   for (const name of DECOR) {
     const src = join(SRC, `${name}.png`);
     if (!existsSync(src)) { console.log(`skip ${name} (no PNG)`); continue; }
-    const info = await sharp(src).resize({ width: 1920, withoutEnlargement: true }).webp({ quality: 78 }).toFile(join(OUT, `${name}.webp`));
+    const info = await sharp(src).resize({ width: MAX_WIDTH[name], withoutEnlargement: true }).webp({ quality: 70 }).toFile(join(OUT, `${name}.webp`));
     console.log(`${name}.webp ${Math.round(info.size / 1024)} KB`);
   }
 }

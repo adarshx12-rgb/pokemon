@@ -21,6 +21,7 @@ export default async function CardsPage() {
       <header className="mb-16">
         <InkPanel shape={SHAPES.banner} className="flex min-h-[22rem] items-end p-8 md:min-h-[28rem] md:p-14">
           {shelves && <Image src={shelves} alt="" fill priority sizes="100vw" className="object-cover opacity-70" />}
+          {shelves && <div aria-hidden className="absolute inset-0 bg-linear-to-r from-ink via-ink/70 to-transparent" />}
           <div aria-hidden className="halftone-fade absolute inset-0" />
           <div className="relative max-w-3xl">
             <p className="caption-box">Ranked rarest to most common</p>
@@ -29,7 +30,7 @@ export default async function CardsPage() {
               Estimated market prices from TCGplayer (USD) and Cardmarket (EUR), refreshed daily. Raw, ungraded copies. Graded copies can sell for many times more.
             </p>
           </div>
-          <SfxText className="absolute right-6 top-6 text-5xl md:right-12 md:top-10 md:text-7xl">ズラッ</SfxText>
+          <SfxText className="absolute right-12 top-10 text-7xl max-md:hidden">ズラッ</SfxText>
         </InkPanel>
       </header>
       <div className="flex gap-16">

@@ -12,7 +12,11 @@ import { SHAPES, WIPE_TO, wipeFrom } from '@/lib/manga/panel';
 
 function Art({ src }: { src: string | null }) {
   return src
-    ? <Image src={src} alt="" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover opacity-80" />
+    ? <>
+        <Image src={src} alt="" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover opacity-80" />
+        {/* Scrim keeps the panel title readable over bright art. */}
+        <div aria-hidden className="absolute inset-0 bg-linear-to-t from-ink via-ink/50 to-transparent" />
+      </>
     : <div aria-hidden className="speed-lines absolute inset-0" />;
 }
 

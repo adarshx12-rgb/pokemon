@@ -1,0 +1,210 @@
+# Editorial Home ("The Grail") — Design Spec
+
+**Date:** 2026-10-11
+**Branch:** feat/pokemon-vault
+**Replaces:** the manga theme (`2026-10-10-manga-theme-design.md`), which the user rejected as looking AI-made.
+**Approved mockup:** `design-assets/grail/mockup/` (git-ignored): `frame1.png` (arrival), `spin-strip.png` (the turn), `frame3.png` (the doors). `index.html` / `spin.html` hold the reference values.
+
+## Goal
+
+Rebuild the home page as a print-magazine spread: black page, red type, indigo wire-mesh walls on both sides, and the vault's grail card — Rayquaza ★ Gold Star — turning in 3D as you scroll, shedding gold glitter, then shrinking into the **Vault** door beside a **Showdown** door.
+
+Restraint is the point. One idea per screen, lots of black, gold only where there is value.
+
+## Scope
+
+| In | Out (later specs) |
+|---|---|
+| Site foundation: fonts, colour tokens, nav, background, page curtain, 404 | Vault (`/cards`) and card-detail restyle; deleting the manga components they still use |
+| Home page (`/`) in full | Showdown redesign (its cobalt/red/white Game Boy plan stands) |
+
+Interim effect on other pages: `/cards`, `/cards/[id]` and `/showdown` inherit the new fonts, nav and mesh background but keep their manga layouts until their own pass. That is accepted.
+
+## 1. Design system
+
+**Colour roles**
+
+| Token | Value | Use |
+|---|---|---|
+| `--color-ink` | `#050507` | page background |
+| `--color-red` | `#ff2b2b` | all type (~5.5:1 on ink, passes AA for small text) |
+| `--color-indigo` | `#787cff` lines / `#d6daff` vertex dots | mesh and rare accents (hover underline) |
+| gold (existing `--color-gold*`) | `#d9b45a` / `#fff1b8` / `#8a6a22` | value only: price, card glow, glitter, gold edge |
+
+Cobalt `#0047AB` / `#002E7A` and Pokédex red `#C8102E` appear on home only inside the Showdown door (Showdown's own palette). Existing cream/muted tokens stay for the pages not yet restyled.
+
+**Type** (via `next/font/google` in `app/layout.tsx`)
+- `--font-display` → **Anton** 400: ultra-condensed headlines, uppercase. A print-grain mask (SVG `feTurbulence` as `mask-image`, values from the mockup) applies to the hero headline only.
+- `--font-mono` → **JetBrains Mono** 400/500: nav, meta lines, captions, body copy. Uppercase, `0.14em` tracking, 11px for meta and 10.5px with `1.75` line height for paragraphs.
+- `--font-pixel` → Press Start 2P (unchanged; used in the Showdown door).
+- Dela Gothic One and Zen Kaku Gothic New are removed. With them goes the CJK `preload: false` workaround.
+- `body` defaults to the mono stack.
+
+**Links, not buttons:** calls to action are mono uppercase text with a 1px underline offset 6px, followed by "→". There are no pill buttons.
+
+## 2. Site foundation
+
+- **`MeshBackground`** replaces `MarbleBackground` in the layout. It's a fixed, full-viewport `<canvas>` at z −10 showing two indigo wire-mesh walls, left and right, that fade to black toward the centre: a valley the content floats in.
+  - **Drawing:** a perspective-projected grid of about 56×40 points. Height is a wall term (rises with distance from centre) plus summed sine waves. Lines are indigo with alpha falling with depth and toward the centre; vertex dots are pale indigo.
+  - **Motion:** the waves drift slowly (phase moves with time), drawn at up to 30 fps. Drawing pauses when the tab is hidden.
+  - **Parameters:** opening width, wall height, horizon, wave amplitude, and a gold "light" (position, radius, strength) that turns nearby vertex dots gold. Pages may change these; the home sequence animates them (section 3). Other pages use the defaults.
+  - **Reduced motion:** draw one static frame and redraw only on resize.
+  - **Device pixel ratio:** capped at 2.
+  - **Below 768px:** walls narrower and opacity reduced to 60% so text stays readable.
+- **`SiteNav`**:
+  - **Left:** "POKÉMON VAULT" in Anton, red.
+  - **Centre:** mono links: The Grail (`/`), Vault (`/cards`), Showdown (`/showdown`). The active link is underlined.
+  - **Right (md and up):** mono "Prices updated {date}", from the hero card's price `updatedAt`. Omitted on other pages.
+  - **Remove:** `mix-blend-difference`. The nav sits on ink with no background.
+- **`app/template.tsx` curtain:** the gold wipe becomes an ink wipe with a 1px red leading edge. It stays hidden under reduced motion via CSS, so server and client markup match.
+- **404 page:** "ERROR 404" mono meta, Anton headline "NOTHING IN THIS DRAWER.", and a "Back to the vault →" link. It drops `SfxText` and `caption-box`.
+
+## 3. Home page
+
+`app/page.tsx` renders one section, `<GrailSequence>`, then the footer. `Hero`, `Chapter` and `FeaturePanels` are deleted.
+
+### Data
+
+- `data/showcase.ts`: `FEATURED_CARD_ID` becomes `'ex8-107'` (Rayquaza ★, EX Deoxys 107/107). This is a deliberate editorial pick: the 3D textures are prepared for this card.
+- The page fetches it with `getCard` (existing retries plus snapshot fallback). Price, set and number come from data. The face images are local files (section 5), so the hero never depends on the flaky image CDN.
+- Missing price: the price block is omitted. A missing card entirely: render the static textures, with name and set from a small constant.
+- Copy never claims "most valuable", since prices move. The claim is "The rarest card in the vault": Gold Stars are the rarest print.
+
+### Scroll sequence
+
+One pinned section, driven by a single progress value `p` from 0 to 1 via GSAP ScrollTrigger with `scrub`. Lenis already feeds ScrollTrigger.
+
+**Scroll length:** 300vh on desktop, 220vh below 768px.
+
+| p | Stage | What happens |
+|---|---|---|
+| 0–0.12 | **Arrival** (frame 1) | Hold the composition: meta lines, giant "RAYQUAZA" behind the card, card tilted (`rotateY −24° rotateX 10° rotateZ −5°`), "GOLD STAR / ONE OF THE RAREST" with a short paragraph and a "Scroll to turn the card ↓" link bottom-left, price bottom-right in gold, and the vertical label "Tier 01 — The Grail". Sparse glitter. |
+| 0.12–0.68 | **The turn** | The card turns a full 360° about Y, eased. Extra tilt and skew follow `sin` of the angle (values in `spin.html`). Glitter emission follows angular speed × \|sin(angle)\| and peaks edge-on. The headline grows to 1.15× and fades to 0.2 opacity. Captions swap in order: `01 / The card` (name, set, number), `02 / The print` ("SHINY GOLD STAR"), `03 / The price` (gold price). A red progress rule fills along the bottom. The mesh opens a little, waves amplify, and the gold light follows the card. |
+| 0.68–1 | **The doors** (frame 3) | The headline and captions fade. The card shrinks and flies to the Vault door slot (target rect measured from the door, FLIP-style). "CHOOSE YOUR DOOR." and its paragraph rise in at left. The Showdown door slides in from the right. The mesh pulls back to the edges and its light settles on the Vault door. At `p = 1` the flying card hands off to the real Vault door card (crossfade over the last 2%). |
+
+Scrubbing works in both directions.
+
+### Components (`components/grail/`)
+
+- **`GrailSequence`** (client): owns the pin and timeline. It writes pose values as CSS custom properties on a root element, not React state, and pushes mesh and glitter parameters through a small module-level store. It renders the server markup it receives as children/props, so all text is in the HTML.
+- **`GrailCard`**: CSS 3D card, built as in `spin.html`.
+  - Two faces with `backface-visibility: hidden`: front = sharpened scan, back = black glass with gold border. Rounded corners (4.5% of width).
+  - Left and right gold edge strips, 5px thick, rotated 90°, so the edge reads as gold when the card is edge-on.
+  - A glint band whose position and opacity follow the angle.
+  - Transform comes from CSS variables set by `GrailSequence`. Decorative: `aria-hidden`.
+- **`GlitterCanvas`** (client): a full-section canvas with a pooled particle system (cap 700). Particles are gold dots (0.6–2.4px) and about 12% four-point stars with a soft glow. They emit from the card's projected edges and drift opposite the turn, slightly upward, fading over 0.6–1.4s. Emission rate comes from the store. It stops when off-screen and is not rendered under reduced motion.
+- **`Doors`**: two `<Link>` doors, each a card-sized object (270×370 desktop, 200×274 mobile) above mono meta, an Anton word (58px) and an "Enter … →" line. The whole door is the link target. Hover: the object lifts 6px, the underline turns indigo, the word turns to a red outline.
+  - **Vault door → `/cards`:** the card front `<Image>` with alt "Rayquaza Gold Star — enter the vault", and a gold glow.
+  - **Showdown door → `/showdown`:** a mini Game Boy in CSS.
+    - The body is a cobalt gradient.
+    - The white screen has a 3px ink border and RIVAL and YOU health bars.
+    - It shows two rows of six empty Poké Ball slots and two platform ellipses.
+    - The text box reads "BUILD YOUR / TEAM OF SIX." with a "▶ADD / RANDOM" menu.
+    - The base has "SHOWDOWN" in pixel type and two red buttons.
+    - No Pokémon sprites.
+  - The doors tilt toward each other (`rotateY ±14°`).
+
+**Pure logic (`lib/grail/`)**, unit-tested:
+- `sequence.ts`:
+  - `stageAt(p)`
+  - `cardPose(p, doorRect, viewport) → { rx, ry, rz, skew, scale, x, y }`
+  - `glitterRate(p)`
+  - `captionAt(p)`
+  - `headlineStyle(p)`
+  - `meshParams(p)`
+- `mesh.ts`: `projectGrid(params, time, size) → points`, with alpha and gold-light weights.
+
+### Layout
+
+**Desktop (1440×900 reference; mockup values)**
+- **Gutters:** 48px.
+- **Headline:** Anton at `clamp(120px, 22vw, 340px)`, centred, top about 190px.
+- **Card:** 310×432, centred, overlapping the headline's lower half.
+- **Price:** Anton 64px with a gold gradient fill.
+- **Doors stage:**
+  - Left column: 400px, with "CHOOSE YOUR DOOR." at 104px.
+  - Doors start at 490px and 840px from the left, top 205px.
+
+**Below 768px**
+- Headline at `24vw`; the card is 62vw wide.
+- The arrival copy stacks under the card, with the price after it.
+- The doors stage stacks the title, then the Vault door, then the Showdown door, full width and centred.
+- No horizontal scroll at 375px.
+
+### Footer
+
+A centred mono line in muted red at 70% opacity: the existing attribution text (TCGplayer/Cardmarket via the Pokémon TCG API, PokéAPI, not affiliated…).
+
+## 4. Accessibility and fallbacks
+
+- **Real text in the DOM:**
+  - The h1 is the visible headline: source text "Rayquaza", uppercased in CSS. It is preceded by visually hidden "Pokémon Vault — " text (an `sr-only` span, not `aria-label`), so its accessible name is "Pokémon Vault — Rayquaza".
+  - Captions are real text, and only the active one is exposed (others `aria-hidden` and `inert`).
+  - Door links are real `<Link>`s in reading order.
+- **Reduced motion:** no pin, spin, glitter canvas, or mesh animation. The section renders as two normal blocks:
+  - frame 1 (static tilted card, front)
+  - frame 3 (title plus both doors)
+  
+  The page curtain is hidden.
+- **No JavaScript:** the same static layout. The sequence enhances it on mount, so server HTML equals the reduced-motion layout. This avoids hydration mismatch and layout shift.
+- **Focus:** tabbing to a door link while the sequence is mid-scroll scrolls to `p = 1` (ScrollTrigger `scrollTo` the end) so the focused door is visible.
+- **Contrast:** red on ink and gold on ink both pass AA. The mesh never sits under body copy at full strength; the centre fade guarantees it.
+
+## 5. Assets
+
+Sources are in `design-assets/grail/` (git-ignored):
+- `front-4k.png`: official scan upscaled by Higgsfield Bytedance Image Upscale. Faithful; no redraw.
+- `back-v1.png`: the back, generated with GPT Image 2.5.
+
+A new `scripts/build-grail-assets.ts` (sharp) produces committed WebPs in `public/grail/`:
+- `rayquaza-front-{600,1200}.webp`, rounded corners on a transparent background, quality 86
+- `rayquaza-back-{600,1200}.webp`
+
+The front is the hero image: preloaded, with the `next/image` `priority` option. The back loads lazily after first paint.
+
+The old home decor (`hero-hand`, `vault-door`, `arena`) is removed from `public/decor/` and the decor manifest. `vault-shelves` and `grail-spotlight` stay until the Vault pass.
+
+No further Higgsfield generation is planned. Video generation of the card was attempted and blocked ("ip_detected"; not charged), which is why the spin is built in code.
+
+## 6. Removals (this pass)
+
+- **Components:**
+  - `components/home/Hero.tsx`, `Chapter.tsx`, `FeaturePanels.tsx`
+  - `components/motion/MarbleBackground.tsx` and `lib/parallax.ts` with its test (used only by the marble)
+  - `GoldParticles`
+- **Layout:** the root layout stops mounting `InkDefs`. `InkPanel` (still used by the Vault pages) needs `#ink-rough`, so a new `app/cards/layout.tsx` mounts `InkDefs` until the Vault pass removes it.
+- **Images:** `public/marble*.webp`.
+- **Tests:** the home assertions in `e2e/manga.spec.ts` (fonts, 3-panel hero, chapter) and the home heading check in `e2e/smoke.spec.ts` ("Rare by design."). Replace them with the new home spec; keep the Vault-page assertions that still hold.
+
+## 7. Testing and verification
+
+- **Unit (vitest):**
+  - `lib/grail/sequence.ts`: stage boundaries; angle is 0 at p ≤ 0.12 and 360 at p ≥ 0.68; pose at p = 1 equals the door rect; glitter rate peaks near the edge-on angles and is about 0 at the ends.
+  - `lib/grail/mesh.ts`: centre columns fully faded; alpha falls with depth; output size matches the grid.
+- **E2E (Playwright)** in `e2e/home.spec.ts`:
+  - The h1 has the accessible name "Pokémon Vault — Rayquaza".
+  - The Vault and Showdown door links navigate correctly.
+  - Under `reducedMotion: 'reduce'`, both doors are visible without scrolling the pin, and there's no glitter canvas.
+  - No failed `/grail/` requests.
+  - No horizontal overflow at 375px.
+  - Headline uses Anton; body uses JetBrains Mono.
+  - No console errors.
+- **Visual:** Playwright screenshots at 1440×900 and 375×812 for p = 0, about 0.4 (edge-on) and 1, compared by eye against the approved mockup frames.
+- **Performance:**
+  - Lighthouse mobile simulation, with the home LCP no worse than the pre-manga 4.1s.
+  - CLS at 0.
+  - The main thread stays smooth while scrubbing: the mesh is capped at 30fps, the glitter pool is capped, and transforms only (no layout) during the sequence.
+- `npm run lint`, `npm test`, `npm run build` all pass.
+
+## Decisions log
+
+| Topic | Decision |
+|---|---|
+| Direction | Option A: replace manga entirely with the editorial direction |
+| Hero art | No plant or generated creature. The real card is the hero; the mesh texture is the user's reference |
+| Hero card | Rayquaza ★ Gold Star `ex8-107`, pinned editorially |
+| Card back | Plain black glass with a gold border (user's call); generated once |
+| Spin | Built in code (CSS 3D), scroll-scrubbed. Video was blocked for IP and is less sharp anyway |
+| Glitter | Live canvas, gold only, follows spin speed |
+| End state | Card becomes the Vault door, beside a cobalt Game Boy Showdown door |
+| Fonts | Anton + JetBrains Mono (+ Press Start 2P for pixel UI) |

@@ -39,3 +39,10 @@ test('showdown: build teams, battle, skip to result', async ({ page }) => {
   await page.getByRole('button', { name: 'Rematch' }).click();
   await expect(page.getByTestId('skip')).toBeVisible();
 });
+
+test('nav marks the current page', async ({ page }) => {
+  await page.goto('/cards');
+  const nav = page.getByRole('navigation', { name: 'Main' });
+  await expect(nav.getByRole('link', { name: 'Vault', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(nav.getByRole('link', { name: 'The Grail' })).not.toHaveAttribute('aria-current', 'page');
+});

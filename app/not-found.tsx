@@ -1,17 +1,13 @@
 import Link from 'next/link';
-import { SfxText } from '@/components/manga/SfxText';
 
 export default function NotFound() {
   return (
-    <main className="grid min-h-screen place-items-center px-6 text-center">
+    <main className="grid min-h-screen place-items-center px-6 text-center text-indigo">
       <div>
-        <div className="mb-6"><SfxText className="text-6xl">ドン!</SfxText></div>
-        <p className="caption-box">Error 404</p>
-        <h1 className="mt-4 font-display text-5xl sm:text-7xl md:text-9xl">
-          A wild <span className="text-gold-gradient emph">MissingNo.</span>
-        </h1>
-        <p className="mt-6 text-muted">This page fled. It isn’t in the vault.</p>
-        <Link href="/" className="btn-gold mt-10">Return home</Link>
+        <p className="meta">Error 404</p>
+        <h1 className="mt-4 font-display text-6xl uppercase leading-[0.9] text-red sm:text-8xl md:text-[10rem]">A wild MissingNo.</h1>
+        <p className="copy mx-auto mt-6 max-w-sm">This page fled. It isn’t in the vault.</p>
+        <Link href="/" className="text-link mt-10">Back to the vault →</Link>
       </div>
     </main>
   );

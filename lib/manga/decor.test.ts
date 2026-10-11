@@ -6,13 +6,13 @@ import { DECOR, decorSrc } from './decor';
 
 describe('decorSrc', () => {
   it('returns the public URL when the image is in the manifest', () => {
-    expect(decorSrc('arena', ['arena'])).toBe('/decor/arena.webp');
+    expect(decorSrc('vault-shelves', ['vault-shelves'])).toBe('/decor/vault-shelves.webp');
   });
   it('returns null when the image is not in the manifest', () => {
-    expect(decorSrc('arena', [])).toBeNull();
+    expect(decorSrc('vault-shelves', [])).toBeNull();
   });
-  it('lists the five spec assets', () => {
-    expect(DECOR).toEqual(['hero-hand', 'vault-door', 'arena', 'vault-shelves', 'grail-spotlight']);
+  it('lists the Vault page assets', () => {
+    expect(DECOR).toEqual(['vault-shelves', 'grail-spotlight']);
   });
 });
 

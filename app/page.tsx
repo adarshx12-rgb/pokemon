@@ -1,29 +1,32 @@
-import { Chapter } from '@/components/home/Chapter';
-import { FeaturePanels } from '@/components/home/FeaturePanels';
-import { Hero } from '@/components/home/Hero';
-import { GRAIL } from '@/data/showcase';
-import { decorSrc } from '@/lib/manga/decor';
+import { GrailSequence } from '@/components/grail/GrailSequence';
+import { TIER_ORDER } from '@/data/rarity';
+import { GRAIL, SHOWCASE } from '@/data/showcase';
 import { getCard } from '@/lib/tcg/client';
+import { formatPrice } from '@/lib/tcg/normalize';
 
 export const revalidate = 86400;
 
-async function featuredCard() {
+async function grailPrice() {
   try {
-    return await getCard(GRAIL.id);
+    return (await getCard(GRAIL.id))?.price ?? null;
   } catch {
-    return null;
+    return null; // the home page still renders; the price block and caption fall back
   }
 }
 
 export default async function Home() {
-  const card = await featuredCard();
+  const price = await grailPrice();
   return (
     <main>
-      <Hero card={card} handSrc={decorSrc('hero-hand')} />
-      <Chapter vaultDoorSrc={decorSrc('vault-door')} arenaSrc={decorSrc('arena')} />
-      <FeaturePanels />
-      <footer className="px-4 pb-16 text-center md:px-10">
-        <p className="caption-box mx-auto max-w-2xl normal-case tracking-normal text-muted">
+      <GrailSequence
+        price={price ? formatPrice(price) : null}
+        priceSource={price?.source ?? null}
+        updatedAt={price?.updatedAt ?? null}
+        tierCount={TIER_ORDER.length}
+        cardCount={SHOWCASE.length}
+      />
+      <footer className="px-6 pb-16 pt-10 text-center">
+        <p className="copy mx-auto max-w-2xl text-indigo">
           Prices are estimates from TCGplayer and Cardmarket via the Pokémon TCG API. Pokémon data from PokéAPI. Not affiliated with Nintendo, Creatures, or Game Freak.
         </p>
       </footer>

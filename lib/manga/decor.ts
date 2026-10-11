@@ -1,7 +1,7 @@
 import manifest from './decor-manifest.json';
 
 /** Optional Higgsfield illustrations in public/decor/. Panels must render fine without them. */
-export const DECOR = ['hero-hand', 'vault-door', 'arena', 'vault-shelves', 'grail-spotlight'] as const;
+export const DECOR = ['vault-shelves', 'grail-spotlight'] as const;
 export type DecorName = (typeof DECOR)[number];
 
 /**

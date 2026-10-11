@@ -1,15 +1,18 @@
-import Link from 'next/link';
 import { TiltCard } from '@/components/TiltCard';
 import { InkPanel } from '@/components/manga/InkPanel';
 import { SpeechBubble } from '@/components/manga/SpeechBubble';
 import { formatPrice } from '@/lib/tcg/normalize';
 import type { Card } from '@/lib/tcg/types';
+import { CardOpenLink } from './VaultBrowser';
+import { CollectorNotes } from './CollectorNotes';
+import { CollectionControls } from './CollectionControls';
 
-export function CardTile({ card, splash = false }: { card: Card; splash?: boolean }) {
+export function CardTile({ card, splash = false, featured = splash }: { card: Card; splash?: boolean; featured?: boolean }) {
   const foil = card.tier === 'grail' || card.tier === 'ultra' || card.tier === 'holo';
   return (
-    <Link href={`/cards/${card.id}`} data-testid="card-tile" data-splash={splash || undefined} className={`group block ${splash ? 'sm:col-span-2 sm:row-span-2' : ''}`}>
-      <InkPanel className="h-full p-4">
+    <article data-splash={splash || undefined} data-featured={featured || undefined} className={`min-w-0 ${splash ? 'col-span-2 sm:row-span-2' : ''}`}>
+      <InkPanel className="flex h-full flex-col p-4">
+        <CardOpenLink card={card} tile className="group relative block focus-visible:outline-2 focus-visible:outline-indigo focus-visible:outline-offset-4">
         <div aria-hidden className="speed-lines absolute inset-0 opacity-0 transition duration-500 group-hover:opacity-100" />
         <div className={`relative transition duration-500 group-hover:scale-[1.03] ${splash ? 'mx-auto max-w-sm' : ''}`}>
           <TiltCard src={splash ? card.images.large : card.images.small} alt={`${card.name} — ${card.setName}`} width={splash ? 734 : 245} height={splash ? 1024 : 342} foil={foil} sizes={splash ? '(min-width: 1024px) 384px, 90vw' : '(min-width: 1024px) 240px, 45vw'} />
@@ -27,7 +30,13 @@ export function CardTile({ card, splash = false }: { card: Card; splash?: boolea
             <p className="font-bold text-gold-light">{card.price ? formatPrice(card.price) : '—'}</p>
           </div>
         </div>
+        <p className="relative mt-3 text-xs text-gold-light underline underline-offset-4">Explore this card ↗</p>
+        </CardOpenLink>
+        {featured && <div className="relative flex flex-1 flex-col pb-2 sm:px-2">
+          <CollectorNotes card={card} compact />
+          <div className="mt-auto pt-2"><CollectionControls id={card.id} /></div>
+        </div>}
       </InkPanel>
-    </Link>
+    </article>
   );
 }

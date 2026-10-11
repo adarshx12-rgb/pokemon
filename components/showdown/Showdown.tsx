@@ -1,12 +1,18 @@
-'use client';
-import { useReducer, useState } from 'react';
+﻿'use client';
+import { useReducer, useRef, useState } from 'react';
 import type { EndEvent, Side } from '@/lib/battle/types';
+import { statsAtLevel50 } from '@/lib/battle/stats';
+import { displayName } from '@/lib/pokeapi/names';
 import { loadMember } from '@/lib/showdown/loadMember';
-import { EMPTY_TEAMS, randomFillCount, teamsReducer } from '@/lib/showdown/teams';
+import { EMPTY_TEAMS, MAX_TEAM, randomFillCount, teamsReducer } from '@/lib/showdown/teams';
+import { Arena } from './Arena';
 import { BattleScreen } from './BattleScreen';
+import { HpPanel } from './HpPanel';
 import { MatchupPreview } from './MatchupPreview';
+import { PokemonSprite } from './PokemonSprite';
 import { ResultScreen } from './ResultScreen';
 import { TeamPanel } from './TeamPanel';
+import styles from './showdown.module.css';
 
 type Phase = 'build' | 'battle' | 'result';
 
@@ -23,83 +29,109 @@ export function Showdown({ names }: { names: string[] }) {
   const [teams, dispatch] = useReducer(teamsReducer, EMPTY_TEAMS);
   const [phase, setPhase] = useState<Phase>('build');
   const [seed, setSeed] = useState(0);
+  const [classic, setClassic] = useState(false);
   const [result, setResult] = useState<EndEvent | null>(null);
   const [loading, setLoading] = useState<Record<Side, boolean>>({ A: false, B: false });
+  const busy = useRef<Record<Side, boolean>>({ A: false, B: false });
   const [toast, setToast] = useState<{ message: string; retry: () => void } | null>(null);
 
   const withLoading = async (side: Side, job: () => Promise<void>) => {
+    if (busy.current[side]) return;
+    busy.current[side] = true;
     setLoading(l => ({ ...l, [side]: true }));
     setToast(null);
     try {
       await job();
     } catch (err) {
       const notFound = err instanceof Error && err.message === 'not_found';
-      setToast({ message: notFound ? 'That Pokémon isn’t in the Pokédex.' : 'Couldn’t reach the Pokédex.', retry: () => void withLoading(side, job) });
+      setToast({ message: notFound ? 'That Pokémon is not in the Pokédex.' : 'Could not load Pokémon data. Try again.', retry: () => void withLoading(side, job) });
     } finally {
+      busy.current[side] = false;
       setLoading(l => ({ ...l, [side]: false }));
     }
   };
 
-  const add = (side: Side) => (slug: string) =>
-    withLoading(side, async () => dispatch({ type: 'add', side, member: await loadMember(slug) }));
-
-  const randomize = () =>
-    withLoading('B', async () => {
-      const members = await Promise.all(sample(names, randomFillCount(teams.B)).map(loadMember));
-      dispatch({ type: 'fillRandom', side: 'B', members });
-    });
-
-  const startBattle = () => { setSeed(Date.now()); setResult(null); setPhase('battle'); };
+  const add = (side: Side, slug: string) => {
+    if (teams[side].length >= MAX_TEAM) return;
+    return withLoading(side, async () => dispatch({ type: 'add', side, member: await loadMember(slug) }));
+  };
+  const randomize = () => withLoading('B', async () => {
+    const members = await Promise.all(sample(names, randomFillCount(teams.B)).map(loadMember));
+    dispatch({ type: 'fillRandom', side: 'B', members });
+  });
   const canBattle = teams.A.length > 0 && teams.B.length > 0 && !loading.A && !loading.B;
+  const startBattle = () => {
+    if (!canBattle) return;
+    setSeed(Date.now()); setResult(null); setPhase('battle');
+  };
+  const reset = () => {
+    if (loading.A || loading.B) return;
+    dispatch({ type: 'clear', side: 'A' }); dispatch({ type: 'clear', side: 'B' }); setToast(null);
+  };
+  const focusTeam = (side: Side) => {
+    const input = document.getElementById(`pokemon-search-${side}`) as HTMLInputElement | null;
+    if (input && !input.disabled) input.focus();
+    else document.querySelector<HTMLButtonElement>(`[data-testid="slot-${side}-0"]`)?.focus();
+  };
+  const previewPanel = (side: Side) => {
+    const pokemon = teams[side][0]?.pokemon;
+    if (!pokemon) return null;
+    const hp = statsAtLevel50(pokemon.baseStats).hp;
+    return <HpPanel name={displayName(pokemon.name)} hp={hp} maxHp={hp} showNumbers={side === 'A'} fainted={teams[side].map(() => false)} />;
+  };
+  const previewSprite = (side: Side) => {
+    const pokemon = teams[side][0]?.pokemon;
+    return pokemon ? <PokemonSprite key={pokemon.name} pokemon={pokemon} side={side} classic={classic} /> : null;
+  };
+  const prompt = loading.A || loading.B ? 'Getting your Pokémon ready…'
+    : canBattle ? `${displayName(teams.A[0].pokemon.name)} is ready. Let the stats decide!`
+    : !teams.A.length && !teams.B.length ? 'What will you choose? Add a Pokémon to each team to begin.'
+    : !teams.A.length ? 'Choose your first Pokémon to meet your rival.'
+    : 'Your Pokémon is ready. Add an opponent to begin.';
 
   return (
-    <main className="px-6 pb-32 pt-36 md:px-16">
-      <header className="mb-16 max-w-3xl">
-        <p className="eyebrow">Stats, speed and type matchups</p>
-        <h1 className="mt-4 font-display text-5xl sm:text-7xl md:text-9xl"><span className="text-gold-gradient italic">Showdown</span></h1>
-        <p className="mt-6 max-w-xl text-muted">Build two teams of up to six. Every Pokémon fights at level 50 and always uses its strongest move against the current opponent.</p>
+    <main className={styles.page}>
+      <header className={styles.header}>
+        <div><h1>Showdown<span>.</span></h1><p>Pick your favorites. Set the order. Settle it with stats.</p></div>
+        <div className={styles.visualMode} role="group" aria-label="Pokémon appearance">
+          <button type="button" aria-pressed={!classic} onClick={() => setClassic(false)}>HD artwork</button>
+          <button type="button" aria-pressed={classic} onClick={() => setClassic(true)}>Classic sprites</button>
+        </div>
       </header>
 
       {phase === 'build' && (
-        <div className="space-y-8">
-          <div className="grid gap-8 xl:grid-cols-2">
-            <TeamPanel side="A" title="Your Team" team={teams.A} names={names} loading={loading.A} dispatch={dispatch} onAdd={add('A')} />
-            <TeamPanel side="B" title="Opponent" team={teams.B} names={names} loading={loading.B} dispatch={dispatch} onAdd={add('B')} onRandomize={randomize} />
+        <div className={styles.builder}>
+          <div className={styles.arenaColumn}>
+            <Arena preview player={previewSprite('A')} opponent={previewSprite('B')} playerPanel={previewPanel('A')} opponentPanel={previewPanel('B')}
+              dialogue={<p aria-live="polite">{prompt}</p>}
+              commands={<>
+                <button type="button" data-testid="battle-start" className={styles.fight} disabled={!canBattle} onClick={startBattle}><span aria-hidden>▶</span> Fight</button>
+                <button type="button" onClick={() => focusTeam('A')}>Your team</button>
+                <button type="button" onClick={() => focusTeam('B')}>Opponent</button>
+                <button type="button" disabled={loading.A || loading.B || (!teams.A.length && !teams.B.length)} onClick={reset}>Reset</button>
+              </>} />
+            <div className={styles.arenaHint}><span>1–6 Pokémon on each team</span><span>First Poké Ball fights first</span></div>
+            <MatchupPreview a={teams.A} b={teams.B} />
+            <details className={styles.rules}>
+              <summary>How the battle works</summary>
+              <p>Everyone fights at level 50 with 31 IVs, no EVs, and a neutral nature. Speed decides who moves first; Attack, Defense, special stats, and type matchups decide damage. HP keeps you in the fight.</p>
+              <p>Your Pokémon automatically chooses its strongest available move against the current opponent. When it faints, the next Poké Ball in your lineup enters. The last team standing wins.</p>
+              <p>This is a simplified stat battle: no items, abilities, weather, or status effects. Accuracy, critical hits, and damage rolls mean rematches can end differently.</p>
+              <a href="https://pokeapi.co/" target="_blank" rel="noreferrer">Stats & artwork from PokéAPI</a>
+            </details>
           </div>
-          <MatchupPreview a={teams.A} b={teams.B} />
-          <div className="flex justify-center">
-            <button type="button" data-testid="battle-start" className="btn-gold !px-12 !py-4 text-base" disabled={!canBattle} onClick={startBattle}>
-              Battle!
-            </button>
+          <div className={styles.teamsColumn}>
+            <TeamPanel side="A" title="Your team" team={teams.A} names={names} loading={loading.A} dispatch={dispatch} onAdd={slug => void add('A', slug)} />
+            <TeamPanel side="B" title="Opponent" team={teams.B} names={names} loading={loading.B} dispatch={dispatch} onAdd={slug => void add('B', slug)} onRandomize={randomize} />
           </div>
         </div>
       )}
-
-      {phase === 'battle' && (
-        <BattleScreen
-          key={seed}
-          teamA={teams.A}
-          teamB={teams.B}
-          seed={seed}
-          onFinish={end => { setResult(end); setPhase('result'); }}
-        />
-      )}
-
-      {phase === 'result' && result && (
-        <ResultScreen
-          result={result}
-          teamA={teams.A}
-          teamB={teams.B}
-          onRematch={startBattle}
-          onEdit={() => setPhase('build')}
-        />
-      )}
-
+      {phase === 'battle' && <BattleScreen key={seed} teamA={teams.A} teamB={teams.B} seed={seed} classic={classic} onFinish={end => { setResult(end); setPhase('result'); }} />}
+      {phase === 'result' && result && <ResultScreen result={result} teamA={teams.A} teamB={teams.B} onRematch={startBattle} onEdit={() => setPhase('build')} />}
       {toast && (
-        <div role="alert" className="border-gold-frame fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-4 rounded-full bg-surface px-6 py-3 text-sm">
-          <span>{toast.message}</span>
-          <button type="button" onClick={toast.retry} className="text-gold-light underline underline-offset-4">Retry</button>
-          <button type="button" aria-label="Dismiss" onClick={() => setToast(null)} className="text-muted">✕</button>
+        <div role="alert" className={styles.toast}>
+          <span>{toast.message}</span><button type="button" onClick={toast.retry}>Retry</button>
+          <button type="button" aria-label="Dismiss" onClick={() => setToast(null)}>×</button>
         </div>
       )}
     </main>

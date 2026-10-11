@@ -5,16 +5,17 @@ import { InkPanel } from '@/components/manga/InkPanel';
 import { guideFor } from '@/data/identifyGuide';
 import type { Card } from '@/lib/tcg/types';
 
-export function CardInspector({ card, children }: { card: Card; children: React.ReactNode }) {
+export function CardInspector({ card, children, compact = false }: { card: Card; children: React.ReactNode; compact?: boolean }) {
   const items = guideFor(card.era);
   const [active, setActive] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(false);
   const region = items.find(i => i.key === active)?.region;
 
   return (
-    <div className="grid gap-16 lg:grid-cols-[minmax(0,28rem)_1fr]">
-      <div className="mx-auto w-full max-w-md lg:sticky lg:top-32 lg:h-fit">
+    <div className={`grid gap-10 ${zoom ? '' : compact ? 'lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]' : 'lg:grid-cols-[minmax(0,28rem)_minmax(0,1fr)]'}`}>
+      <div className={`mx-auto w-full lg:h-fit ${zoom ? 'max-w-2xl' : `max-w-md lg:sticky ${compact ? 'lg:top-24' : 'lg:top-32'}`}`}>
         <InkPanel className="screentone p-6">
-          <TiltCard src={card.images.large} alt={`${card.name} — ${card.setName}`} width={734} height={1024} foil priority sizes="(min-width: 1024px) 448px, 90vw">
+          <TiltCard src={card.images.large} alt={`${card.name} — ${card.setName}`} width={734} height={1024} foil={card.tier !== 'common' && card.tier !== 'uncommon' && card.tier !== 'rare'} maxTilt={2} priority sizes={zoom ? '90vw' : '(min-width: 1024px) 448px, 90vw'}>
             {region && (
               <div
                 aria-hidden
@@ -24,8 +25,10 @@ export function CardInspector({ card, children }: { card: Card; children: React.
             )}
           </TiltCard>
         </InkPanel>
+        <button type="button" aria-pressed={zoom} onClick={() => setZoom(!zoom)} className="mt-4 w-full cursor-pointer border border-line px-4 py-3 text-xs text-gold-light focus-visible:outline-2 focus-visible:outline-indigo">{zoom ? 'Return to details' : 'Enlarge artwork'}</button>
+        <p className="mt-3 text-center text-[11px] leading-relaxed text-muted">Reference artwork · condition varies by copy</p>
       </div>
-      <div className="space-y-12">
+      <div className="min-w-0 space-y-8">
         {children}
         <section>
           <h2 className="font-display text-4xl">How to <span className="text-gold-gradient emph">identify value</span></h2>

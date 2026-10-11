@@ -21,11 +21,19 @@ export function syncScrollSize(): void {
   lenis?.resize();
 }
 
+/** Stop page inertia while a native dialog owns scrolling and focus. */
+export function lockSmoothScroll(): () => void {
+  const instance = lenis;
+  const wasStopped = instance?.isStopped;
+  instance?.stop();
+  return () => { if (instance === lenis && !wasStopped) instance?.start(); };
+}
+
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     gsap.registerPlugin(ScrollTrigger);
-    const instance = new Lenis({ lerp: 0.1 });
+    const instance = new Lenis({ lerp: 0.085 });
     lenis = instance;
     instance.on('scroll', ScrollTrigger.update);
     const tick = (time: number) => instance.raf(time * 1000);

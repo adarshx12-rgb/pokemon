@@ -1,5 +1,6 @@
 import type { TeamMember } from '@/lib/battle/types';
 import { coverage } from '@/lib/showdown/matchup';
+import styles from './showdown.module.css';
 
 export function MatchupPreview({ a, b }: { a: TeamMember[]; b: TeamMember[] }) {
   if (!a.length || !b.length) return null;
@@ -8,14 +9,11 @@ export function MatchupPreview({ a, b }: { a: TeamMember[]; b: TeamMember[] }) {
     { label: 'Opponent hits super-effectively', value: coverage(b, a), of: a.length },
   ];
   return (
-    <div className="grid gap-4 rounded-3xl border border-line p-6 sm:grid-cols-2">
+    <div className={styles.matchup}>
       {rows.map(r => (
         <div key={r.label}>
-          <p className="text-sm text-muted">{r.label}</p>
-          <p className="mt-2 font-display text-2xl sm:text-4xl">
-            <span className="text-gold-gradient">{r.value}</span>
-            <span className="text-muted"> / {r.of}</span>
-          </p>
+          <p>{r.label}</p>
+          <strong>{r.value} <small>/ {r.of} Pokémon</small></strong>
         </div>
       ))}
     </div>

@@ -8,19 +8,19 @@ export const GUIDE: GuideItem[] = [
   {
     key: 'rarity',
     title: 'Rarity symbol',
-    body: 'Found at the bottom of the card: ● common, ◆ uncommon, ★ rare. Modern sets use extra and gold stars for illustration, special illustration, and hyper rares, which are the cards that drive set value.',
+    body: 'Start with the symbol near the collector number: many older cards use a circle for common, a diamond for uncommon and a star for rare. Newer sets use additional symbols. Rarity and market value are separate things.',
     regions: { vintage: { x: 86, y: 91, w: 10, h: 5 }, modern: { x: 20, y: 92, w: 12, h: 5 } },
   },
   {
     key: 'number',
     title: 'Set symbol & card number',
-    body: 'Tells you exactly which printing you have. A number above the set total (e.g. 199/165) marks a secret rare, almost always the most valuable cards in a set.',
+    body: 'Match the set and full collector number, then the language and finish. Numbers such as 199/165 extend beyond the printed main-set total; a higher number does not guarantee a higher price.',
     regions: { vintage: { x: 70, y: 91, w: 16, h: 5 }, modern: { x: 3, y: 92, w: 18, h: 5 } },
   },
   {
     key: 'edition',
     title: '1st Edition stamp',
-    body: 'A black “Edition 1” stamp just left of the artwork box marks the first print run and can multiply value 5–10×. On Base Set, “Shadowless” copies (no drop shadow on the right of the art frame) rank next.',
+    body: 'Check for a 1st Edition stamp on applicable vintage releases. For English Base Set, also check the artwork-frame shadow to distinguish shadowless and unlimited printings. Compare matching editions; there is no fixed price multiplier.',
     regions: { vintage: { x: 6, y: 52, w: 12, h: 6 } },
   },
   {
@@ -32,7 +32,7 @@ export const GUIDE: GuideItem[] = [
   {
     key: 'condition',
     title: 'Condition & grading',
-    body: 'Check centering, corners, edges, and surface scratches. A PSA 10 can sell for many times a raw copy, and a PSA 9 often goes for half of a 10. The prices shown here are for raw, ungraded cards.',
+    body: 'Check centering, corners, edges, creases and surface scratches using photos of the actual card. A seller’s condition description is not a professional grade. Compare the same grading company and grade when researching graded copies.',
     regions: { vintage: { x: 0, y: 0, w: 100, h: 100 }, modern: { x: 0, y: 0, w: 100, h: 100 } },
   },
 ];

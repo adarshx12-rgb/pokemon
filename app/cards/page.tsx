@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import { TierBand } from '@/components/cards/TierBand';
 import { TierIndex } from '@/components/cards/TierIndex';
+import { VaultBrowser } from '@/components/cards/VaultBrowser';
 import { InkPanel } from '@/components/manga/InkPanel';
 import { SfxText } from '@/components/manga/SfxText';
 import { SHOWCASE } from '@/data/showcase';
@@ -24,11 +25,12 @@ export default async function CardsPage() {
           {shelves && <div aria-hidden className="absolute inset-0 bg-linear-to-r from-ink via-ink/70 to-transparent" />}
           <div aria-hidden className="halftone-fade absolute inset-0" />
           <div className="relative max-w-3xl">
-            <p className="caption-box">Ranked rarest to most common</p>
+            <p className="caption-box">A collector’s index · six curated tiers</p>
             <h1 className="mt-4 font-display text-6xl uppercase sm:text-7xl md:text-9xl">The <span className="text-gold-gradient emph">Vault</span></h1>
             <p className="mt-6 max-w-xl text-muted">
-              Estimated market prices from TCGplayer (USD) and Cardmarket (EUR), refreshed daily. Raw, ungraded copies. Graded copies can sell for many times more.
+              Discover the artwork, understand the printing, and keep track of the cards you love. Open any card for collector notes and a dated market estimate.
             </p>
+            <p className="mt-4 max-w-xl text-xs leading-relaxed text-muted">Our tiers are editorial groupings, not official rarity rankings. Prices refer to raw, ungraded cards; check the finish and source date on each card.</p>
           </div>
           <SfxText className="absolute right-12 top-10 text-7xl max-md:hidden">ズラッ</SfxText>
         </InkPanel>
@@ -36,9 +38,11 @@ export default async function CardsPage() {
       <div className="flex gap-16">
         <TierIndex tiers={groups.map(g => g.tier)} />
         <div className="min-w-0 flex-1 space-y-24">
+          <VaultBrowser>
           {groups.map((g, i) => (
             <TierBand key={g.tier} tier={g.tier} cards={g.cards} rank={i + 1} backdropSrc={g.tier === 'grail' ? decorSrc('grail-spotlight') : null} />
           ))}
+          </VaultBrowser>
         </div>
       </div>
     </main>

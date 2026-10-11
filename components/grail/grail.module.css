@@ -22,6 +22,40 @@
 .root[data-sequenced] .doors { position: absolute; inset: 0; min-height: 0; } /* max-width + auto margins centre them */
 .root[data-sequenced] .grail { display: block; pointer-events: none; }
 .root[data-sequenced] .grail a { pointer-events: auto; }
+.root[data-sequenced] .welcome,
+.root[data-sequenced] .cardName { will-change: transform, opacity; }
+
+/* Sharp depth planes: distant headlines recede; copy projects toward the viewer.
+   Each plane has its own perspective so grain masks and fades cannot flatten it. */
+.root[data-sequenced] [data-depth] {
+  --depth-z: 90px;
+  transform-origin: left center;
+  transform: perspective(1600px)
+    translate3d(var(--depth-x, 0px), calc(var(--depth-y, 0px) + var(--headline-y, 0px)), var(--depth-z))
+    rotateX(var(--depth-rx, 0deg)) rotateY(var(--depth-ry, 0deg))
+    scale(var(--headline-scale, 1));
+  will-change: transform, opacity;
+}
+.root[data-sequenced] [data-depth="back"] { --depth-z: -180px; transform-origin: center; }
+.root[data-sequenced] [data-depth="middle"] {
+  --depth-z: 44px;
+  text-shadow: 1px 1px 0 #9b191e, 2px 2px 0 #431018;
+}
+.root[data-sequenced] [data-depth="front"] {
+  text-shadow: 1px 1px 0 var(--color-ink), 2px 2px 0 var(--color-ink);
+}
+.root[data-sequenced] [data-depth] :global(.text-gold-gradient) { text-shadow: none; }
+.root[data-sequenced] .metaRow { transform-origin: center; }
+.root[data-sequenced] .facts,
+.root[data-sequenced] .price { transform-origin: right center; }
+.root[data-sequenced] .grailCopy,
+.root[data-sequenced] .price { z-index: 4; }
+
+@media (max-width: 767px), (max-height: 500px) {
+  .root[data-sequenced] [data-depth] { --depth-z: 36px; }
+  .root[data-sequenced] [data-depth="back"] { --depth-z: -100px; }
+  .root[data-sequenced] [data-depth="middle"] { --depth-z: 20px; }
+}
 
 /* ---------- shared ---------- */
 .metaRow { display: flex; justify-content: space-between; gap: 24px; width: 100%; }
@@ -68,10 +102,10 @@
 .root[data-sequenced] .grailCopy { position: absolute; left: 48px; bottom: 56px; }
 .root[data-sequenced] .price { position: absolute; right: 96px; bottom: 56px; }
 .root[data-sequenced] .grail .vlabel { display: block; }
-.root[data-sequenced] .captions { display: block; position: absolute; z-index: 2; left: 48px; top: 37svh; width: 300px; list-style: none; }
+.root[data-sequenced] .captions { display: block; position: absolute; z-index: 4; left: 48px; top: 37svh; width: 300px; list-style: none; }
 .caption { position: absolute; left: 0; top: 0; width: 100%; opacity: 0; }
-/* The small labels cross the dimmed red headline: an ink halo keeps them legible (captions sit above it, z-index 2). */
-.caption :global(.meta) { text-shadow: 0 0 12px var(--color-ink), 0 0 2px var(--color-ink); }
+/* Hard ink edges keep foreground labels readable over the distant headline. */
+.caption :global(.meta) { text-shadow: 1px 1px 0 var(--color-ink), -1px -1px 0 var(--color-ink); }
 .captionTitle {
   font-family: var(--font-display); color: var(--color-red); text-transform: uppercase; font-weight: 400;
   font-size: 56px; line-height: 0.92; margin: 14px 0 12px;
@@ -126,7 +160,7 @@
 /* Both door objects are drawn at 270×370 and scaled, so the Game Boy's pixel layout never reflows. */
 .doorScale {
   position: absolute; left: 0; top: 0; width: 270px; height: 370px; perspective: 1400px;
-  transform-origin: top left; transform: scale(var(--door-scale)); transition: transform 0.3s;
+  transform-origin: top left; transform: scale(var(--door-scale)); transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 /* The hover lift lives here, not on .doorObj: GrailSequence measures .doorObj and it must stay untransformed. */
 .door:hover .doorScale { transform: translateY(-6px) scale(var(--door-scale)); }

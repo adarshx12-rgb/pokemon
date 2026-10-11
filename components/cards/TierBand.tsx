@@ -37,14 +37,14 @@ export function TierBand({ tier, cards, rank, backdropSrc = null }: { tier: Tier
           {backdropSrc && <div aria-hidden className="absolute inset-0 bg-linear-to-r from-ink/80 via-transparent to-ink/90" />}
           {TONE[tier] && <div aria-hidden className={`${TONE[tier]} absolute inset-0`} />}
           <div className="relative">
-            <p className="caption-box">Tier {String(rank).padStart(2, '0')}</p>
+            <p className="caption-box">Curated tier {String(rank).padStart(2, '0')}</p>
             <h2 className={`mt-4 font-display text-4xl uppercase sm:text-6xl md:text-8xl ${ACCENT[tier]}`}>{meta.label}</h2>
           </div>
           <p className="relative max-w-sm text-sm text-muted">{meta.blurb}</p>
         </InkPanel>
       </PanelReveal>
       <div className="grid grid-flow-dense grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
-        {cards.map(card => <CardTile key={card.id} card={card} splash={card.id === splash} />)}
+        {cards.map((card, index) => <CardTile key={card.id} card={card} splash={card.id === splash} featured={index === 0 || card.id === splash} />)}
       </div>
     </section>
   );

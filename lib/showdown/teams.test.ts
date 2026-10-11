@@ -21,6 +21,27 @@ describe('teamsReducer', () => {
     const s = teamsReducer({ A: [mon('x'), mon('y')], B: [] }, { type: 'remove', side: 'A', index: 0 });
     expect(s.A.map(m => m.pokemon.name)).toEqual(['y']);
   });
+  it('reorders complete members without changing their moves or the other team', () => {
+    const original = { A: [mon('first'), mon('second'), mon('third')], B: [mon('rival')] };
+    const s = teamsReducer(original, { type: 'reorder', side: 'A', from: 2, to: 0 });
+    expect(s.A.map(m => m.pokemon.name)).toEqual(['third', 'first', 'second']);
+    expect(s.A[0]).toBe(original.A[2]);
+    expect(s.B).toBe(original.B);
+    expect(original.A.map(m => m.pokemon.name)).toEqual(['first', 'second', 'third']);
+    expect(teamsReducer(s, { type: 'reorder', side: 'A', from: 0, to: 2 }).A).toEqual(original.A);
+  });
+  it('ignores invalid and empty-slot reorder targets', () => {
+    const s = { A: [mon('first'), mon('second')], B: [] };
+    for (const [from, to] of [[-1, 0], [0, 6], [0, 2], [3, 0], [0.5, 1], [0, 0]]) {
+      expect(teamsReducer(s, { type: 'reorder', side: 'A', from, to })).toBe(s);
+    }
+  });
+  it('clears only the requested team', () => {
+    const s = { A: six, B: [mon('rival')] };
+    const cleared = teamsReducer(s, { type: 'clear', side: 'A' });
+    expect(cleared.A).toEqual([]);
+    expect(cleared.B).toBe(s.B);
+  });
   it('replaces one move slot', () => {
     const s = teamsReducer({ A: [mon('x')], B: [] }, { type: 'setMove', side: 'A', index: 0, slot: 0, move: mv('b') });
     expect(s.A[0].moves[0].name).toBe('b');

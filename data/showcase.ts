@@ -4,22 +4,23 @@
  */
 export const GRAIL = { id: 'ex8-107', name: 'Rayquaza', setName: 'EX Deoxys', number: '107/107', year: '2005' } as const;
 
-export const SHOWCASE: { id: string; note?: string }[] = [
+// Card-specific editorial notes live in collectorNotes.ts.
+export const SHOWCASE: { id: string }[] = [
   // Grail candidates
-  { id: 'sv3pt5-199', note: 'The 151 Charizard ex special illustration rare — the modern era’s defining chase card.' },
-  { id: 'sv3pt5-205', note: 'Gold hyper rare Mew ex — a textured gold foil finish limited to one per set.' },
+  { id: 'sv3pt5-199' },
+  { id: 'sv3pt5-205' },
   { id: 'sv4pt5-234' },
-  { id: 'sv8-238', note: 'Surging Sparks’ Pikachu ex special illustration rare.' },
-  { id: 'swsh7-215', note: '“Moonbreon” — the Umbreon VMAX alternate art, the most sought-after card of the Sword & Shield era.' },
+  { id: 'sv8-238' },
+  { id: 'swsh7-215' },
   { id: 'swsh11-186' },
   { id: 'swsh12-186' },
-  { id: 'ex8-107', note: 'Gold Star Rayquaza — Gold Stars were pulled roughly once per several booster boxes.' },
-  { id: 'neo4-107', note: 'Shining Charizard from Neo Destiny — the first shiny Charizard card.' },
+  { id: 'ex8-107' },
+  { id: 'neo4-107' },
   // Ultra
   { id: 'sv3pt5-6' },
   { id: 'swsh7-95' },
   // Holo
-  { id: 'base1-4', note: 'Base Set Charizard. A 1st Edition PSA 10 is one of the most valuable trading cards ever sold.' },
+  { id: 'base1-4' },
   { id: 'base1-2' },
   { id: 'base1-15' },
   { id: 'base1-10' },
@@ -35,7 +36,7 @@ export const SHOWCASE: { id: string; note?: string }[] = [
   { id: 'sv3pt5-2' },
   { id: 'sv3pt5-5' },
   // Common
-  { id: 'base1-58', note: 'Base Set “Red Cheeks” Pikachu — a common worth far more than most rares when in mint condition.' },
+  { id: 'base1-58' },
   { id: 'base1-46' },
   { id: 'base1-44' },
   { id: 'base1-63' },

@@ -7,6 +7,9 @@ import type { BattleEvent, EndEvent, Side, TeamMember } from '@/lib/battle/types
 import { applyEvent, initView, teamNames, type BattleView } from '@/lib/battle/view';
 import { HpPanel } from './HpPanel';
 import { TextBox } from './TextBox';
+import { Arena } from './Arena';
+import { PokemonSprite } from './PokemonSprite';
+import styles from './showdown.module.css';
 
 const SPEEDS = [1, 2, 4] as const;
 
@@ -25,9 +28,9 @@ function fxFor(events: BattleEvent[], i: number): Fx | null {
   return null;
 }
 
-interface Props { teamA: TeamMember[]; teamB: TeamMember[]; seed: number; onFinish: (end: EndEvent) => void }
+interface Props { teamA: TeamMember[]; teamB: TeamMember[]; seed: number; classic: boolean; onFinish: (end: EndEvent) => void }
 
-export function BattleScreen({ teamA, teamB, seed, onFinish }: Props) {
+export function BattleScreen({ teamA, teamB, seed, classic, onFinish }: Props) {
   const events = useMemo(() => simulate(teamA, teamB, seed), [teamA, teamB, seed]);
   const names = useMemo(() => teamNames(teamA, teamB), [teamA, teamB]);
   const [view, setView] = useState<BattleView>(() => initView(teamA, teamB));
@@ -69,7 +72,6 @@ export function BattleScreen({ teamA, teamB, seed, onFinish }: Props) {
     finish();
   };
 
-  const alive = (side: Side) => view.fainted[side].filter(f => !f).length;
   const animMs = `${450 / speed}ms`;
 
   const sprite = (side: Side) => {
@@ -77,7 +79,6 @@ export function BattleScreen({ teamA, teamB, seed, onFinish }: Props) {
     if (idx === null) return null;
     const team = side === 'A' ? teamA : teamB;
     const p = team[idx].pokemon;
-    const src = side === 'A' ? p.sprites.back ?? p.sprites.artwork : p.sprites.front ?? p.sprites.artwork;
     // The key only changes when this sprite gets a new effect, so idle sprites never replay an animation.
     const f = sideFx[side];
     const anim = view.fainted[side][idx] ? 'faint-drop'
@@ -88,8 +89,7 @@ export function BattleScreen({ teamA, teamB, seed, onFinish }: Props) {
     return (
       <div key={`${side}-${idx}-${f?.key ?? 'none'}`} className="relative size-full"
         style={anim ? { animation: `${anim} ${animMs} ease-out both` } : undefined}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src ?? ''} alt={names[side][idx]} className="size-full object-contain [image-rendering:pixelated] drop-shadow-[0_10px_20px_rgba(0,0,0,0.6)]" />
+        <PokemonSprite pokemon={p} side={side} classic={classic} />
       </div>
     );
   };
@@ -99,46 +99,23 @@ export function BattleScreen({ teamA, teamB, seed, onFinish }: Props) {
     if (idx === null) return null;
     return (
       <HpPanel name={names[side][idx]} hp={view.hp[side][idx]} maxHp={view.maxHp[side][idx]} showNumbers={side === 'A'}
-        alive={alive(side)} total={view.fainted[side].length} />
+        fainted={view.fainted[side]} />
     );
   };
 
   return (
-    <div className="mx-auto max-w-4xl">
-      <div data-testid="battle-stage" className="border-gold-frame relative aspect-[4/3] overflow-hidden rounded-3xl bg-[radial-gradient(ellipse_at_top,#1d1a12,#0a0a0a_70%)]">
-        {/* ground ellipses */}
-        <div className="absolute right-[6%] top-[34%] h-[8%] w-[38%] rounded-[50%] bg-gold/15 blur-sm" />
-        <div className="absolute bottom-[28%] left-[4%] h-[8%] w-[42%] rounded-[50%] bg-gold/15 blur-sm" />
-
-        <div className="absolute left-[4%] top-[6%] w-[46%]">{panel('B')}</div>
-        <div className="absolute right-[8%] top-[4%] size-[34%]">{sprite('B')}</div>
-        <div className="absolute bottom-[26%] left-[6%] size-[38%]">{sprite('A')}</div>
-        <div className="absolute bottom-[29%] right-[4%] w-[46%]">{panel('A')}</div>
-
-        {fx?.kind === 'hit' && (
-          <div key={fx.key} aria-hidden className="pointer-events-none absolute inset-0"
-            style={{ backgroundColor: fx.color, animation: `hit-flash ${animMs} ease-out both` }} />
-        )}
-
-        <div className="absolute inset-x-[2%] bottom-[2%] h-[24%]">
-          <TextBox key={view.messageId} message={view.message} speed={speed} />
-        </div>
-      </div>
-
-      <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-        <button type="button" className="btn-ghost !px-5 !py-2 text-xs" onClick={() => setPlaying(p => !p)} disabled={index >= events.length}>
-          {playing ? '⏸ Pause' : '▶ Play'}
-        </button>
-        <div role="group" aria-label="Battle speed" className="flex overflow-hidden rounded-full border border-gold/50">
-          {SPEEDS.map(s => (
-            <button key={s} type="button" aria-pressed={speed === s} onClick={() => setSpeed(s)}
-              className={`px-4 py-2 text-xs transition ${speed === s ? 'bg-gold text-ink' : 'text-gold-light hover:bg-gold/10'}`}>
-              {s}×
-            </button>
-          ))}
-        </div>
-        <button type="button" data-testid="skip" className="btn-gold !px-5 !py-2 text-xs" onClick={skip}>Skip to result</button>
-      </div>
+    <div className={styles.battle}>
+      <Arena player={sprite('A')} opponent={sprite('B')} playerPanel={panel('A')} opponentPanel={panel('B')}
+        overlay={fx?.kind === 'hit' && <div key={fx.key} aria-hidden className="pointer-events-none absolute inset-0"
+          style={{ backgroundColor: fx.color, animation: `hit-flash ${animMs} ease-out both` }} />}
+        dialogue={<TextBox key={view.messageId} message={view.message || 'The battle is about to begin…'} speed={speed} />}
+        commands={<>
+          <button type="button" onClick={() => setPlaying(p => !p)} disabled={index >= events.length}>{playing ? 'Pause' : 'Play'}</button>
+          <button type="button" aria-label={`Battle speed ${speed} times. Increase speed`} onClick={() => setSpeed(SPEEDS[(SPEEDS.indexOf(speed) + 1) % SPEEDS.length])}>Speed {speed}×</button>
+          <button type="button" data-testid="skip" onClick={skip}>Result</button>
+          <span className="self-center text-center text-[9px] opacity-60">Auto battle</span>
+        </>} />
+      <p className={styles.battleHelp}>Your lineup is locked. Stats, speed, and type matchups take it from here.</p>
     </div>
   );
 }

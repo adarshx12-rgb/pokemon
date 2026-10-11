@@ -6,8 +6,8 @@ import { scrollToY, syncScrollSize } from '@/components/motion/SmoothScroll';
 import { GRAIL } from '@/data/showcase';
 import { formatUpdated, priceCaption } from '@/lib/grail/format';
 import {
-  captionAt, cardPose, doorsStyle, glintStyle, glitterRate, grailCopyOpacity, headlineStyle,
-  meshLightStrength, meshShape, poseTransform, ruleStyle, welcomeStyle, type Rect,
+  captionOpacity, cardPose, doorsStyle, glintStyle, glitterRate, grailCopyOpacity, headlineStyle,
+  easeInOut, meshLightStrength, meshShape, poseTransform, ruleStyle, seg, welcomeStyle, type Rect,
 } from '@/lib/grail/sequence';
 import { grailStore, resetGrailStore } from '@/lib/grail/store';
 import { Doors } from './Doors';
@@ -72,11 +72,22 @@ function startSequence(root: HTMLElement, stage: HTMLElement): () => void {
   const staticMax = document.documentElement.scrollHeight - window.innerHeight;
 
   root.dataset.sequenced = '';
+  // CSS composes the headline's scroll transform with its depth plane.
+  el.headline.style.removeProperty('transform');
 
   let home: Rect = { left: 0, top: 0, width: 1, height: 1 };
   let door: Rect = home;
+  let motionScale = 1;
+  let progress = 0;
+  const camera = { x: 0, y: 0, targetX: 0, targetY: 0 };
+  const layers = [...root.querySelectorAll<HTMLElement>('[data-depth]')].map(node => ({
+    node,
+    distance: node.dataset.depth === 'back' ? -0.55 : node.dataset.depth === 'middle' ? 0.65 : 1.2,
+    welcome: !!node.closest('[data-part="welcome"]'),
+  }));
   // Both boxes are untransformed wrappers, so their rects are stable whatever the sequence is doing.
   const measure = () => {
+    motionScale = window.innerWidth < 768 || window.innerHeight < 500 ? 0.4 : 1;
     const s = stage.getBoundingClientRect();
     const rel = (n: HTMLElement): Rect => {
       const r = n.getBoundingClientRect();
@@ -87,7 +98,28 @@ function startSequence(root: HTMLElement, stage: HTMLElement): () => void {
   };
 
   const apply = (p: number) => {
+    progress = p;
+    // Project each plane independently: opacity/masks on the title and welcome would
+    // flatten a shared preserve-3d scene. These transforms stay sharp during fades.
+    const depthStrength = 1 - easeInOut(seg(p, 0.74, 0.94));
+    // Cursor is a small accent; the persistent planes and scroll supply the depth.
+    const pointerX = camera.x * 0.2;
+    const pointerY = camera.y * 0.2;
+    for (const layer of layers) {
+      const drift = layer.welcome ? -52 * seg(p, 0, 0.24) : 24 - 48 * seg(p, 0.14, 0.74);
+      const amount = layer.distance * motionScale * depthStrength;
+      layer.node.style.setProperty('--depth-x', `${pointerX * 22 * amount}px`);
+      layer.node.style.setProperty('--depth-y', `${(pointerY * 14 + drift) * amount}px`);
+      layer.node.style.setProperty('--depth-rx', `${-pointerY * 1.8 * amount}deg`);
+      layer.node.style.setProperty('--depth-ry', `${pointerX * 2.2 * amount}deg`);
+    }
     const pose = cardPose(p, home, door);
+    // The near card follows the viewer, then returns exactly to its measured door slot.
+    const cardDepth = motionScale * depthStrength;
+    pose.x += pointerX * 18 * cardDepth;
+    pose.y += pointerY * 12 * cardDepth;
+    pose.rx -= pointerY * 2.5 * cardDepth;
+    pose.ry += pointerX * 3.5 * cardDepth;
     el.card.style.transform = poseTransform(pose);
     el.card.style.opacity = String(pose.opacity);
     const glint = glintStyle(p);
@@ -96,17 +128,17 @@ function startSequence(root: HTMLElement, stage: HTMLElement): () => void {
 
     const welcome = welcomeStyle(p);
     show(el.welcome, welcome.opacity);
-    el.welcome.style.transform = `translateY(${welcome.y}px)`;
+    el.welcome.style.transform = `translate3d(0, ${welcome.y}px, 0)`;
 
     const headline = headlineStyle(p);
     el.headline.style.opacity = String(headline.opacity);
-    el.headline.style.transform = `translateY(${headline.y}px) scale(${headline.scale})`;
+    el.headline.style.setProperty('--headline-y', `${headline.y}px`);
+    el.headline.style.setProperty('--headline-scale', String(headline.scale));
 
     const copy = grailCopyOpacity(p);
     for (const node of [el.grailMeta, el.grailCopy, el.price, el.grailLabel]) show(node, copy);
 
-    const active = captionAt(p);
-    el.captions.forEach((caption, i) => show(caption, i === active ? 1 : 0));
+    el.captions.forEach((caption, i) => show(caption, captionOpacity(p, i)));
 
     const rule = ruleStyle(p);
     el.rule.style.opacity = String(rule.opacity);
@@ -142,20 +174,64 @@ function startSequence(root: HTMLElement, stage: HTMLElement): () => void {
   };
 
   const pinVh = () => (window.innerWidth < 768 ? PIN_VH.phone : PIN_VH.desktop);
+  // A real scrubbed playhead smooths wheel, touch and keyboard updates together.
+  // `scrub` alone cannot smooth work performed directly in ScrollTrigger.onUpdate.
+  const playhead = { progress: 0 };
+  const animation = gsap.to(playhead, {
+    progress: 1,
+    duration: 1,
+    ease: 'none',
+    paused: true,
+    onUpdate: () => apply(playhead.progress),
+  });
   const trigger = ScrollTrigger.create({
     trigger: root,
     start: 'top top',
     end: () => `+=${window.innerHeight * pinVh()}`,
     pin: stage,
-    scrub: true,
+    animation,
+    scrub: 0.35,
     invalidateOnRefresh: true,
-    onRefresh: self => { syncScrollSize(); measure(); apply(self.progress); },
-    onUpdate: self => apply(self.progress),
+    onRefresh: self => {
+      syncScrollSize();
+      measure();
+      animation.progress(self.progress);
+      apply(self.progress);
+    },
   });
   syncScrollSize(); // the pin spacer has just changed the page height
   measure();
   apply(trigger.progress);
-  document.fonts?.ready.then(() => ScrollTrigger.refresh());
+  // Only tick while the camera is moving; scroll uses the existing scrubbed playhead.
+  // Touch retains native gestures and gets the same depth separation from scroll.
+  const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+  const tickCamera = (_time: number, deltaMs: number) => {
+    const blend = 1 - Math.exp(-Math.min(deltaMs, 50) / 130);
+    camera.x += (camera.targetX - camera.x) * blend;
+    camera.y += (camera.targetY - camera.y) * blend;
+    const settled = Math.abs(camera.targetX - camera.x) + Math.abs(camera.targetY - camera.y) < 0.001;
+    if (settled) {
+      camera.x = camera.targetX;
+      camera.y = camera.targetY;
+      gsap.ticker.remove(tickCamera);
+    }
+    apply(progress);
+  };
+  const onPointerMove = (event: PointerEvent) => {
+    if (!finePointer.matches || event.pointerType === 'touch') return;
+    camera.targetX = Math.max(-1, Math.min(1, event.clientX / window.innerWidth * 2 - 1));
+    camera.targetY = Math.max(-1, Math.min(1, event.clientY / window.innerHeight * 2 - 1));
+    gsap.ticker.add(tickCamera);
+  };
+  const resetCamera = () => {
+    camera.targetX = camera.targetY = 0;
+    gsap.ticker.add(tickCamera);
+  };
+  stage.addEventListener('pointermove', onPointerMove, { passive: true });
+  stage.addEventListener('pointerleave', resetCamera);
+  window.addEventListener('blur', resetCamera);
+  let disposed = false;
+  document.fonts?.ready.then(() => { if (!disposed) ScrollTrigger.refresh(); });
 
   const at = (p: number) => trigger.start + (trigger.end - trigger.start) * p;
   // Static screens map onto the sequence: welcome → 0–0.25, grail → 0.25–1, doors → the end.
@@ -192,10 +268,16 @@ function startSequence(root: HTMLElement, stage: HTMLElement): () => void {
   root.addEventListener('focusin', onFocusIn);
 
   return () => {
+    disposed = true;
+    stage.removeEventListener('pointermove', onPointerMove);
+    stage.removeEventListener('pointerleave', resetCamera);
+    window.removeEventListener('blur', resetCamera);
+    gsap.ticker.remove(tickCamera);
     root.removeEventListener('click', onClick);
     root.removeEventListener('focusin', onFocusIn);
     window.removeEventListener('scrollend', onScrollEnd);
     trigger.kill(true);
+    animation.kill();
     resetGrailStore();
     delete root.dataset.sequenced;
     syncScrollSize();
@@ -239,17 +321,17 @@ export function GrailSequence({ price, priceSource, updatedAt, tierCount, cardCo
     <section ref={rootRef} className={styles.root} aria-label="Pokémon Vault">
       <div ref={stageRef} className={styles.stage}>
         <div className={styles.welcome} data-part="welcome">
-          <div className={`meta ${styles.metaRow}`}>
+          <div className={`meta ${styles.metaRow}`} data-depth="front">
             <span>Ed. 01 — The collector’s index</span>
             <span>Rare cards · ranked · priced daily</span>
           </div>
-          <h1 className={`grain ${styles.siteName}`}>Pokémon <br className="md:hidden" />Vault</h1>
-          <p className={styles.subhead}>Rare by design /<br />priced by the market</p>
-          <div className={styles.intro}>
+          <h1 className={`grain ${styles.siteName}`} data-depth="back">Pokémon <br className="md:hidden" />Vault</h1>
+          <p className={styles.subhead} data-depth="middle">Rare by design /<br />priced by the market</p>
+          <div className={styles.intro} data-depth="front">
             <p className="copy">{DESCRIPTION}</p>
             <a href="#grail" className="text-link" data-goto="0.25">Scroll to open the vault ↓</a>
           </div>
-          <ul className={`meta ${styles.facts}`}>
+          <ul className={`meta ${styles.facts}`} data-depth="front">
             <li><span className="text-red">{pad2(tierCount)}</span> tiers</li>
             <li><span className="text-red">{cardCount}</span> cards on file</li>
             {updated && <li>Prices updated {updated}</li>}
@@ -259,25 +341,25 @@ export function GrailSequence({ price, priceSource, updatedAt, tierCount, cardCo
         </div>
 
         <div id="grail" className={styles.grail}>
-          <div className={`meta ${styles.metaRow}`} data-part="grailMeta">
+          <div className={`meta ${styles.metaRow}`} data-part="grailMeta" data-depth="front">
             <span>No. 001 — The rarest card in the vault</span>
             <span>{GRAIL.setName} · {GRAIL.year} · {GRAIL.number}</span>
           </div>
-          <h2 className={`grain ${styles.cardName}`} data-part="headline">{GRAIL.name}</h2>
+          <h2 className={`grain ${styles.cardName}`} data-part="headline" data-depth="back">{GRAIL.name}</h2>
           <div className={styles.cardHome} data-card-home><GrailCard /></div>
-          <div className={styles.grailCopy} data-part="grailCopy">
+          <div className={styles.grailCopy} data-part="grailCopy" data-depth="front">
             <p className={styles.kicker}>Gold Star /<br />one of the rarest</p>
             <p className="copy">A shiny Rayquaza marked with a gold star, the rarest print in its set. Kept in tier 01 of the vault.</p>
             <a href="#doors" className="text-link" data-goto="0.74">Scroll to turn the card ↓</a>
           </div>
           {price && (
-            <div className={styles.price} data-part="price">
+            <div className={styles.price} data-part="price" data-depth="front">
               <p className="meta text-gold">Est. market — {priceSource}</p>
               <p className={`text-gold-gradient ${styles.priceValue}`}>{price}</p>
             </div>
           )}
           <span className={`meta ${styles.vlabel}`} data-part="grailLabel" aria-hidden>Tier 01 — The Grail</span>
-          <ol className={styles.captions}>
+          <ol className={styles.captions} data-depth="front">
             <li className={styles.caption} data-caption="0">
               <p className="meta">01 / The card</p>
               <p className={styles.captionTitle}>{GRAIL.name}</p>

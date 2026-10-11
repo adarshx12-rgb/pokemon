@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import { GRID, projectGrid, type MeshPoint } from '@/lib/grail/mesh';
 import { grailStore } from '@/lib/grail/store';
 
-const FRAME_MS = 1000 / 30;
+const FRAME_MS = 1000 / 60;
 const BUCKETS = 10;
 
 /** Fixed indigo wire-mesh walls on both sides of every page. Pages shape it through grailStore. */
@@ -18,7 +18,7 @@ export function MeshBackground() {
     let w = 0;
     let h = 0;
     let raf = 0;
-    let last = -Infinity;
+    let last = 0;
 
     const resize = () => {
       const dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -85,8 +85,10 @@ export function MeshBackground() {
 
     const loop = (t: number) => {
       raf = requestAnimationFrame(loop);
-      if (t - last < FRAME_MS) return;
-      last = t;
+      const elapsed = t - last;
+      if (elapsed < FRAME_MS - 0.5) return;
+      // Retain the remainder so small RAF timing variations don't skip alternate frames.
+      last = t - (Math.max(0, elapsed) % FRAME_MS);
       draw(t);
     };
     const start = () => { cancelAnimationFrame(raf); if (!reduce && !document.hidden) raf = requestAnimationFrame(loop); };

@@ -57,17 +57,29 @@ export function MeshBackground() {
         ctx.stroke(path);
       });
 
+      // Dots batched the same way: one fill per alpha bucket, indigo and gold-lit kept apart.
+      const dots = Array.from({ length: BUCKETS }, () => new Path2D());
+      const litDots = Array.from({ length: BUCKETS }, () => new Path2D());
       for (const row of grid) {
         for (const p of row) {
           if (p.alpha < 0.05) continue;
-          ctx.fillStyle = p.lit > 0.15
-            ? `rgba(255, 226, 150, ${Math.min(1, p.alpha * 0.9 + p.lit)})`
-            : `rgba(124, 120, 255, ${Math.min(1, p.alpha * 1.2)})`;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, 1.3 + p.alpha * 1.7, 0, Math.PI * 2);
-          ctx.fill();
+          const lit = p.lit > 0.15;
+          const alpha = lit ? Math.min(1, p.alpha * 0.9 + p.lit) : Math.min(1, p.alpha * 1.2);
+          const path = (lit ? litDots : dots)[Math.min(BUCKETS - 1, Math.floor(alpha * BUCKETS))];
+          const r = 1.3 + p.alpha * 1.7;
+          path.moveTo(p.x + r, p.y);
+          path.arc(p.x, p.y, r, 0, Math.PI * 2);
         }
       }
+      const bucketAlpha = (i: number) => (i + 0.5) / BUCKETS;
+      dots.forEach((path, i) => {
+        ctx.fillStyle = `rgba(124, 120, 255, ${bucketAlpha(i)})`;
+        ctx.fill(path);
+      });
+      litDots.forEach((path, i) => {
+        ctx.fillStyle = `rgba(255, 226, 150, ${bucketAlpha(i)})`;
+        ctx.fill(path);
+      });
       ctx.globalAlpha = 1;
     };
 

@@ -7,22 +7,24 @@ const LINKS = [
   { href: '/cards', label: 'Vault' },
   { href: '/showdown', label: 'Showdown' },
 ] as const;
+/** Matches .door:focus-visible and .text-link:focus-visible. */
+const RING = 'focus-visible:outline-2 focus-visible:outline-indigo focus-visible:outline-offset-4';
 
 export function SiteNav() {
   const path = usePathname();
   const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
   return (
     <header className="fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-4 bg-linear-to-b from-ink/90 to-transparent px-4 py-5 md:px-12">
-      <Link href="/" className="whitespace-nowrap font-display text-lg uppercase tracking-wide text-red md:text-[22px]">
+      <Link href="/" className={`whitespace-nowrap font-display text-lg uppercase tracking-wide text-red md:text-[22px] ${RING}`}>
         Pokémon Vault
       </Link>
-      <nav aria-label="Main" className="meta flex gap-5 whitespace-nowrap md:gap-11">
+      <nav aria-label="Main" className="meta flex gap-3 whitespace-nowrap min-[400px]:gap-5 md:gap-11">
         {LINKS.map(link => (
           <Link
             key={link.href}
             href={link.href}
             aria-current={isActive(link.href) ? 'page' : undefined}
-            className={isActive(link.href) ? 'text-red underline underline-offset-[6px]' : 'text-indigo transition hover:text-red'}
+            className={`${isActive(link.href) ? 'text-red underline underline-offset-[6px]' : 'text-indigo transition hover:text-red'} ${RING}`}
           >
             {link.label}
           </Link>

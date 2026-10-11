@@ -9,6 +9,8 @@
 .welcome, .grail, .doors {
   position: relative; min-height: 100svh; padding: 112px 48px 56px;
   display: flex; flex-direction: column;
+  /* Very wide screens: the screens' contents stay within 1600px, centred. The mesh canvas stays full-bleed. */
+  max-width: 1600px; margin-inline: auto;
 }
 .welcome { justify-content: center; z-index: 2; }
 .grail { align-items: center; justify-content: center; gap: 28px; z-index: 1; }
@@ -17,14 +19,13 @@
 .root[data-sequenced] .stage { height: 100svh; overflow: hidden; }
 .root[data-sequenced] .welcome,
 .root[data-sequenced] .grail,
-.root[data-sequenced] .doors { position: absolute; inset: 0; min-height: 0; }
+.root[data-sequenced] .doors { position: absolute; inset: 0; min-height: 0; } /* max-width + auto margins centre them */
 .root[data-sequenced] .grail { display: block; pointer-events: none; }
 .root[data-sequenced] .grail a { pointer-events: auto; }
 
 /* ---------- shared ---------- */
 .metaRow { display: flex; justify-content: space-between; gap: 24px; width: 100%; }
 .vlabel { position: absolute; right: 40px; top: 50%; transform: translateY(-50%); writing-mode: vertical-rl; }
-.display { font-family: var(--font-display); color: var(--color-red); text-transform: uppercase; font-weight: 400; }
 
 /* ---------- welcome ---------- */
 .siteName {
@@ -67,8 +68,10 @@
 .root[data-sequenced] .grailCopy { position: absolute; left: 48px; bottom: 56px; }
 .root[data-sequenced] .price { position: absolute; right: 96px; bottom: 56px; }
 .root[data-sequenced] .grail .vlabel { display: block; }
-.root[data-sequenced] .captions { display: block; position: absolute; left: 48px; top: 37svh; width: 300px; list-style: none; }
+.root[data-sequenced] .captions { display: block; position: absolute; z-index: 2; left: 48px; top: 37svh; width: 300px; list-style: none; }
 .caption { position: absolute; left: 0; top: 0; width: 100%; opacity: 0; }
+/* The small labels cross the dimmed red headline: an ink halo keeps them legible (captions sit above it, z-index 2). */
+.caption :global(.meta) { text-shadow: 0 0 12px var(--color-ink), 0 0 2px var(--color-ink); }
 .captionTitle {
   font-family: var(--font-display); color: var(--color-red); text-transform: uppercase; font-weight: 400;
   font-size: 56px; line-height: 0.92; margin: 14px 0 12px;
@@ -216,11 +219,17 @@
   /* shrink smoothly with screen height so the card bottom stays clear of the price */
   .root[data-sequenced] .cardHome { --card-w: min(62vw, 36svh, max(96px, calc((100svh - 420px - 12vw) * 0.714))); }
   .root[data-sequenced] .grailCopy { left: 20px; right: 20px; bottom: 32px; width: auto; }
-  .root[data-sequenced] .grailCopy .copy { display: none; }
   .root[data-sequenced] .price { right: 20px; top: auto; bottom: 214px; }
   .root[data-sequenced] .captions { left: 20px; top: auto; bottom: 48px; width: calc(100% - 40px); height: 130px; }
   .captionTitle { font-size: 36px; }
   .root[data-sequenced] .rule { left: 20px; right: 20px; bottom: 24px; }
+}
+/* Short phones (360×640, 375×667): a tighter doors screen keeps the meta clear of the nav and both links in view. */
+@media (max-width: 767px) and (max-height: 700px) {
+  .doors { padding-top: 76px; padding-bottom: 20px; }
+  .doorsLayout { gap: 20px; }
+  .chooseTitle { font-size: 44px; margin: 8px 0 0; }
+  .doorsCopy { display: none; }
 }
 
 /* ---------- short landscape screens (phones on their side, desktop zoomed to 200%) ---------- */

@@ -125,15 +125,19 @@ function startSequence(root: HTMLElement, stage: HTMLElement): () => void {
     const cx = home.left + home.width / 2 + pose.x;
     const cy = home.top + home.height / 2 + pose.y;
     Object.assign(grailStore.mesh, meshShape(p));
-    grailStore.light = { x: cx, y: cy, r: home.width * 1.4 * pose.scale, strength: meshLightStrength(p) };
+    // Mutated in place: this runs on every scroll update. resetGrailStore nulls both, so create them then.
+    const light = (grailStore.light ??= { x: 0, y: 0, r: 0, strength: 0 });
+    light.x = cx;
+    light.y = cy;
+    light.r = home.width * 1.4 * pose.scale;
+    light.strength = meshLightStrength(p);
     grailStore.glitter.rate = glitterRate(p);
-    grailStore.glitter.emitter = {
-      x: cx,
-      y: cy,
-      w: home.width * pose.scale * Math.max(0.12, Math.abs(Math.cos(ry))),
-      h: home.height * pose.scale,
-      dir: Math.cos(ry) >= 0 ? -1 : 1,
-    };
+    const emitter = (grailStore.glitter.emitter ??= { x: 0, y: 0, w: 0, h: 0, dir: 1 });
+    emitter.x = cx;
+    emitter.y = cy;
+    emitter.w = home.width * pose.scale * Math.max(0.12, Math.abs(Math.cos(ry)));
+    emitter.h = home.height * pose.scale;
+    emitter.dir = Math.cos(ry) >= 0 ? -1 : 1;
   };
 
   const pinVh = () => (window.innerWidth < 768 ? PIN_VH.phone : PIN_VH.desktop);

@@ -237,3 +237,9 @@ No further Higgsfield generation is planned. Video generation of the card was at
 - Footer copy is indigo (red at 70% opacity would fail AA for small text).
 - One 1200px WebP per face; next/image builds the srcset.
 - Body text colour stays cream on the not-yet-restyled pages; the home section sets indigo itself.
+- The nav sits on a `from-ink/90` → transparent gradient rather than no background, so it stays readable over content scrolling under it.
+- Short landscape screens (500px tall or less: phones on their side, desktops at 200% zoom) keep the pinned sequence with a compact tier: type sized from the screen height, the welcome, grail and doors paragraphs and the side labels hidden, and 140×192 doors (160×219 from 420px tall) beside a three-line title, so both door links stay in view.
+- Tablet portrait (768–1100px wide, 900px or more tall) stacks the one-line "Choose your door." title above the doors; 768–960px side-by-side layouts use 220px doors so the title column stays readable.
+- No-JS: the page-transition curtain and fade are CSS animations (app/template.tsx), so visitors without JavaScript get the static stacked layout instead of a black screen.
+- Screens wider than 1600px keep the welcome, grail and doors contents in a centred 1600px column; the mesh stays full-bleed.
+- Short phones (under 768px wide, 700px tall or less) hide the doors paragraph and use a 44px title so the doors meta clears the nav.

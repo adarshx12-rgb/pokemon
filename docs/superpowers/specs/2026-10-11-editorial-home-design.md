@@ -227,3 +227,13 @@ No further Higgsfield generation is planned. Video generation of the card was at
 | Glitter | Live canvas of round gold dust (no stars), dense around the card, follows spin speed (user) |
 | End state | Card becomes the Vault door, beside a cobalt Game Boy Showdown door |
 | Fonts | Anton + JetBrains Mono (+ Press Start 2P for pixel UI) |
+
+## Clarifications (implementation plan, 2026-10-11)
+
+- 404 headline stays "A wild MissingNo." (existing test and tone) in the new Anton/indigo style.
+- "Prices updated {date}" appears in the welcome screen's facts list, not the nav: the nav lives in the shared layout and has no page data.
+- Mobile doors sit side by side at 160×219 so both fit the pinned screen; desktop viewports 760px tall or less use 200×274 doors.
+- The Vault door image has empty alt text; the link is named by its own text ("01 — The collection Vault Enter the vault →").
+- Footer copy is indigo (red at 70% opacity would fail AA for small text).
+- One 1200px WebP per face; next/image builds the srcset.
+- Body text colour stays cream on the not-yet-restyled pages; the home section sets indigo itself.

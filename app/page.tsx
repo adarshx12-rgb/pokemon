@@ -1,7 +1,7 @@
 import { Chapter } from '@/components/home/Chapter';
 import { FeaturePanels } from '@/components/home/FeaturePanels';
 import { Hero } from '@/components/home/Hero';
-import { FEATURED_CARD_ID } from '@/data/showcase';
+import { GRAIL } from '@/data/showcase';
 import { decorSrc } from '@/lib/manga/decor';
 import { getCard } from '@/lib/tcg/client';
 
@@ -9,7 +9,7 @@ export const revalidate = 86400;
 
 async function featuredCard() {
   try {
-    return await getCard(FEATURED_CARD_ID);
+    return await getCard(GRAIL.id);
   } catch {
     return null;
   }

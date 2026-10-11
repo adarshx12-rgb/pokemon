@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "e2e": "playwright test",
     "verify:showcase": "tsx scripts/verify-showcase.ts",
-    "snapshot:showcase": "tsx scripts/snapshot-showcase.ts"
+    "snapshot:showcase": "tsx scripts/snapshot-showcase.ts",
+    "build:grail": "tsx scripts/build-grail-assets.ts"
   },
   "dependencies": {
     "framer-motion": "^14.1.0",

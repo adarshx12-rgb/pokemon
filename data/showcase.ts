@@ -1,4 +1,8 @@
-export const FEATURED_CARD_ID = 'base1-4';
+/**
+ * The home page's grail. The 3D faces in public/grail/ are made for this exact card, so this is an
+ * editorial pick, not "the most expensive card" (prices move; Umbreon VMAX is close behind).
+ */
+export const GRAIL = { id: 'ex8-107', name: 'Rayquaza', setName: 'EX Deoxys', number: '107/107', year: '2005' } as const;
 
 export const SHOWCASE: { id: string; note?: string }[] = [
   // Grail candidates

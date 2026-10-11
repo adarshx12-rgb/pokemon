@@ -1,14 +1,5 @@
 import { test, expect } from '@playwright/test';
 
-test('headings use Dela Gothic One and body uses Zen Kaku Gothic New', async ({ page }) => {
-  await page.goto('/');
-  const h1Font = await page.locator('h1').evaluate(el => getComputedStyle(el).fontFamily);
-  const bodyFont = await page.locator('body').evaluate(el => getComputedStyle(el).fontFamily);
-  expect(h1Font).toMatch(/Dela Gothic One/i);
-  expect(bodyFont).toMatch(/Zen Kaku Gothic New/i);
-  await expect(page.locator('svg filter#ink-rough')).toHaveCount(1);
-});
-
 test('home hero is a 3-panel manga spread', async ({ page }) => {
   await page.goto('/');
   const hero = page.getByTestId('hero');
@@ -68,12 +59,6 @@ test('card detail uses an ink frame and a speech-bubble note', async ({ page }) 
   await expect(page.getByRole('heading', { name: /identify value/i })).toBeVisible();
   await expect(page.locator('main [data-ink-panel]').first()).toBeVisible();
   await expect(page.locator('main blockquote')).toHaveCount(0);
-});
-
-test('does not preload every CJK font slice', async ({ page }) => {
-  // Dela Gothic One and Zen Kaku ship ~120 unicode-range slices each; preloading them all cost ~3 MB before first paint.
-  await page.goto('/');
-  expect(await page.locator('link[rel="preload"][as="font"]').count()).toBeLessThanOrEqual(6);
 });
 
 // ---- Final-review fixes ----

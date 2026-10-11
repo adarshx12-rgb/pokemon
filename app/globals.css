@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #0a0a0a;
+  --color-ink: #050507;
   --color-surface: #141414;
   --color-line: #2a2418;
   --color-gold: #d4af37;
@@ -9,14 +9,18 @@
   --color-gold-dark: #8c6b1f;
   --color-cream: #ede6d6;
   --color-muted: #8a8375;
-  --font-display: var(--font-dela), 'Arial Black', sans-serif;
-  --font-sans: var(--font-zen-kaku), system-ui, sans-serif;
+  --color-red: #ff2b2b;
+  --color-indigo: #6e6bff;
+  --color-indigo-deep: #4a4dff;
+  --font-display: var(--font-anton), 'Arial Narrow', sans-serif;
+  --font-sans: var(--font-jetbrains), ui-monospace, monospace;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
   --font-pixel: var(--font-press-start), monospace;
 }
 
 html { background: var(--color-ink); color: var(--color-cream); }
 body { font-family: var(--font-sans); }
-::selection { background: var(--color-gold); color: var(--color-ink); }
+::selection { background: var(--color-red); color: var(--color-ink); }
 
 .text-gold-gradient {
   background: linear-gradient(135deg, #8c6b1f 0%, #d4af37 35%, #f5d77a 50%, #d4af37 65%, #8c6b1f 100%);

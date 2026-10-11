@@ -281,7 +281,7 @@ export function GrailSequence({ price, priceSource, updatedAt, tierCount, cardCo
             <div data-part="doorsTitle">
               <p className="meta">Contents — Ed. 01</p>
               <h2 className={styles.chooseTitle}>Choose <br />your <br />door.</h2>
-              <p className="copy max-w-[300px]">The grail goes back in the vault. Follow it in, or take a team to the arena.</p>
+              <p className={`copy max-w-[300px] ${styles.doorsCopy}`}>The grail goes back in the vault. Follow it in, or take a team to the arena.</p>
             </div>
             <Doors />
           </div>

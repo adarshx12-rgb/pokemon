@@ -222,3 +222,52 @@
   .captionTitle { font-size: 36px; }
   .root[data-sequenced] .rule { left: 20px; right: 20px; bottom: 24px; }
 }
+
+/* ---------- short landscape screens (phones on their side, desktop zoomed to 200%) ---------- */
+/* Everything is sized from the screen height, the long paragraphs drop out and the doors shrink, so
+   each pinned screen fits under the nav with both door links in view. Applies in both modes, so the
+   welcome and doors layouts still match between static and sequenced. */
+@media (max-height: 500px) {
+  .root { --pad-x: 48px; }
+  .welcome, .grail, .doors { padding: 76px var(--pad-x) 16px; }
+  .vlabel, .root[data-sequenced] .grail .vlabel { display: none; }
+
+  .siteName { font-size: min(14.7vw, 24svh); white-space: nowrap; text-align: center; }
+  .siteName br { display: none; }
+  .subhead { font-size: 8svh; margin-top: 12px; }
+  .intro { margin-top: 16px; }
+  .intro :global(.copy) { display: none; }
+  .intro > a { margin-top: 0; }
+  .facts { position: absolute; right: var(--pad-x); bottom: 16px; margin: 0; text-align: right; line-height: 1.9; }
+
+  .cardName { font-size: min(22vw, 40svh); }
+  .kicker { font-size: 7svh; margin-bottom: 10px; }
+  .grailCopy > a { margin-top: 10px; }
+  .priceValue { font-size: 10svh; margin-top: 6px; }
+  .captionTitle { font-size: 9svh; margin: 8px 0 6px; }
+
+  .root[data-sequenced] .grail .metaRow { top: 76px; left: var(--pad-x); right: var(--pad-x); }
+  .root[data-sequenced] .cardName { top: 96px; }
+  .root[data-sequenced] .cardHome { --card-w: min(310px, 21.5vw, 34svh); top: 30svh; }
+  .root[data-sequenced] .grailCopy { left: var(--pad-x); right: auto; bottom: 16px; width: 300px; }
+  .root[data-sequenced] .grailCopy :global(.copy) { display: none; }
+  .root[data-sequenced] .price { top: auto; right: var(--pad-x); bottom: 16px; }
+  .root[data-sequenced] .captions { top: 37svh; bottom: auto; left: var(--pad-x); width: 300px; height: auto; }
+  .root[data-sequenced] .rule { left: var(--pad-x); right: var(--pad-x); bottom: 8px; }
+
+  .doorsLayout { grid-template-columns: minmax(0, 260px) 1fr; gap: 32px; }
+  .chooseTitle { font-size: 12svh; margin: 6px 0 0; }
+  .chooseTitle br { display: inline; }
+  .doorsCopy { display: none; }
+  .doorRow { gap: 40px; justify-content: center; }
+  .door :global(.meta), .door :global(.text-link) { white-space: nowrap; }
+  .door { --door-w: 140px; --door-scale: 0.5185; }
+  .doorObj { margin-bottom: 8px; }
+  .doorWord { font-size: 26px; margin: 4px 0 6px; }
+}
+@media (max-height: 500px) and (min-height: 420px) {
+  .door { --door-w: 160px; --door-scale: 0.5926; }
+}
+@media (max-height: 500px) and (max-width: 767px) {
+  .root { --pad-x: 20px; }
+}

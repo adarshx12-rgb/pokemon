@@ -205,3 +205,8 @@
   .captionTitle { font-size: 36px; }
   .root[data-sequenced] .rule { left: 20px; right: 20px; bottom: 24px; }
 }
+
+/* short phones: shrink the card so the price clears it */
+@media (max-width: 767px) and (max-height: 740px) {
+  .cardHome { --card-w: min(62vw, 22svh); }
+}

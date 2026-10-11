@@ -10,7 +10,7 @@ const pokemon = (name: string) => ({
     front: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${ids[name] ?? 25}.png`,
     back: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${ids[name] ?? 25}.png`,
   },
-  movePool: [{ name: 'tackle', power: 40, accuracy: 100, type: 'normal', damageClass: 'physical' }],
+  movePool: ['tackle', 'body-slam', 'quick-attack', 'hyper-fang'].map((name, index) => ({ name, power: 40 + index * 10, accuracy: 100, type: 'normal', damageClass: 'physical' })),
 });
 
 async function add(page: Page, side: 'A' | 'B', name: string) {
@@ -57,6 +57,18 @@ test('empty opening, artwork, pointer/keyboard order, battle, rematch and reset'
   await expect(page.getByTestId('arena-pokemon-A')).toHaveAttribute('src', /back\/25.png/);
   await page.getByRole('button', { name: 'HD artwork' }).click();
   await expect.poll(() => page.getByTestId('arena-preview').locator('img').evaluateAll(images => images.every(img => (img as HTMLImageElement).complete && (img as HTMLImageElement).naturalWidth > 0))).toBe(true);
+  for (const viewport of [{ width: 1366, height: 768 }, { width: 1280, height: 720 }]) {
+    await page.setViewportSize(viewport);
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    for (const name of [/My team/, /Opponent/]) {
+      const panel = page.getByRole('region', { name });
+      await expect(panel.locator('select')).toHaveCount(4);
+      const box = await panel.boundingBox();
+      expect(box!.y).toBeGreaterThan(60);
+      expect(box!.y + box!.height).toBeLessThan(viewport.height);
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
   await page.screenshot({ path: 'test-results/showdown-teams.png', fullPage: true, animations: 'disabled', caret: 'initial' });
   await page.getByTestId('battle-start').click();
   await expect(page.getByTestId('battle-stage')).toBeVisible();
@@ -115,4 +127,26 @@ test('phone touch ordering, empty slots focus search, and no horizontal overflow
   await expect.poll(() => page.getByTestId('arena-preview').locator('img').evaluateAll(images => images.every(img => (img as HTMLImageElement).complete && (img as HTMLImageElement).naturalWidth > 0))).toBe(true);
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
   await page.screenshot({ path: 'test-results/showdown-phone.png', fullPage: true, animations: 'disabled', caret: 'initial' });
+});
+
+test('live species learnsets keep Blastoise and Pikachu moves separate', async ({ page }) => {
+  await page.unroute('**/api/pokemon/*');
+  await page.goto('/showdown');
+  await add(page, 'A', 'blastoise');
+  const player = page.getByRole('region', { name: /My team/ });
+  await expect(player.locator('select')).toHaveCount(4);
+  await expect(player.locator('option[value="thunderbolt"]')).toHaveCount(0);
+  await expect(player.locator('option[value="flamethrower"]')).toHaveCount(0);
+  await expect(player.locator('optgroup[label="Naturally learned"] option[value="hydro-pump"]')).toHaveCount(4);
+  await expect(player.locator('optgroup[label="Other learnable moves"] option[value="ice-beam"]')).toHaveCount(4);
+  await player.locator('select').first().selectOption('ice-beam');
+  await expect(player.locator('select').first()).toHaveValue('ice-beam');
+  await expect(player.locator('select').nth(1).locator('option[value="ice-beam"]')).toHaveJSProperty('disabled', true);
+  await add(page, 'B', 'pikachu');
+  const opponent = page.getByRole('region', { name: /Opponent/ });
+  await expect(opponent.locator('option[value="thunderbolt"]')).toHaveCount(4);
+  await expect(opponent.locator('option[value="hydro-pump"]')).toHaveCount(0);
+  await page.getByTestId('battle-start').click();
+  await page.getByTestId('skip').click();
+  await expect(page.getByTestId('result-banner')).toHaveText(/VICTORY|DEFEAT/);
 });

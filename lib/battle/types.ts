@@ -12,6 +12,7 @@ export interface Move {
   power: number;
   accuracy: number | null; // null = never misses
   damageClass: DamageClass;
+  learnMethods?: string[]; // How this particular species learns the move, from PokéAPI.
 }
 
 export interface StatBlock { hp: number; atk: number; def: number; spa: number; spd: number; spe: number }

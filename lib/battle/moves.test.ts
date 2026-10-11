@@ -7,6 +7,18 @@ const m = (name: string, type: Move['type'], power: number, damageClass: Move['d
   ({ name, type, power, accuracy, damageClass });
 
 describe('autoMoveset', () => {
+  it('prioritizes natural attacks, fills from legal coverage, and never repeats moves', () => {
+    const pool = [
+      { ...m('hydro-pump', 'water', 110), learnMethods: ['level-up'] },
+      { ...m('aqua-tail', 'water', 90), learnMethods: ['level-up'] },
+      { ...m('bite', 'dark', 60), learnMethods: ['level-up'] },
+      { ...m('ice-beam', 'ice', 90), learnMethods: ['machine'] },
+      { ...m('water-spout', 'water', 150), learnMethods: ['egg'] },
+    ];
+    const selected = autoMoveset([...pool, pool[0]], ['water']);
+    expect(selected.map(move => move.name)).toEqual(['hydro-pump', 'aqua-tail', 'bite', 'ice-beam']);
+    expect(new Set(selected.map(move => move.name)).size).toBe(selected.length);
+  });
   it('returns Struggle for an empty pool', () => {
     expect(autoMoveset([], ['normal'])).toEqual([STRUGGLE]);
   });

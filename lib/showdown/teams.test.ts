@@ -46,6 +46,15 @@ describe('teamsReducer', () => {
     const s = teamsReducer({ A: [mon('x')], B: [] }, { type: 'setMove', side: 'A', index: 0, slot: 0, move: mv('b') });
     expect(s.A[0].moves[0].name).toBe('b');
   });
+  it('rejects foreign moves and repeated moves, and uses canonical learned move data', () => {
+    const member = mon('blastoise');
+    const original = { A: [member], B: [] };
+    expect(teamsReducer(original, { type: 'setMove', side: 'A', index: 0, slot: 0, move: mv('thunderbolt') })).toBe(original);
+    const edited = teamsReducer(original, { type: 'setMove', side: 'A', index: 0, slot: 0, move: { ...mv('b'), power: 999 } });
+    expect(edited.A[0].moves[0]).toBe(member.pokemon.movePool[1]);
+    const twoMoves = { A: [{ ...member, moves: member.pokemon.movePool }], B: [] };
+    expect(teamsReducer(twoMoves, { type: 'setMove', side: 'A', index: 0, slot: 0, move: mv('b') })).toBe(twoMoves);
+  });
   it('fillRandom appends to empty slots, or replaces a full team', () => {
     const partial = teamsReducer({ A: [], B: [mon('keep')] }, { type: 'fillRandom', side: 'B', members: [mon('r1'), mon('r2')] });
     expect(partial.B.map(m => m.pokemon.name)).toEqual(['keep', 'r1', 'r2']);

@@ -75,14 +75,12 @@ export function TeamOrder({ side, team, selected, disabled, onSelect, onReorder,
                   e.preventDefault(); reorder(i, i + (e.key === 'ArrowLeft' ? -1 : 1));
                 }}>
                 <Pokeball filled={!!member} />
-                <span className={styles.orderNumber}>{i === 0 ? 'Lead' : String(i + 1).padStart(2, '0')}</span>
-                {member && <span className={styles.orderName}>{displayName(member.pokemon.name)}</span>}
               </button>
             </li>
           );
         })}
       </ol>
-      <p id={`order-help-${side}`} className={styles.orderHelp}>Drag Poké Balls to set the order. <span>Keyboard: Alt + ← / →.</span></p>
+      <p id={`order-help-${side}`} className="sr-only">Drag Poké Balls to set the order. Keyboard: Alt + left or right arrow. The first Poké Ball fights first.</p>
       <span className="sr-only" aria-live="polite">{announcement}</span>
     </>
   );

@@ -13,7 +13,14 @@ export interface RawPokemon {
   name: string;
   types: { slot: number; type: { name: string } }[];
   stats: { base_stat: number; stat: { name: string } }[];
-  moves: { move: { name: string; url: string } }[];
+  moves: {
+    move: { name: string; url: string };
+    version_group_details: {
+      move_learn_method: { name: string };
+      version_group: { name: string };
+      level_learned_at: number;
+    }[];
+  }[];
   sprites: {
     front_default: string | null;
     back_default: string | null;
@@ -59,10 +66,16 @@ export function normalizePokemon(raw: RawPokemon, moves: RawMove[]): BattlePokem
   }
   const types = [...raw.types].sort((a, b) => a.slot - b.slot).map(t => t.type.name).filter(isType);
   const seen = new Set<string>();
+  const learnset = new Map(raw.moves.map(entry => [entry.move.name,
+    [...new Set(entry.version_group_details.map(detail => detail.move_learn_method.name))],
+  ]));
   const movePool: Move[] = [];
   for (const m of moves) {
+    const learnMethods = learnset.get(m.name);
+    // A fetched move definition alone is not evidence that this species can learn it.
+    if (!learnMethods?.length) continue;
     const move = normalizeMove(m);
-    if (move && !seen.has(move.name)) { seen.add(move.name); movePool.push(move); }
+    if (move && !seen.has(move.name)) { seen.add(move.name); movePool.push({ ...move, learnMethods }); }
   }
   const sd = raw.sprites.other?.showdown;
   const art = raw.sprites.other?.['official-artwork']?.front_default ?? null;

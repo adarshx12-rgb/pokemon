@@ -11,7 +11,10 @@ function moveScore(move: Move, types: TypeName[]): number {
 
 export function autoMoveset(pool: Move[], types: TypeName[]): Move[] {
   if (pool.length === 0) return [STRUGGLE];
-  const ranked = [...pool].sort((a, b) => moveScore(b, types) - moveScore(a, types) || a.name.localeCompare(b.name));
+  const unique = [...new Map(pool.map(move => [move.name, move])).values()];
+  // Start with the species' natural attacks, then fill coverage from its other legal moves.
+  const natural = (move: Move) => Number(move.learnMethods?.includes('level-up') ?? false);
+  const ranked = unique.sort((a, b) => natural(b) - natural(a) || moveScore(b, types) - moveScore(a, types) || a.name.localeCompare(b.name));
   const picked: Move[] = [];
   const perType = new Map<TypeName, number>();
   for (const move of ranked) {

@@ -33,12 +33,17 @@ export function teamsReducer(state: Teams, action: TeamsAction): Teams {
       reordered.splice(to, 0, reordered.splice(from, 1)[0]);
       return { ...state, [action.side]: reordered };
     }
-    case 'setMove':
+    case 'setMove': {
+      const member = team[action.index];
+      if (!member || !Number.isInteger(action.slot) || action.slot < 0 || action.slot >= member.moves.length) return state;
+      const learnedMove = member.pokemon.movePool.find(move => move.name === action.move.name);
+      if (!learnedMove || member.moves.some((move, slot) => slot !== action.slot && move.name === learnedMove.name)) return state;
       return {
         ...state,
         [action.side]: team.map((m, i) =>
-          i === action.index ? { ...m, moves: m.moves.map((mv, s) => (s === action.slot ? action.move : mv)) } : m),
+          i === action.index ? { ...m, moves: m.moves.map((mv, s) => (s === action.slot ? learnedMove : mv)) } : m),
       };
+    }
     case 'fillRandom': {
       if (action.members.length === 0) return state;
       const base = team.length >= MAX_TEAM ? [] : team;

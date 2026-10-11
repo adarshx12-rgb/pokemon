@@ -4,6 +4,10 @@ import type { RawMove, RawPokemon } from './normalize';
 
 const rawMove = (name: string, type: string, power: number | null, cls: string, accuracy: number | null = 100): RawMove =>
   ({ name, power, accuracy, type: { name: type }, damage_class: { name: cls } });
+const learned = (name: string, method = 'level-up'): RawPokemon['moves'][number] => ({
+  move: { name, url: `https://pokeapi.co/api/v2/move/${name}/` },
+  version_group_details: [{ move_learn_method: { name: method }, version_group: { name: 'scarlet-violet' }, level_learned_at: 1 }],
+});
 
 const raw: RawPokemon = {
   id: 6, name: 'charizard',
@@ -13,7 +17,7 @@ const raw: RawPokemon = {
     { base_stat: 78, stat: { name: 'defense' } }, { base_stat: 109, stat: { name: 'special-attack' } },
     { base_stat: 85, stat: { name: 'special-defense' } }, { base_stat: 100, stat: { name: 'speed' } },
   ],
-  moves: [],
+  moves: [learned('flamethrower'), learned('roost', 'machine')],
   sprites: {
     front_default: 'front.png', back_default: 'back.png',
     other: { showdown: { front_default: 'sd-front.gif', back_default: null }, 'official-artwork': { front_default: 'art.png' } },
@@ -38,6 +42,22 @@ describe('normalizeMove exclusions', () => {
 });
 
 describe('normalizePokemon', () => {
+  it('keeps only attacks this species is recorded as learning, even if unrelated definitions are supplied', () => {
+    const blastoise: RawPokemon = { ...raw, id: 9, name: 'blastoise', moves: [learned('hydro-pump'), learned('ice-beam', 'machine')] };
+    const p = normalizePokemon(blastoise, [
+      rawMove('hydro-pump', 'water', 110, 'special'),
+      rawMove('ice-beam', 'ice', 90, 'special'),
+      rawMove('thunderbolt', 'electric', 90, 'special'),
+      rawMove('flamethrower', 'fire', 90, 'special'),
+    ]);
+    expect(p.movePool.map(move => move.name)).toEqual(['hydro-pump', 'ice-beam']);
+    expect(p.movePool[0].learnMethods).toEqual(['level-up']);
+    expect(p.movePool[1].learnMethods).toEqual(['machine']);
+  });
+  it('does not admit a move with no recorded learning method', () => {
+    const p = normalizePokemon({ ...raw, moves: [{ ...learned('thunderbolt'), version_group_details: [] }] }, [rawMove('thunderbolt', 'electric', 90, 'special')]);
+    expect(p.movePool).toEqual([]);
+  });
   it('maps stats, slot-ordered types, sprites with fallbacks, and a deduped move pool', () => {
     const p = normalizePokemon(raw, [rawMove('flamethrower', 'fire', 90, 'special'), rawMove('flamethrower', 'fire', 90, 'special'), rawMove('roost', 'flying', null, 'status')]);
     expect(p.types).toEqual(['fire', 'flying']);

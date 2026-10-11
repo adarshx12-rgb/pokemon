@@ -110,18 +110,19 @@ export function Showdown({ names }: { names: string[] }) {
                 <button type="button" onClick={() => focusTeam('B')}>Opponent</button>
                 <button type="button" disabled={loading.A || loading.B || (!teams.A.length && !teams.B.length)} onClick={reset}>Reset</button>
               </>} />
-            <div className={styles.arenaHint}><span>1–6 Pokémon on each team</span><span>First Poké Ball fights first</span></div>
+            <div className={styles.arenaHint}><span>1–6 Pokémon on each team</span><span>Drag Poké Balls to reorder · First ball leads</span></div>
             <MatchupPreview a={teams.A} b={teams.B} />
             <details className={styles.rules}>
               <summary>How the battle works</summary>
               <p>Everyone fights at level 50 with 31 IVs, no EVs, and a neutral nature. Speed decides who moves first; Attack, Defense, special stats, and type matchups decide damage. HP keeps you in the fight.</p>
               <p>Your Pokémon automatically chooses its strongest available move against the current opponent. When it faints, the next Poké Ball in your lineup enters. The last team standing wins.</p>
+              <p>Moves come from each species’ recorded learnset across the games. Default movesets favor naturally learned attacks; the menus also include compatible TM, tutor, and inherited moves. Some Pokémon can legitimately learn attacks of other types. Only damaging moves supported by this battle are included; Pokémon with none use Struggle.</p>
               <p>This is a simplified stat battle: no items, abilities, weather, or status effects. Accuracy, critical hits, and damage rolls mean rematches can end differently.</p>
               <a href="https://pokeapi.co/" target="_blank" rel="noreferrer">Stats & artwork from PokéAPI</a>
             </details>
           </div>
           <div className={styles.teamsColumn}>
-            <TeamPanel side="A" title="Your team" team={teams.A} names={names} loading={loading.A} dispatch={dispatch} onAdd={slug => void add('A', slug)} />
+            <TeamPanel side="A" title="My team" team={teams.A} names={names} loading={loading.A} dispatch={dispatch} onAdd={slug => void add('A', slug)} />
             <TeamPanel side="B" title="Opponent" team={teams.B} names={names} loading={loading.B} dispatch={dispatch} onAdd={slug => void add('B', slug)} onRandomize={randomize} />
           </div>
         </div>

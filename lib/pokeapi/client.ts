@@ -30,7 +30,7 @@ function getMove(url: string): Promise<RawMove | null> {
 export async function fetchPokemon(slug: string): Promise<BattlePokemon | null> {
   const raw = await getJson<RawPokemon>(`${API}/pokemon/${encodeURIComponent(slug)}`);
   if (!raw) return null;
-  const urls = raw.moves.map(m => m.move.url);
+  const urls = raw.moves.filter(m => m.version_group_details.length > 0).map(m => m.move.url);
   const moves: RawMove[] = [];
   for (let i = 0; i < urls.length; i += CONCURRENCY) {
     const batch = await Promise.all(urls.slice(i, i + CONCURRENCY).map(getMove));

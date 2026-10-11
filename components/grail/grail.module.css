@@ -119,14 +119,14 @@
 .door:focus-visible { outline: 2px solid var(--color-indigo); outline-offset: 6px; }
 .doorObj {
   position: relative; width: var(--door-w); height: calc(var(--door-w) * 370 / 270); margin-bottom: 26px;
-  transition: transform 0.3s;
 }
-.door:hover .doorObj { transform: translateY(-6px); }
 /* Both door objects are drawn at 270×370 and scaled, so the Game Boy's pixel layout never reflows. */
 .doorScale {
   position: absolute; left: 0; top: 0; width: 270px; height: 370px; perspective: 1400px;
-  transform-origin: top left; transform: scale(var(--door-scale));
+  transform-origin: top left; transform: scale(var(--door-scale)); transition: transform 0.3s;
 }
+/* The hover lift lives here, not on .doorObj: GrailSequence measures .doorObj and it must stay untransformed. */
+.door:hover .doorScale { transform: translateY(-6px) scale(var(--door-scale)); }
 .vaultCard {
   position: absolute; inset: 0; overflow: hidden; border-radius: 4.5% / 3.28%;
   transform: rotateZ(-2deg) rotateY(14deg); /* = DOOR_TILT in lib/grail/sequence.ts */

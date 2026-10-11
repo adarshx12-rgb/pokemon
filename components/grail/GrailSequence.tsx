@@ -1,7 +1,15 @@
 'use client';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { scrollToY } from '@/components/motion/SmoothScroll';
 import { GRAIL } from '@/data/showcase';
 import { formatUpdated, priceCaption } from '@/lib/grail/format';
+import {
+  captionAt, cardPose, doorsStyle, glintStyle, glitterRate, grailCopyOpacity, headlineStyle,
+  meshLightStrength, meshShape, poseTransform, ruleStyle, welcomeStyle, type Rect,
+} from '@/lib/grail/sequence';
+import { grailStore, resetGrailStore } from '@/lib/grail/store';
 import { Doors } from './Doors';
 import { GlitterCanvas } from './GlitterCanvas';
 import { GrailCard } from './GrailCard';
@@ -18,6 +26,160 @@ export interface GrailSequenceProps {
 const DESCRIPTION =
   'A vault of rare Pokémon cards, from Base Set holos to Gold Stars. Every card is ranked into six tiers of rarity and priced daily from TCGplayer and Cardmarket. Open the vault to browse them, or take a team of six into Showdown.';
 const pad2 = (n: number) => String(n).padStart(2, '0');
+/** Pinned scroll distance in viewport heights (section = 400vh desktop / 300vh phone, per the spec). */
+const PIN_VH = { desktop: 3, phone: 2 } as const;
+
+/**
+ * Pins the stage and drives every part from the scroll progress. Returns the teardown, which reverts the
+ * pin spacer and restores the static page.
+ */
+function startSequence(root: HTMLElement, stage: HTMLElement): () => void {
+  gsap.registerPlugin(ScrollTrigger);
+
+  const one = (sel: string) => root.querySelector<HTMLElement>(sel);
+  const el = {
+    welcome: one('[data-part="welcome"]')!,
+    headline: one('[data-part="headline"]')!,
+    grailMeta: one('[data-part="grailMeta"]')!,
+    grailCopy: one('[data-part="grailCopy"]')!,
+    price: one('[data-part="price"]'), // absent when the card has no price
+    grailLabel: one('[data-part="grailLabel"]')!,
+    rule: one('[data-part="rule"]')!,
+    ruleFill: one('[data-part="ruleFill"]')!,
+    doors: one('[data-part="doors"]')!,
+    doorsTitle: one('[data-part="doorsTitle"]')!,
+    vaultDoor: one('[data-door="vault"]')!,
+    showdownDoor: one('[data-door="showdown"]')!,
+    doorCard: one('[data-door-card]')!,
+    vaultCard: one('[data-vault-card]')!,
+    home: one('[data-card-home]')!,
+    card: one('[data-grail-card]')!,
+    captions: [...root.querySelectorAll<HTMLElement>('[data-caption]')],
+  };
+  /** Fade a block; once invisible it leaves the tab order and the accessibility tree. */
+  const show = (node: HTMLElement | null, opacity: number) => {
+    if (!node) return;
+    node.style.opacity = String(opacity);
+    node.inert = opacity < 0.05;
+  };
+
+  // The static page may already be scrolled or focused when the pin arrives: a restored scroll position,
+  // or an End key, Tab or scroll before hydration. Note where it was so the same screen stays in view.
+  const staticY = window.scrollY;
+  const absTop = (n: HTMLElement) => n.getBoundingClientRect().top + staticY;
+  const [rootTop, grailTop, doorsTop] = [root, one('#grail')!, el.doors].map(absTop);
+  const doorFocused = !!document.activeElement?.closest('[data-door]');
+
+  root.dataset.sequenced = '';
+
+  let home: Rect = { left: 0, top: 0, width: 1, height: 1 };
+  let door: Rect = home;
+  // Both boxes are untransformed wrappers, so their rects are stable whatever the sequence is doing.
+  const measure = () => {
+    const s = stage.getBoundingClientRect();
+    const rel = (n: HTMLElement): Rect => {
+      const r = n.getBoundingClientRect();
+      return { left: r.left - s.left, top: r.top - s.top, width: r.width, height: r.height };
+    };
+    home = rel(el.home);
+    door = rel(el.doorCard);
+  };
+
+  const apply = (p: number) => {
+    const pose = cardPose(p, home, door);
+    el.card.style.transform = poseTransform(pose);
+    el.card.style.opacity = String(pose.opacity);
+    const glint = glintStyle(p);
+    el.card.style.setProperty('--glint', `${glint.x}%`);
+    el.card.style.setProperty('--glint-o', String(glint.opacity));
+
+    const welcome = welcomeStyle(p);
+    show(el.welcome, welcome.opacity);
+    el.welcome.style.transform = `translateY(${welcome.y}px)`;
+
+    const headline = headlineStyle(p);
+    el.headline.style.opacity = String(headline.opacity);
+    el.headline.style.transform = `translateY(${headline.y}px) scale(${headline.scale})`;
+
+    const copy = grailCopyOpacity(p);
+    for (const node of [el.grailMeta, el.grailCopy, el.price, el.grailLabel]) show(node, copy);
+
+    const active = captionAt(p);
+    el.captions.forEach((caption, i) => show(caption, i === active ? 1 : 0));
+
+    const rule = ruleStyle(p);
+    el.rule.style.opacity = String(rule.opacity);
+    el.ruleFill.style.transform = `scaleX(${rule.fill})`;
+
+    const doors = doorsStyle(p);
+    el.doorsTitle.style.opacity = String(doors.titleOpacity);
+    el.doorsTitle.style.transform = `translateY(${doors.titleY}px)`;
+    el.vaultDoor.style.opacity = String(doors.titleOpacity);
+    el.showdownDoor.style.opacity = String(doors.showdownOpacity);
+    el.showdownDoor.style.transform = `translateX(${doors.showdownX}px)`;
+    el.vaultCard.style.opacity = String(doors.doorCardOpacity);
+    // Invisible door links must not catch clicks meant for the grail screen; focus still reaches them (see onFocusIn).
+    el.doors.style.pointerEvents = doors.titleOpacity > 0.5 ? '' : 'none';
+
+    const ry = (pose.ry * Math.PI) / 180;
+    const cx = home.left + home.width / 2 + pose.x;
+    const cy = home.top + home.height / 2 + pose.y;
+    Object.assign(grailStore.mesh, meshShape(p));
+    grailStore.light = { x: cx, y: cy, r: home.width * 1.4 * pose.scale, strength: meshLightStrength(p) };
+    grailStore.glitter.rate = glitterRate(p);
+    grailStore.glitter.emitter = {
+      x: cx,
+      y: cy,
+      w: home.width * pose.scale * Math.max(0.12, Math.abs(Math.cos(ry))),
+      h: home.height * pose.scale,
+      dir: Math.cos(ry) >= 0 ? -1 : 1,
+    };
+  };
+
+  const pinVh = () => (window.innerWidth < 768 ? PIN_VH.phone : PIN_VH.desktop);
+  const trigger = ScrollTrigger.create({
+    trigger: root,
+    start: 'top top',
+    end: () => `+=${window.innerHeight * pinVh()}`,
+    pin: stage,
+    scrub: true,
+    invalidateOnRefresh: true,
+    onRefresh: self => { measure(); apply(self.progress); },
+    onUpdate: self => apply(self.progress),
+  });
+  measure();
+  apply(trigger.progress);
+  document.fonts?.ready.then(() => ScrollTrigger.refresh());
+
+  const at = (p: number) => trigger.start + (trigger.end - trigger.start) * p;
+  // Static screens map onto the sequence: welcome → 0–0.25, grail → 0.25–1, doors → the end.
+  // Set natively: Lenis caches the page height and hasn't seen the pin spacer yet, so it would clamp.
+  const resume = doorFocused || staticY >= doorsTop ? trigger.end
+    : staticY <= rootTop ? null
+    : staticY < grailTop ? at((0.25 * (staticY - rootTop)) / (grailTop - rootTop))
+    : at(0.25 + (0.75 * (staticY - grailTop)) / (doorsTop - grailTop));
+  if (resume !== null) window.scrollTo({ top: resume, behavior: 'instant' });
+
+  const onClick = (e: MouseEvent) => {
+    const link = (e.target as HTMLElement).closest<HTMLElement>('[data-goto]');
+    if (!link) return;
+    e.preventDefault();
+    scrollToY(at(Number(link.dataset.goto)));
+  };
+  const onFocusIn = (e: FocusEvent) => {
+    if ((e.target as HTMLElement).closest('[data-door]') && trigger.progress < 1) scrollToY(trigger.end, true);
+  };
+  root.addEventListener('click', onClick);
+  root.addEventListener('focusin', onFocusIn);
+
+  return () => {
+    root.removeEventListener('click', onClick);
+    root.removeEventListener('focusin', onFocusIn);
+    trigger.kill(true);
+    resetGrailStore();
+    delete root.dataset.sequenced;
+  };
+}
 
 /**
  * The home page: welcome → grail card → doors. Server-rendered as three stacked screens; on capable
@@ -27,6 +189,30 @@ export function GrailSequence({ price, priceSource, updatedAt, tierCount, cardCo
   const rootRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const updated = formatUpdated(updatedAt);
+
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const root = rootRef.current;
+    const stage = stageRef.current;
+    if (!root || !stage) return;
+    // Wait for the scroll to rest first: a smooth scroll still running from before hydration (an End key,
+    // say) would otherwise carry on to its old target after the pin has changed the page height.
+    let stop: (() => void) | undefined;
+    let lastY = NaN;
+    let raf = 0;
+    const settle = () => {
+      if (window.scrollY === lastY) stop = startSequence(root, stage);
+      else {
+        lastY = window.scrollY;
+        raf = requestAnimationFrame(settle);
+      }
+    };
+    raf = requestAnimationFrame(settle);
+    return () => {
+      cancelAnimationFrame(raf);
+      stop?.();
+    };
+  }, []);
 
   return (
     <section ref={rootRef} className={styles.root} aria-label="Pokémon Vault">

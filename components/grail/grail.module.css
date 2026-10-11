@@ -189,7 +189,7 @@
   .kicker { font-size: 30px; margin-bottom: 12px; }
   .priceValue { font-size: 40px; }
   .doorsLayout { grid-template-columns: 1fr; gap: 24px; }
-  .chooseTitle { font-size: 56px; margin: 12px 0 0; }
+  .chooseTitle { font-size: 56px; margin: 12px 0 20px; }
   .doorRow { gap: 16px; justify-content: flex-start; }
   .door { --door-w: 160px; --door-scale: 0.5926; }
   .doorObj { margin-bottom: 14px; }
@@ -200,7 +200,7 @@
   .root[data-sequenced] .cardHome { top: calc(110px + 12vw); }
   .root[data-sequenced] .grailCopy { left: 20px; right: 20px; bottom: 32px; width: auto; }
   .root[data-sequenced] .grailCopy .copy { display: none; }
-  .root[data-sequenced] .price { right: 20px; bottom: auto; top: 104px; }
+  .root[data-sequenced] .price { right: 20px; top: auto; bottom: 214px; }
   .root[data-sequenced] .captions { left: 20px; top: auto; bottom: 48px; width: calc(100% - 40px); height: 130px; }
   .captionTitle { font-size: 36px; }
   .root[data-sequenced] .rule { left: 20px; right: 20px; bottom: 24px; }

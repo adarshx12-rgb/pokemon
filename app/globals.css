@@ -53,6 +53,12 @@ body { font-family: var(--font-sans); }
   }
 }
 
+/* Page transition (app/template.tsx): an ink curtain lifts, then the page fades in. Pure CSS so no-JS visitors see the page. */
+@keyframes curtain-lift { from { transform: scaleY(1); } to { transform: scaleY(0); } }
+@keyframes page-in { from { opacity: 0; } to { opacity: 1; } }
+.page-curtain { animation: curtain-lift 0.7s cubic-bezier(0.76, 0, 0.24, 1) both; }
+.page-in { animation: page-in 0.4s 0.3s both; }
+
 /* ---------- Manga (night-ink) ---------- */
 @keyframes sfx-pop { 0% { transform: rotate(-8deg) skewX(-10deg) scale(0); } 70% { transform: rotate(-8deg) skewX(-10deg) scale(1.15); } 100% { transform: rotate(-8deg) skewX(-10deg) scale(1); } }
 /* In the components layer so Tailwind utilities (absolute, max-w-*, …) can override them. */

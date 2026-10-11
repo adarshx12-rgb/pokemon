@@ -198,15 +198,12 @@
   .root[data-sequenced] .grail .metaRow { top: 84px; left: 20px; right: 20px; }
   .root[data-sequenced] .cardName { top: 110px; }
   .root[data-sequenced] .cardHome { top: calc(110px + 12vw); }
+  /* shrink smoothly with screen height so the card bottom stays clear of the price */
+  .root[data-sequenced] .cardHome { --card-w: min(62vw, 36svh, max(96px, calc((100svh - 420px - 12vw) * 0.714))); }
   .root[data-sequenced] .grailCopy { left: 20px; right: 20px; bottom: 32px; width: auto; }
   .root[data-sequenced] .grailCopy .copy { display: none; }
   .root[data-sequenced] .price { right: 20px; top: auto; bottom: 214px; }
   .root[data-sequenced] .captions { left: 20px; top: auto; bottom: 48px; width: calc(100% - 40px); height: 130px; }
   .captionTitle { font-size: 36px; }
   .root[data-sequenced] .rule { left: 20px; right: 20px; bottom: 24px; }
-}
-
-/* short phones: shrink the card so the price clears it */
-@media (max-width: 767px) and (max-height: 740px) {
-  .cardHome { --card-w: min(62vw, 22svh); }
 }

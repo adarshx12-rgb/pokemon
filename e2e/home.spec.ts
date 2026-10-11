@@ -46,13 +46,27 @@ test.describe('reduced motion', () => {
   });
 });
 
-const opacity = (page: import('@playwright/test').Page, sel: string) =>
+type Page = import('@playwright/test').Page;
+const opacity = (page: Page, sel: string) =>
   page.locator(sel).first().evaluate(el => Number(getComputedStyle(el).opacity));
-/** Scroll to a fraction of the pinned sequence (desktop pin = 3 viewport heights). */
-const scrollToProgress = async (page: import('@playwright/test').Page, p: number) => {
-  await page.evaluate(p => window.scrollTo(0, window.innerHeight * 3 * p), p);
-  await page.waitForTimeout(900); // let Lenis settle
+/** Scroll to a fraction of the pinned sequence (pin = 3 viewport heights, 2 below 768px) and wait until it lands. */
+const scrollToProgress = async (page: Page, p: number) => {
+  // Wait for the pin first: before it the page is shorter and the scroll would clamp.
+  await expect(page.locator('section[data-sequenced]')).toBeAttached();
+  const target = await page.evaluate(p => {
+    const y = Math.round(window.innerHeight * (window.innerWidth < 768 ? 2 : 3) * p);
+    window.scrollTo(0, y);
+    return y;
+  }, p);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThanOrEqual(target - 2);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThanOrEqual(target + 2);
 };
+/** Waits a couple of frames, so effects and teardowns that run on the next frame have run. */
+const nextFrames = (page: Page) =>
+  page.evaluate(() => new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
+type Box = { x: number; y: number; width: number; height: number };
+const overlaps = (a: Box, b: Box) =>
+  a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
 
 test.describe('scroll sequence (desktop)', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
@@ -60,21 +74,22 @@ test.describe('scroll sequence (desktop)', () => {
   test('welcome → grail → turn → doors', async ({ page }) => {
     const errors: string[] = [];
     page.on('pageerror', e => errors.push(e.message));
+    page.on('console', msg => { if (msg.type() === 'error') errors.push(`console: ${msg.text()}`); });
     await page.goto('/');
     await expect(page.locator('[data-glitter]')).toBeVisible();
     expect(await opacity(page, '[data-grail-card]')).toBe(0);
 
     await scrollToProgress(page, 0.25);
-    expect(await opacity(page, '[data-part="welcome"]')).toBe(0);
-    expect(await opacity(page, '[data-grail-card]')).toBe(1);
-    expect(await opacity(page, '[data-part="grailCopy"]')).toBe(1);
+    await expect.poll(() => opacity(page, '[data-part="welcome"]')).toBe(0);
+    await expect.poll(() => opacity(page, '[data-grail-card]')).toBe(1);
+    await expect.poll(() => opacity(page, '[data-part="grailCopy"]')).toBe(1);
 
     await scrollToProgress(page, 0.5);
-    expect(await opacity(page, '[data-caption="1"]')).toBe(1);
+    await expect.poll(() => opacity(page, '[data-caption="1"]')).toBe(1);
 
     await scrollToProgress(page, 1);
-    expect(await opacity(page, '[data-grail-card]')).toBe(0);
-    expect(await opacity(page, '[data-vault-card]')).toBe(1);
+    await expect.poll(() => opacity(page, '[data-grail-card]')).toBe(0);
+    await expect.poll(() => opacity(page, '[data-vault-card]')).toBe(1);
     await expect(page.getByRole('link', { name: /Enter the vault/ })).toBeInViewport();
     await expect(page.getByRole('link', { name: /Enter the arena/ })).toBeInViewport();
     expect(errors).toEqual([]);
@@ -83,32 +98,43 @@ test.describe('scroll sequence (desktop)', () => {
   test('tabbing to a door jumps to the end of the sequence', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('link', { name: /Enter the vault/ }).focus();
-    await page.waitForTimeout(900);
     await expect(page.getByRole('link', { name: /Enter the vault/ })).toBeInViewport();
-    expect(await opacity(page, '[data-vault-card]')).toBe(1);
+    await expect.poll(() => opacity(page, '[data-vault-card]')).toBe(1);
+  });
+
+  test('tabbing to a door right after the pin starts also lands on the end', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('section[data-sequenced]')).toBeAttached();
+    await page.getByRole('link', { name: /Enter the vault/ }).focus();
+    await expect(page.getByRole('link', { name: /Enter the vault/ })).toBeInViewport();
+    await expect.poll(() => opacity(page, '[data-vault-card]')).toBe(1);
   });
 
   test('End key lands cleanly on the doors', async ({ page }) => {
     await page.goto('/');
     await page.keyboard.press('End');
-    await page.waitForTimeout(1200);
-    expect(await opacity(page, '[data-grail-card]')).toBe(0);
-    expect(await opacity(page, '[data-vault-card]')).toBe(1);
+    await expect.poll(() => opacity(page, '[data-grail-card]')).toBe(0);
+    await expect.poll(() => opacity(page, '[data-vault-card]')).toBe(1);
   });
 
   test('after a resize at the end, the card slot still matches the Vault door', async ({ page }) => {
     await page.goto('/');
     await scrollToProgress(page, 1);
     await page.setViewportSize({ width: 1024, height: 768 });
-    await page.waitForTimeout(600);
-    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 3 * 0.99));
-    await page.waitForTimeout(900);
-    const [card, door] = await Promise.all([
-      page.locator('[data-grail-card]').boundingBox(),
-      page.locator('[data-door-card]').boundingBox(),
-    ]);
-    expect(Math.abs(card!.x + card!.width / 2 - (door!.x + door!.width / 2))).toBeLessThan(12);
-    expect(Math.abs(card!.y + card!.height / 2 - (door!.y + door!.height / 2))).toBeLessThan(12);
+    // ScrollTrigger refreshes after the resize: the pin spacer becomes the new viewport + 3 viewports of scroll.
+    await expect.poll(() => page.evaluate(() => document.querySelector<HTMLElement>('.pin-spacer')?.offsetHeight)).toBe(768 * 4);
+    await scrollToProgress(page, 0.99);
+    const offset = async () => {
+      const [card, door] = await Promise.all([
+        page.locator('[data-grail-card]').boundingBox(),
+        page.locator('[data-door-card]').boundingBox(),
+      ]);
+      return Math.max(
+        Math.abs(card!.x + card!.width / 2 - (door!.x + door!.width / 2)),
+        Math.abs(card!.y + card!.height / 2 - (door!.y + door!.height / 2)),
+      );
+    };
+    await expect.poll(offset).toBeLessThan(12);
   });
 
   test('leaving for the Vault stops the sequence without errors', async ({ page }) => {
@@ -119,7 +145,7 @@ test.describe('scroll sequence (desktop)', () => {
     await page.getByRole('link', { name: /Enter the vault/ }).click();
     await expect(page).toHaveURL(/\/cards$/);
     await expect(page.locator('[data-glitter]')).toHaveCount(0);
-    await page.waitForTimeout(500);
+    await nextFrames(page); // the sequence teardown and the canvases' last frames
     expect(errors).toEqual([]);
   });
 });
@@ -139,9 +165,78 @@ test.describe('phone', () => {
   test.use({ viewport: { width: 375, height: 812 } });
   test('both doors fit side by side at the end', async ({ page }) => {
     await page.goto('/');
-    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 2)); // mobile pin = 2 viewport heights
-    await page.waitForTimeout(900);
+    await scrollToProgress(page, 1); // mobile pin = 2 viewport heights
     await expect(page.getByRole('link', { name: /Enter the vault/ })).toBeInViewport({ ratio: 1 });
     await expect(page.getByRole('link', { name: /Enter the arena/ })).toBeInViewport({ ratio: 1 });
+  });
+});
+
+test.describe('tablet portrait', () => {
+  test.use({ viewport: { width: 820, height: 1180 } });
+  test('the doors title stays clear of the doors and both links fit', async ({ page }) => {
+    await page.goto('/');
+    await scrollToProgress(page, 1);
+    await expect(page.getByRole('link', { name: /Enter the vault/ })).toBeInViewport({ ratio: 1 });
+    await expect(page.getByRole('link', { name: /Enter the arena/ })).toBeInViewport({ ratio: 1 });
+    const title = page.getByRole('heading', { level: 2, name: /Choose your door/ });
+    await expect(title).toBeInViewport({ ratio: 1 });
+    const titleBox = (await title.boundingBox())!;
+    expect(titleBox.width).toBeGreaterThan(200); // the 400px column used to collapse to 12-64px
+    for (const door of ['[data-door="vault"]', '[data-door="showdown"]']) {
+      expect(overlaps(titleBox, (await page.locator(door).boundingBox())!)).toBe(false);
+    }
+  });
+});
+
+test.describe('short landscape (phone on its side)', () => {
+  test.use({ viewport: { width: 812, height: 375 } });
+  test('welcome link shows on load, the grail copy clears the headline, and both doors fit', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('section[data-sequenced]')).toBeAttached();
+    await expect(page.getByRole('link', { name: /Scroll to open the vault/ })).toBeInViewport({ ratio: 1 });
+    // The nav text ends about 54px down; the welcome meta row must start below it.
+    const welcomeMeta = (await page.locator('[data-part="welcome"] .meta').first().boundingBox())!;
+    expect(welcomeMeta.y).toBeGreaterThanOrEqual(60);
+
+    await scrollToProgress(page, 0.25);
+    await expect.poll(() => opacity(page, '[data-part="grailCopy"]')).toBe(1);
+    const headline = (await page.locator('[data-part="headline"]').boundingBox())!;
+    const copy = (await page.locator('[data-part="grailCopy"]').boundingBox())!;
+    expect(overlaps(headline, copy)).toBe(false);
+
+    await scrollToProgress(page, 1);
+    await expect(page.getByRole('link', { name: /Enter the vault/ })).toBeInViewport({ ratio: 1 });
+    await expect(page.getByRole('link', { name: /Enter the arena/ })).toBeInViewport({ ratio: 1 });
+  });
+});
+
+test.describe('JavaScript disabled', () => {
+  test.use({ javaScriptEnabled: false, viewport: { width: 1440, height: 900 } });
+  test('shows the static page: the heading and both door links', async ({ page }) => {
+    await page.goto('/');
+    const h1 = page.getByRole('heading', { level: 1 });
+    await expect(h1).toBeVisible();
+    // toBeVisible ignores opacity and covering layers, so check the heading is really painted.
+    const painted = () => h1.evaluate(el => {
+      let alpha = 1;
+      for (let n: Element | null = el; n; n = n.parentElement) alpha *= Number(getComputedStyle(n).opacity);
+      // Any fixed layer drawn over the heading (the page curtain is pointer-events: none, so hit tests miss it).
+      const r = el.getBoundingClientRect();
+      const [x, y] = [r.left + r.width / 2, r.top + r.height / 2];
+      const covered = [...document.querySelectorAll('body *')].some(n => {
+        const cs = getComputedStyle(n);
+        if (cs.position !== 'fixed' || !(Number(cs.zIndex) > 0) || n.contains(el)) return false;
+        const b = n.getBoundingClientRect();
+        return b.height > 1 && b.left <= x && x <= b.right && b.top <= y && y <= b.bottom && cs.backgroundColor !== 'rgba(0, 0, 0, 0)';
+      });
+      return alpha === 1 && !covered;
+    });
+    await expect.poll(painted).toBe(true);
+    for (const name of [/Enter the vault/, /Enter the arena/]) {
+      const link = page.getByRole('link', { name });
+      await link.scrollIntoViewIfNeeded();
+      await expect(link).toBeVisible();
+      await expect(link).toBeInViewport();
+    }
   });
 });

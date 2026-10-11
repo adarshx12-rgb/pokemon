@@ -13,6 +13,14 @@ export function scrollToY(y: number, immediate = false): void {
   else window.scrollTo({ top: y, behavior: immediate ? 'instant' : 'smooth' });
 }
 
+/**
+ * Re-measure the page now. Lenis notices height changes only after a 250ms debounce, so right after the
+ * home pin is added it would still clamp native and keyboard scrolls (End, focus) to the old page height.
+ */
+export function syncScrollSize(): void {
+  lenis?.resize();
+}
+
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;

@@ -2,7 +2,7 @@
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { scrollToY } from '@/components/motion/SmoothScroll';
+import { scrollToY, syncScrollSize } from '@/components/motion/SmoothScroll';
 import { GRAIL } from '@/data/showcase';
 import { formatUpdated, priceCaption } from '@/lib/grail/format';
 import {
@@ -69,6 +69,7 @@ function startSequence(root: HTMLElement, stage: HTMLElement): () => void {
   const absTop = (n: HTMLElement) => n.getBoundingClientRect().top + staticY;
   const [rootTop, grailTop, doorsTop] = [root, one('#grail')!, el.doors].map(absTop);
   const doorFocused = !!document.activeElement?.closest('[data-door]');
+  const staticMax = document.documentElement.scrollHeight - window.innerHeight;
 
   root.dataset.sequenced = '';
 
@@ -148,9 +149,10 @@ function startSequence(root: HTMLElement, stage: HTMLElement): () => void {
     pin: stage,
     scrub: true,
     invalidateOnRefresh: true,
-    onRefresh: self => { measure(); apply(self.progress); },
+    onRefresh: self => { syncScrollSize(); measure(); apply(self.progress); },
     onUpdate: self => apply(self.progress),
   });
+  syncScrollSize(); // the pin spacer has just changed the page height
   measure();
   apply(trigger.progress);
   document.fonts?.ready.then(() => ScrollTrigger.refresh());
@@ -164,6 +166,18 @@ function startSequence(root: HTMLElement, stage: HTMLElement): () => void {
     : at(0.25 + (0.75 * (staticY - grailTop)) / (doorsTop - grailTop));
   if (resume !== null) window.scrollTo({ top: resume, behavior: 'instant' });
 
+  // A native smooth scroll that began in the frame before the pin (End pressed during the idle wait) still
+  // runs to the static page's bottom, which is mid-turn on the pinned page. Finish it at the doors instead.
+  const startedAt = performance.now();
+  const onScrollEnd = () => {
+    window.removeEventListener('scrollend', onScrollEnd);
+    const aimedAtStaticEnd = staticMax >= doorsTop && Math.abs(window.scrollY - staticMax) <= 1;
+    if (aimedAtStaticEnd && performance.now() - startedAt < 1500 && trigger.progress < 1) {
+      window.scrollTo({ top: trigger.end, behavior: 'instant' });
+    }
+  };
+  window.addEventListener('scrollend', onScrollEnd);
+
   const onClick = (e: MouseEvent) => {
     const link = (e.target as HTMLElement).closest<HTMLElement>('[data-goto]');
     if (!link) return;
@@ -171,7 +185,8 @@ function startSequence(root: HTMLElement, stage: HTMLElement): () => void {
     scrollToY(at(Number(link.dataset.goto)));
   };
   const onFocusIn = (e: FocusEvent) => {
-    if ((e.target as HTMLElement).closest('[data-door]') && trigger.progress < 1) scrollToY(trigger.end, true);
+    // Natively, like the resume above: right after the pin, Lenis still clamps to the old page height.
+    if ((e.target as HTMLElement).closest('[data-door]') && trigger.progress < 1) window.scrollTo({ top: trigger.end, behavior: 'instant' });
   };
   root.addEventListener('click', onClick);
   root.addEventListener('focusin', onFocusIn);
@@ -179,9 +194,11 @@ function startSequence(root: HTMLElement, stage: HTMLElement): () => void {
   return () => {
     root.removeEventListener('click', onClick);
     root.removeEventListener('focusin', onFocusIn);
+    window.removeEventListener('scrollend', onScrollEnd);
     trigger.kill(true);
     resetGrailStore();
     delete root.dataset.sequenced;
+    syncScrollSize();
   };
 }
 

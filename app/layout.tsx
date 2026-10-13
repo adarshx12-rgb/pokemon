@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { GoogleAnalytics } from '@next/third-parties/google';
 import { Anton, JetBrains_Mono, Press_Start_2P } from 'next/font/google';
 import { MeshBackground } from '@/components/grail/MeshBackground';
 import { SmoothScroll } from '@/components/motion/SmoothScroll';
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SiteFooter />
         </SmoothScroll>
       </body>
+      <GoogleAnalytics gaId="G-7BY96E0KMR" />
     </html>
   );
 }

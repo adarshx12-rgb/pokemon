@@ -20,6 +20,7 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
+    "@next/third-parties": "^16.4.0",
     "@opennextjs/cloudflare": "^1.20.10",
     "framer-motion": "^14.1.0",
     "gsap": "^3.15.0",

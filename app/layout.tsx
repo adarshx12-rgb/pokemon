@@ -31,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SiteFooter />
         </SmoothScroll>
       </body>
-      <GoogleAnalytics gaId="G-YJW3K1WSC5" />
+      <GoogleAnalytics gaId="G-7BY96E0KMR" />
     </html>
   );
 }

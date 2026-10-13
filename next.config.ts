@@ -6,12 +6,13 @@ const isDev = process.env.NODE_ENV === "development";
 // every external origin is still allowlisted. Dev adds eval and the HMR websocket.
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://www.googletagmanager.com`,
+  // Google Analytics, plus the Cloudflare Web Analytics beacon that Cloudflare injects at the edge.
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://www.googletagmanager.com https://static.cloudflareinsights.com`,
   "style-src 'self' 'unsafe-inline'",
   // Card scans (pokemontcg.io), PokéAPI sprites (GitHub), and the Google Analytics pixel.
   "img-src 'self' data: blob: https://images.pokemontcg.io https://raw.githubusercontent.com https://*.google-analytics.com https://*.googletagmanager.com",
   "font-src 'self'",
-  `connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com${isDev ? " ws:" : ""}`,
+  `connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://cloudflareinsights.com${isDev ? " ws:" : ""}`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

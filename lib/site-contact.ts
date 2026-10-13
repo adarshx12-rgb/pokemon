@@ -1,8 +1,7 @@
-// Replace these sample details with the operator's verified public information.
-// The reserved .example domain intentionally does not identify a real mailbox.
+// Public operator details. The operator is shown by brand name only — never the owner's personal name.
 export const SITE_CONTACT = {
-  email: 'hello@pokefame.example',
+  email: 'hello@pokefame.com',
   operator: 'pokéfame Editorial Team',
-  country: 'To be added',
-  placeholder: true,
+  country: 'India',
+  placeholder: false,
 } as const;

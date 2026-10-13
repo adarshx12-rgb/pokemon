@@ -19,6 +19,22 @@ async function add(page: Page, side: 'A' | 'B', name: string) {
   await expect(page.getByTestId(`search-${side}`)).not.toHaveAttribute('placeholder', 'Loading from the Pokédex…');
 }
 
+async function finishAttack(page: Page) {
+  await expect(page.locator('[data-testid^="move-"]:enabled')).toHaveCount(0);
+  // Jump between battle events without replaying thousands of unrelated scroll frames.
+  for (let event = 0; event < 7; event++) await page.clock.fastForward(5_000);
+}
+
+async function finishBattle(page: Page) {
+  for (let turn = 0; turn < 100; turn++) {
+    if (await page.getByRole('button', { name: 'View result', exact: true }).isVisible()) break;
+    await page.locator('[data-testid^="move-"]:enabled').first().click();
+    await finishAttack(page);
+  }
+  await page.getByRole('button', { name: 'View result', exact: true }).click();
+  await expect(page.getByTestId('result-banner')).toHaveText(/VICTORY|DEFEAT/);
+}
+
 test.beforeEach(async ({ page }) => {
   await page.route('**/api/pokemon/*', async route => {
     const name = decodeURIComponent(new URL(route.request().url()).pathname.split('/').at(-1)!);
@@ -70,16 +86,33 @@ test('empty opening, artwork, pointer/keyboard order, battle, rematch and reset'
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
   await page.screenshot({ path: 'test-results/showdown-teams.png', fullPage: true, animations: 'disabled', caret: 'initial' });
+  await page.clock.install();
   await page.getByTestId('battle-start').click();
   await expect(page.getByTestId('battle-stage')).toBeVisible();
   await expect(page.getByTestId('arena-pokemon-A')).toHaveAttribute('alt', 'Pikachu');
-  await page.getByRole('button', { name: 'Pause', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeVisible();
-  await page.getByTestId('skip').click();
-  await expect(page.getByTestId('result-banner')).toHaveText(/VICTORY|DEFEAT/);
+  await expect(page.locator('[data-testid^="move-"]')).toHaveCount(8);
+  const hp = page.getByRole('progressbar');
+  const hpValues = () => hp.evaluateAll(bars => bars.map(bar => bar.getAttribute('aria-valuenow')));
+  const before = await hpValues();
+  await page.clock.fastForward(30_000);
+  expect(await hpValues()).toEqual(before);
+  const selected = page.locator('[data-testid^="move-"]:enabled').last();
+  const selectedId = await selected.getAttribute('data-testid');
+  await selected.click();
+  await expect(page.locator('[data-testid^="move-"]:enabled')).toHaveCount(0);
+  await finishAttack(page);
+  expect(await hpValues()).not.toEqual(before);
+  await expect(page.getByTestId('battle-stage')).toContainText(selectedId!.split('-').slice(2).join(' ').toUpperCase());
+  const after = await hpValues();
+  await page.clock.fastForward(30_000);
+  expect(await hpValues()).toEqual(after);
+  await page.screenshot({ path: 'test-results/showdown-manual-desktop.png', fullPage: true, caret: 'initial' });
+  await page.getByRole('button', { name: 'Reset battle', exact: true }).click();
+  expect(await hpValues()).toEqual(before);
+  await finishBattle(page);
   await page.getByRole('button', { name: 'Rematch', exact: true }).click();
   await expect(page.getByTestId('battle-stage')).toBeVisible();
-  await page.getByTestId('skip').click();
+  await finishBattle(page);
   await page.getByRole('button', { name: 'Edit teams', exact: true }).click();
   await page.getByRole('button', { name: 'Reset', exact: true }).click();
   await expect(page.locator('[data-testid^="slot-"]')).toHaveCount(0);
@@ -127,6 +160,15 @@ test('phone touch ordering, empty slots focus search, and no horizontal overflow
   await expect.poll(() => page.getByTestId('arena-preview').locator('img').evaluateAll(images => images.every(img => (img as HTMLImageElement).complete && (img as HTMLImageElement).naturalWidth > 0))).toBe(true);
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
   await page.screenshot({ path: 'test-results/showdown-phone.png', fullPage: true, animations: 'disabled', caret: 'initial' });
+  await page.getByTestId('battle-start').click();
+  await expect(page.locator('[data-testid^="move-"]')).toHaveCount(8);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  const mobileHp = () => page.getByRole('progressbar').evaluateAll(bars => bars.map(bar => bar.getAttribute('aria-valuenow')));
+  const beforeAttack = await mobileHp();
+  await page.locator('[data-testid^="move-"]:enabled').first().tap();
+  await expect.poll(mobileHp).not.toEqual(beforeAttack);
+  await expect(page.getByTestId('turn-prompt')).toBeVisible();
+  await page.screenshot({ path: 'test-results/showdown-manual-phone.png', fullPage: true, caret: 'initial' });
 });
 
 test('live species learnsets keep Blastoise and Pikachu moves separate', async ({ page }) => {
@@ -147,6 +189,6 @@ test('live species learnsets keep Blastoise and Pikachu moves separate', async (
   await expect(opponent.locator('option[value="thunderbolt"]')).toHaveCount(4);
   await expect(opponent.locator('option[value="hydro-pump"]')).toHaveCount(0);
   await page.getByTestId('battle-start').click();
-  await page.getByTestId('skip').click();
-  await expect(page.getByTestId('result-banner')).toHaveText(/VICTORY|DEFEAT/);
+  await expect(page.getByTestId('move-A-ice-beam')).toBeVisible();
+  await expect(page.locator('[data-testid^="move-B-hydro-pump"]')).toHaveCount(0);
 });

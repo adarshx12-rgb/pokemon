@@ -24,7 +24,7 @@ function turnOrder(a: Fighter, b: Fighter, rng: Rng): Side[] {
 const hpFraction = (team: Fighter[]) =>
   team.reduce((s, f) => s + f.hp, 0) / team.reduce((s, f) => s + f.maxHp, 0);
 
-export function simulate(teamA: TeamMember[], teamB: TeamMember[], seed: number): BattleEvent[] {
+export function createBattle(teamA: TeamMember[], teamB: TeamMember[], seed: number) {
   if (teamA.length === 0 || teamB.length === 0) throw new Error('Both teams need at least one Pokémon');
 
   const rng = createRng(seed);
@@ -40,24 +40,51 @@ export function simulate(teamA: TeamMember[], teamB: TeamMember[], seed: number)
   switchIn('A');
   switchIn('B');
 
-  for (let turn = 1; turn <= TURN_CAP; turn++) {
-    // Actors are fixed at the start of the turn, so a Pokémon that switches in mid-turn does not act.
-    const actors = turnOrder(sides.A[active.A], sides.B[active.B], rng).map(side => ({ side, index: active[side] }));
+  let turn = 0;
+  let ended = false;
+  let actors: { side: Side; index: number }[] = [];
+  const advance = () => {
+    actors = actors.filter(actor => sides[actor.side][actor.index].hp > 0);
+    if (ended || actors.length) return;
+    if (turn >= TURN_CAP) {
+      const winner: Side = hpFraction(sides.A) >= hpFraction(sides.B) ? 'A' : 'B';
+      events.push({ kind: 'end', winner, reason: 'turnCap', damageDealt });
+      ended = true;
+      return;
+    }
+    turn++;
+    // A replacement cannot act in the round in which its teammate fainted.
+    actors = turnOrder(sides.A[active.A], sides.B[active.B], rng).map(side => ({ side, index: active[side] }));
+  };
+  advance();
 
-    for (const { side, index } of actors) {
+  return {
+    initialEvents: [...events],
+    get nextSide(): Side | null { return ended ? null : actors[0].side; },
+    get turn() { return turn; },
+    bestMove() {
+      const { side, index } = actors[0];
       const attacker = sides[side][index];
-      if (attacker.hp === 0) continue;
-
+      return chooseMove(attacker.member.moves, attacker.combatant, sides[other(side)][active[other(side)]].combatant).name;
+    },
+    playMove(side: Side, moveName: string): BattleEvent[] {
+      if (ended || actors[0].side !== side) return [];
+      const { index } = actors[0];
+      const attacker = sides[side][index];
       const foeSide = other(side);
       const foeIndex = active[foeSide];
       const defender = sides[foeSide][foeIndex];
       const moves = attacker.member.moves.length ? attacker.member.moves : [STRUGGLE];
-      const move = chooseMove(moves, attacker.combatant, defender.combatant);
+      const move = moves.find(candidate => candidate.name === moveName);
+      if (!move) return [];
+      const start = events.length;
+      actors.shift();
       events.push({ kind: 'useMove', side, index, move });
 
       if (move.accuracy !== null && rng() * 100 >= move.accuracy) {
         events.push({ kind: 'miss', side, index });
-        continue;
+        advance();
+        return events.slice(start);
       }
 
       const roll = rollDamage(move, attacker.combatant, defender.combatant, rng);
@@ -74,15 +101,21 @@ export function simulate(teamA: TeamMember[], teamB: TeamMember[], seed: number)
         const next = sides[foeSide].findIndex(f => f.hp > 0);
         if (next === -1) {
           events.push({ kind: 'end', winner: side, reason: 'knockout', damageDealt });
-          return events;
+          ended = true;
+          return events.slice(start);
         }
         active[foeSide] = next;
         switchIn(foeSide);
       }
-    }
-  }
+      advance();
+      return events.slice(start);
+    },
+  };
+}
 
-  const winner: Side = hpFraction(sides.A) >= hpFraction(sides.B) ? 'A' : 'B';
-  events.push({ kind: 'end', winner, reason: 'turnCap', damageDealt });
+export function simulate(teamA: TeamMember[], teamB: TeamMember[], seed: number): BattleEvent[] {
+  const battle = createBattle(teamA, teamB, seed);
+  const events = [...battle.initialEvents];
+  while (battle.nextSide !== null) events.push(...battle.playMove(battle.nextSide, battle.bestMove()));
   return events;
 }

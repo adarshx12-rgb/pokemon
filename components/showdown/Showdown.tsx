@@ -84,7 +84,7 @@ export function Showdown({ names }: { names: string[] }) {
     return pokemon ? <PokemonSprite key={pokemon.name} pokemon={pokemon} side={side} classic={classic} /> : null;
   };
   const prompt = loading.A || loading.B ? 'Getting your Pokémon ready…'
-    : canBattle ? `${displayName(teams.A[0].pokemon.name)} is ready. Let the stats decide!`
+    : canBattle ? `${displayName(teams.A[0].pokemon.name)} is ready. Select Fight to choose your moves!`
     : !teams.A.length && !teams.B.length ? 'What will you choose? Add a Pokémon to each team to begin.'
     : !teams.A.length ? 'Choose your first Pokémon to meet your rival.'
     : 'Your Pokémon is ready. Add an opponent to begin.';
@@ -92,7 +92,7 @@ export function Showdown({ names }: { names: string[] }) {
   return (
     <main className={styles.page}>
       <header className={styles.header}>
-        <div><h1>Showdown<span>.</span></h1><p>Pick your favorites. Set the order. Settle it with stats.</p></div>
+        <div><h1>Showdown<span>.</span></h1><p>Pick your favorites. Choose every move. Play both sides.</p></div>
         <div className={styles.visualMode} role="group" aria-label="Pokémon appearance">
           <button type="button" aria-pressed={!classic} onClick={() => setClassic(false)}>HD artwork</button>
           <button type="button" aria-pressed={classic} onClick={() => setClassic(true)}>Classic sprites</button>
@@ -115,7 +115,7 @@ export function Showdown({ names }: { names: string[] }) {
             <details className={styles.rules}>
               <summary>How the battle works</summary>
               <p>Everyone fights at level 50 with 31 IVs, no EVs, and a neutral nature. Speed decides who moves first; Attack, Defense, special stats, and type matchups decide damage. HP keeps you in the fight.</p>
-              <p>Your Pokémon automatically chooses its strongest available move against the current opponent. When it faints, the next Poké Ball in your lineup enters. The last team standing wins.</p>
+              <p>You control both teams. Select Fight, then click a move for the highlighted Pokémon to play its attack. Speed decides the order each round; neither side attacks automatically. When a Pokémon faints, the next Poké Ball in its lineup enters. The last team standing wins.</p>
               <p>Moves come from each species’ recorded learnset across the games. Default movesets favor naturally learned attacks; the menus also include compatible TM, tutor, and inherited moves. Some Pokémon can legitimately learn attacks of other types. Only damaging moves supported by this battle are included; Pokémon with none use Struggle.</p>
               <p>This is a simplified stat battle: no items, abilities, weather, or status effects. Accuracy, critical hits, and damage rolls mean rematches can end differently.</p>
               <a href="https://pokeapi.co/" target="_blank" rel="noreferrer">Stats & artwork from PokéAPI</a>
@@ -127,7 +127,7 @@ export function Showdown({ names }: { names: string[] }) {
           </div>
         </div>
       )}
-      {phase === 'battle' && <BattleScreen key={seed} teamA={teams.A} teamB={teams.B} seed={seed} classic={classic} onFinish={end => { setResult(end); setPhase('result'); }} />}
+      {phase === 'battle' && <BattleScreen key={seed} teamA={teams.A} teamB={teams.B} seed={seed} classic={classic} onReset={startBattle} onEdit={() => setPhase('build')} onFinish={end => { setResult(end); setPhase('result'); }} />}
       {phase === 'result' && result && <ResultScreen result={result} teamA={teams.A} teamB={teams.B} onRematch={startBattle} onEdit={() => setPhase('build')} />}
       {toast && (
         <div role="alert" className={styles.toast}>

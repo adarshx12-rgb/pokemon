@@ -23,7 +23,7 @@ test('unknown card shows the 404', async ({ page }) => {
   await expect(page.getByText('MissingNo.')).toBeVisible();
 });
 
-test('showdown: build teams, battle, skip to result', async ({ page }) => {
+test('showdown: build teams and choose an attack manually', async ({ page }) => {
   await page.goto('/showdown');
   await page.getByTestId('search-A').fill('pikachu');
   await page.getByRole('option', { name: 'Pikachu', exact: true }).click();
@@ -31,10 +31,11 @@ test('showdown: build teams, battle, skip to result', async ({ page }) => {
   await page.getByTestId('randomize').click();
   await expect(page.getByTestId('slot-B-5')).toBeVisible();
   await page.getByTestId('battle-start').click();
-  await page.getByTestId('skip').click();
-  await expect(page.getByTestId('result-banner')).toHaveText(/VICTORY|DEFEAT/);
-  await page.getByRole('button', { name: 'Rematch' }).click();
-  await expect(page.getByTestId('skip')).toBeVisible();
+  await expect(page.getByTestId('turn-prompt')).toBeVisible();
+  await page.locator('[data-testid^="move-"]:enabled').first().click();
+  await expect(page.getByTestId('battle-stage')).toContainText(/used /);
+  await page.getByRole('button', { name: 'Edit teams', exact: true }).click();
+  await expect(page.getByTestId('battle-start')).toBeEnabled();
 });
 
 test('nav marks the current page', async ({ page }) => {

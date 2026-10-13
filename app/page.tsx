@@ -25,7 +25,7 @@ export default async function Home() {
         '@context': 'https://schema.org',
         '@type': 'WebSite',
         name: SITE_NAME,
-        alternateName: 'POKEFAME',
+        alternateName: 'POKÉFAME',
         url: SITE_URL.href,
         description: HOME_DESCRIPTION,
         inLanguage: 'en',

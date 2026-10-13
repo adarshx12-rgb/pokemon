@@ -6,7 +6,7 @@ export function ErrorScreen({ code, retry }: { code: '404' | '500'; retry?: () =
   return (
     <main className={styles.screen}>
       <div className={styles.content}>
-        <p className={styles.brand}>POKEFAME</p>
+        <p className={styles.brand}>POKÉFAME</p>
         <p className={styles.code} aria-label={`Error ${code}`}>{code}</p>
         <h1>{missing ? 'A wild MissingNo.' : 'Something went wrong.'}</h1>
         <p className={styles.description}>{missing

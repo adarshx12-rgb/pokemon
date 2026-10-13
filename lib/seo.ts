@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 
-export const SITE_NAME = 'pokefame';
+export const SITE_NAME = 'pokéfame';
 export const SITE_URL = new URL('https://pokefame.com');
 export const HOME_TITLE = 'Pokemon Cards, Rare Cards & Showdown';
-export const HOME_DESCRIPTION = 'Explore Pokémon cards and rare Pokémon cards with collector notes and dated price estimates. Build teams and play a Pokémon showdown on pokefame.';
+export const HOME_DESCRIPTION = 'Explore Pokémon cards and rare Pokémon cards with collector notes and dated price estimates. Build teams and play a Pokémon showdown on pokéfame.';
 
 export function pageMetadata({ title, description, path, image }: {
   title: string;
@@ -17,7 +17,7 @@ export function pageMetadata({ title, description, path, image }: {
     width: 1200,
     height: 630,
     type: 'image/png',
-    alt: 'POKEFAME — Pokémon cards, rare finds, and a Pokémon battle simulator',
+    alt: 'POKÉFAME — Pokémon cards, rare finds, and a Pokémon battle simulator',
   };
   return {
     title: fullTitle,

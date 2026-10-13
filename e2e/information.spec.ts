@@ -47,7 +47,7 @@ test('unknown routes return a real 404 with recovery links and noindex', async (
   expect(robots.some(value => value?.includes('noindex'))).toBe(true);
   await page.getByRole('link', { name: 'Back to home', exact: true }).click();
   await expect(page).toHaveURL('/');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName('POKEFAME');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName('POKÉFAME');
 });
 
 test('sitemap includes information pages and excludes error pages', async ({ request }) => {

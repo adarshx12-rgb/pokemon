@@ -4,7 +4,7 @@ test('home exposes readable guide content and complete sharing metadata without 
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   await page.goto('/', { waitUntil: 'domcontentloaded' });
-  await expect(page).toHaveTitle('Pokemon Cards, Rare Cards & Showdown | pokefame');
+  await expect(page).toHaveTitle('Pokemon Cards, Rare Cards & Showdown | pokéfame');
   const guide = page.locator('#field-guide');
   const words = (await guide.innerText()).trim().split(/\s+/).length;
   expect(words).toBeGreaterThanOrEqual(800);
@@ -12,8 +12,8 @@ test('home exposes readable guide content and complete sharing metadata without 
   console.log(`Homepage guide: ${words} words`);
   await expect(guide.getByRole('heading', { level: 3 })).toHaveCount(6);
   await expect(page.locator('h1')).toHaveCount(1);
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /^https:\/\/pokefame.com\/?$/);
-  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', /^https:\/\/pokefame.com\/?$/);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /^https:\/\/pokefame\.com\/?$/);
+  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', /^https:\/\/pokefame\.com\/?$/);
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', 'https://pokefame.com/social-image');
   await expect(page.locator('meta[property="og:image:width"]')).toHaveAttribute('content', '1200');
   await expect(page.locator('meta[property="og:image:height"]')).toHaveAttribute('content', '630');
@@ -41,7 +41,7 @@ test('guide fits mobile and desktop with working chapter links', async ({ page }
 
 test('card pages have unique metadata and use card artwork for sharing', async ({ page }) => {
   await page.goto('/cards/ex8-107', { waitUntil: 'domcontentloaded' });
-  await expect(page).toHaveTitle(/Rayquaza.*Deoxys.*pokefame/);
+  await expect(page).toHaveTitle(/Rayquaza.*Deoxys.*pokéfame/);
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://pokefame.com/cards/ex8-107');
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /images\.pokemontcg\.io\/ex8\/107/);
   await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /Rayquaza.*Deoxys/);
@@ -72,7 +72,7 @@ test('AI crawlers are allowed and llms.txt maps the site', async ({ request }) =
     expect(llms.ok()).toBe(true);
     expect(llms.headers()['content-type']).toContain('text/plain');
     const text = await llms.text();
-    expect(text).toMatch(/^# POKEFAME\n\n> /);
+    expect(text).toMatch(/^# POKÉFAME\n\n> /);
     for (const page of ['/cards', '/showdown', '/cards/ex8-107', '/about']) expect(text).toContain(`(https://pokefame.com${page})`);
   }
 });

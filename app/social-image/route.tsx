@@ -9,7 +9,7 @@ export function GET() {
         <span>The collector’s index</span><span>pokefame.com</span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <div style={{ fontSize: 112, fontWeight: 700, letterSpacing: '-6px', color: '#ff2b2b' }}>POKEFAME</div>
+        <div style={{ fontSize: 112, fontWeight: 700, letterSpacing: '-6px', color: '#ff2b2b' }}>POKÉFAME</div>
         <div style={{ fontSize: 44, marginTop: 24 }}>Pokémon cards. Rare finds. Better battles.</div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 24, borderTop: '1px solid #514d65', fontSize: 23 }}>

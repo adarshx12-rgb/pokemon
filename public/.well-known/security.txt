@@ -1,0 +1,6 @@
+# Security contact for pokefame.com (RFC 9116)
+Contact: mailto:hello@pokefame.com
+Expires: 2027-10-13T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://pokefame.com/.well-known/security.txt
+Policy: https://pokefame.com/contact

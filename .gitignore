@@ -47,3 +47,8 @@ next-env.d.ts
 
 # original, uncompressed design source files
 /design-assets/
+
+# cloudflare
+/.open-next/
+/.wrangler/
+.dev.vars*

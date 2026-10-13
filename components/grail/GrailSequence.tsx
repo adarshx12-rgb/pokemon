@@ -1,5 +1,6 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { scrollToY, syncScrollSize } from '@/components/motion/SmoothScroll';
@@ -24,10 +25,10 @@ export interface GrailSequenceProps {
 }
 
 const DESCRIPTION =
-  'A vault of rare Pokémon cards, from Base Set holos to Gold Stars. Every card is ranked into six tiers of rarity and priced daily from TCGplayer and Cardmarket. Open the vault to browse them, or take a team of six into Showdown.';
+  'A vault of rare Pokémon cards, from Base Set holos to Gold Stars. Browse six curated tiers with dated market estimates, or choose every move in a Pokémon showdown.';
 const pad2 = (n: number) => String(n).padStart(2, '0');
-/** Pinned scroll distance in viewport heights (section = 400vh desktop / 300vh phone, per the spec). */
-const PIN_VH = { desktop: 3, phone: 2 } as const;
+/** Larger screens pin for three viewport heights; phones use normal document flow. */
+const PIN_VH = 3;
 
 /**
  * Pins the stage and drives every part from the scroll progress. Returns the teardown, which reverts the
@@ -173,7 +174,6 @@ function startSequence(root: HTMLElement, stage: HTMLElement): () => void {
     emitter.dir = Math.cos(ry) >= 0 ? -1 : 1;
   };
 
-  const pinVh = () => (window.innerWidth < 768 ? PIN_VH.phone : PIN_VH.desktop);
   // A real scrubbed playhead smooths wheel, touch and keyboard updates together.
   // `scrub` alone cannot smooth work performed directly in ScrollTrigger.onUpdate.
   const playhead = { progress: 0 };
@@ -187,7 +187,7 @@ function startSequence(root: HTMLElement, stage: HTMLElement): () => void {
   const trigger = ScrollTrigger.create({
     trigger: root,
     start: 'top top',
-    end: () => `+=${window.innerHeight * pinVh()}`,
+    end: () => `+=${window.innerHeight * PIN_VH}`,
     pin: stage,
     animation,
     scrub: 0.35,
@@ -280,6 +280,16 @@ function startSequence(root: HTMLElement, stage: HTMLElement): () => void {
     animation.kill();
     resetGrailStore();
     delete root.dataset.sequenced;
+    // Restore the readable document when resizing from the pinned desktop to mobile.
+    const animated = new Set([el.welcome, el.headline, el.grailMeta, el.grailCopy, el.price, el.grailLabel,
+      el.rule, el.ruleFill, el.doors, el.doorsTitle, el.vaultDoor, el.showdownDoor, el.vaultCard, el.card,
+      ...el.captions, ...layers.map(layer => layer.node)]);
+    for (const node of animated) {
+      if (!node) continue;
+      node.inert = false;
+      for (const property of ['opacity', 'transform', 'pointer-events', '--depth-x', '--depth-y', '--depth-rx',
+        '--depth-ry', '--headline-y', '--headline-scale', '--glint', '--glint-o']) node.style.removeProperty(property);
+    }
     syncScrollSize();
   };
 }
@@ -291,30 +301,30 @@ function startSequence(root: HTMLElement, stage: HTMLElement): () => void {
 export function GrailSequence({ price, priceSource, updatedAt, tierCount, cardCount }: GrailSequenceProps) {
   const rootRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
+  const [flipped, setFlipped] = useState(false);
   const updated = formatUpdated(updatedAt);
 
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const root = rootRef.current;
     const stage = stageRef.current;
     if (!root || !stage) return;
-    // Wait for the scroll to rest first: a smooth scroll still running from before hydration (an End key,
-    // say) would otherwise carry on to its old target after the pin has changed the page height.
-    let stop: (() => void) | undefined;
-    let lastY = NaN;
-    let raf = 0;
-    const settle = () => {
-      if (window.scrollY === lastY) stop = startSequence(root, stage);
-      else {
-        lastY = window.scrollY;
-        raf = requestAnimationFrame(settle);
-      }
-    };
-    raf = requestAnimationFrame(settle);
-    return () => {
-      cancelAnimationFrame(raf);
-      stop?.();
-    };
+    const media = gsap.matchMedia();
+    media.add('(min-width: 768px) and (min-height: 501px) and (prefers-reduced-motion: no-preference)', () => {
+      // Let any pre-hydration scroll finish before measuring the pin.
+      let stop: (() => void) | undefined;
+      let lastY = NaN;
+      let raf = 0;
+      const settle = () => {
+        if (window.scrollY === lastY) stop = startSequence(root, stage);
+        else {
+          lastY = window.scrollY;
+          raf = requestAnimationFrame(settle);
+        }
+      };
+      raf = requestAnimationFrame(settle);
+      return () => { cancelAnimationFrame(raf); stop?.(); };
+    });
+    return () => media.revert();
   }, []);
 
   return (
@@ -329,7 +339,11 @@ export function GrailSequence({ price, priceSource, updatedAt, tierCount, cardCo
           <p className={styles.subhead} data-depth="middle">Rare by design /<br />priced by the market</p>
           <div className={styles.intro} data-depth="front">
             <p className="copy">{DESCRIPTION}</p>
-            <a href="#grail" className="text-link" data-goto="0.25">Scroll to open the vault ↓</a>
+            <div className={styles.mobileActions}>
+              <Link href="/cards">Browse the Vault <span aria-hidden>↗</span></Link>
+              <Link href="/showdown">Play Showdown <span aria-hidden>↗</span></Link>
+            </div>
+            <a href="#grail" className={`text-link ${styles.scrollLink}`} data-goto="0.25">Scroll to open the vault ↓</a>
           </div>
           <ul className={`meta ${styles.facts}`} data-depth="front">
             <li><span className="text-red">{pad2(tierCount)}</span> tiers</li>
@@ -346,11 +360,15 @@ export function GrailSequence({ price, priceSource, updatedAt, tierCount, cardCo
             <span>{GRAIL.setName} · {GRAIL.year} · {GRAIL.number}</span>
           </div>
           <h2 className={`grain ${styles.cardName}`} data-part="headline" data-depth="back">{GRAIL.name}</h2>
-          <div className={styles.cardHome} data-card-home><GrailCard /></div>
+          <div className={styles.cardHome} data-card-home><GrailCard flipped={flipped} /></div>
+          <button type="button" className={styles.flipCard} aria-pressed={flipped} onClick={() => setFlipped(value => !value)}>
+            {flipped ? 'Show card front' : 'Flip the card'} <span aria-hidden>↻</span>
+          </button>
           <div className={styles.grailCopy} data-part="grailCopy" data-depth="front">
-            <p className={styles.kicker}>Gold Star /<br />one of the rarest</p>
+            <p className={styles.kicker}>Gold Star / <br />one of the rarest</p>
             <p className="copy">A shiny Rayquaza marked with a gold star, the rarest print in its set. Kept in tier 01 of the vault.</p>
-            <a href="#doors" className="text-link" data-goto="0.74">Scroll to turn the card ↓</a>
+            <a href="#doors" className={`text-link ${styles.turnLink}`} data-goto="0.74">Scroll to turn the card ↓</a>
+            <Link href={`/cards/${GRAIL.id}`} className={`text-link ${styles.mobileCardLink}`}>Explore Rayquaza ↗</Link>
           </div>
           {price && (
             <div className={styles.price} data-part="price" data-depth="front">

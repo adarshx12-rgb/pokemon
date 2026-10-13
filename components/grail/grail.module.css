@@ -5,6 +5,7 @@
  */
 .root { position: relative; color: var(--color-indigo); }
 .stage { position: relative; }
+.mobileActions, .flipCard, .mobileCardLink { display: none; }
 
 .welcome, .grail, .doors {
   position: relative; min-height: 100svh; padding: 112px 48px 56px;
@@ -313,4 +314,83 @@
 }
 @media (max-height: 500px) and (max-width: 767px) {
   .root { --pad-x: 20px; }
+}
+
+/* Phones use a readable document flow; only larger screens pin the three scenes. */
+@media (max-width: 767px), (max-height: 500px) {
+  .root { color: #b1afff; --pad-x: max(20px, env(safe-area-inset-left)); }
+  .welcome, .grail, .doors { padding: 84px var(--pad-x) 36px; min-height: auto; }
+  .welcome { min-height: 100svh; justify-content: center; }
+  .root :global(.meta) { font-size: 10px; letter-spacing: .08em; line-height: 1.7; }
+  .root :global(.copy) { font-size: 14px; line-height: 1.7; letter-spacing: 0; text-transform: none; color: #c8c3ce; }
+  .root :global(.text-link) { min-height: 44px; padding-block: 13px; font-size: 11px; letter-spacing: .03em; color: #b1afff; }
+  .siteName { font-size: clamp(68px, 22vw, 140px); line-height: .94; text-align: left; white-space: normal; margin-top: 12px; }
+  .siteName br { display: inline; }
+  .subhead { font-size: clamp(26px, 7.8vw, 40px); line-height: 1.08; margin-top: 18px; }
+  .intro { max-width: 480px; margin-top: 18px; }
+  .intro :global(.copy) { display: block; }
+  .intro > a { margin-top: 10px; }
+  .mobileActions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+  .mobileActions a { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 48px; padding: 10px 12px; border: 1px solid #65627d; color: #ede6d6; font-size: 12px; line-height: 1.4; touch-action: manipulation; }
+  .mobileActions a:first-child { background: #ff2b2b; color: #050507; border-color: #ff2b2b; font-weight: 600; }
+  .mobileActions a:focus-visible, .flipCard:focus-visible { outline: 2px solid #ede6d6; outline-offset: 4px; }
+  .facts { position: static; display: flex; flex-wrap: wrap; gap: 5px 20px; text-align: left; margin: 16px 0 0; padding-top: 12px; border-top: 1px solid #28232e; }
+  .facts li:nth-child(3) { flex-basis: 100%; }
+  .facts li:last-child { display: none; }
+  .vlabel, .metaRow > :last-child { display: none; }
+
+  .grail { gap: 20px; padding-top: 44px; padding-bottom: 44px; scroll-margin-top: 64px; border-top: 1px solid #28232e; }
+  .grail .metaRow { flex-direction: column; gap: 3px; }
+  .grail .metaRow > :last-child { display: block; color: #c8c3ce; }
+  .cardName { font-size: clamp(64px, 21vw, 120px); width: 100%; }
+  .cardHome { --card-w: min(66vw, 260px); margin-top: -30px; }
+  .card { transition: transform .65s cubic-bezier(.22, 1, .36, 1); }
+  .card[data-flipped="true"] { transform: rotateX(5deg) rotateZ(3deg) rotateY(180deg); }
+  .flipCard { display: flex; align-items: center; gap: 20px; min-height: 44px; margin-top: 2px; padding: 10px 18px; border: 1px solid #65627d; color: #ede6d6; font-size: 12px; cursor: pointer; touch-action: manipulation; }
+  .grailCopy { width: 100%; max-width: 480px; }
+  .kicker { font-size: 32px; line-height: 1.08; margin-bottom: 12px; }
+  .kicker br { display: none; }
+  .grailCopy :global(.copy) { display: block; }
+  .grailCopy .turnLink { display: none; }
+  .grailCopy .mobileCardLink { display: inline-block; margin-top: 12px; }
+  .price { align-self: flex-start; text-align: left; width: 100%; border-top: 1px solid #28232e; padding-top: 16px; }
+  .priceValue { font-size: 44px; }
+
+  .doors { padding-top: 36px; padding-bottom: 36px; scroll-margin-top: 64px; }
+  .doorsLayout { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .chooseTitle { font-size: clamp(44px, 12vw, 64px); line-height: 1; margin: 10px 0 16px; }
+  .chooseTitle br { display: none; }
+  .doorsCopy { display: block; }
+  .doorRow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .door { --door-w: 148px; --door-scale: .5481; width: 100%; min-width: 0; }
+  .doorObj { margin: 0 auto 18px; }
+  .doorWord { font-size: clamp(28px, 8vw, 40px); line-height: 1.1; margin-block: 8px; }
+  .door :global(.meta), .door :global(.text-link) { white-space: normal; }
+  .door :global(.text-link) { display: flex; align-items: center; font-size: 10px; }
+  .door:hover .doorScale { transform: scale(var(--door-scale)); }
+  .door:hover .doorWord { color: var(--color-red); -webkit-text-stroke: 0; }
+}
+@media (max-width: 359px) {
+  .root { --pad-x: 16px; }
+  .mobileActions a { font-size: 11px; padding-inline: 10px; }
+  .door { --door-w: 128px; --door-scale: .4741; }
+}
+@media (min-width: 400px) and (max-width: 767px) {
+  .door { --door-w: 170px; --door-scale: .6296; }
+}
+@media (max-height: 500px) and (min-width: 600px) {
+  .welcome { display: grid; grid-template-columns: 1fr 1fr; column-gap: 28px; align-content: center; }
+  .welcome .metaRow, .welcome .facts { grid-column: 1 / -1; }
+  .siteName { font-size: clamp(64px, 10vw, 96px); }
+  .subhead { grid-column: 1; font-size: 28px; }
+  .intro { grid-column: 2; grid-row: 2 / 4; }
+  .grail { display: grid; grid-template-columns: 1fr 1fr; align-items: center; }
+  .grail .metaRow, .cardName { grid-column: 1 / -1; }
+  .cardHome { grid-column: 1; grid-row: 3 / 6; margin: 0 auto; --card-w: 220px; }
+  .grailCopy, .price, .flipCard { grid-column: 2; }
+  .flipCard { justify-self: start; }
+  .door { --door-w: 170px; --door-scale: .6296; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card { transition: none; }
 }

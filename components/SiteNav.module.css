@@ -1,0 +1,13 @@
+@media (max-width: 767px), (max-height: 500px) {
+  .header {
+    gap: 8px;
+    padding: max(6px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 6px max(16px, env(safe-area-inset-left));
+    background: rgb(5 5 7 / .96);
+    border-bottom: 1px solid #28232e;
+  }
+  .header > a { display: flex; align-items: center; min-height: 44px; font-size: 18px; letter-spacing: 0; }
+  .header nav { gap: 4px; font-size: 11px; letter-spacing: .06em; }
+  .header nav a { display: flex; align-items: center; justify-content: center; min-height: 44px; padding-inline: 8px; color: #b1afff; }
+  .header nav a[aria-current="page"] { color: #ff2b2b; }
+  .header nav .homeLink { display: none; }
+}

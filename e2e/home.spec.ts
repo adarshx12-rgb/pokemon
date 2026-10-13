@@ -49,12 +49,12 @@ test.describe('reduced motion', () => {
 type Page = import('@playwright/test').Page;
 const opacity = (page: Page, sel: string) =>
   page.locator(sel).first().evaluate(el => Number(getComputedStyle(el).opacity));
-/** Scroll to a fraction of the pinned sequence (pin = 3 viewport heights, 2 below 768px) and wait until it lands. */
+/** Scroll to a fraction of the desktop sequence and wait until it lands. */
 const scrollToProgress = async (page: Page, p: number) => {
   // Wait for the pin first: before it the page is shorter and the scroll would clamp.
   await expect(page.locator('section[data-sequenced]')).toBeAttached();
   const target = await page.evaluate(p => {
-    const y = Math.round(window.innerHeight * (window.innerWidth < 768 ? 2 : 3) * p);
+    const y = Math.round(window.innerHeight * 3 * p);
     window.scrollTo(0, y);
     return y;
   }, p);
@@ -162,13 +162,53 @@ test.describe('short desktop viewport', () => {
 });
 
 test.describe('phone', () => {
-  test.use({ viewport: { width: 375, height: 812 } });
-  test('both doors fit side by side at the end', async ({ page }) => {
+  test.use({ viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true });
+  test('native scrolling, readable copy, direct links, and tap-to-flip work', async ({ page }) => {
     await page.goto('/');
-    await scrollToProgress(page, 1); // mobile pin = 2 viewport heights
+    await expect(page.locator('section[data-sequenced]')).toHaveCount(0);
+    await expect(page.getByRole('link', { name: /Browse the Vault/ })).toBeInViewport({ ratio: 1 });
+    await expect(page.getByRole('link', { name: /Play Showdown/ })).toBeInViewport({ ratio: 1 });
+    expect(await page.locator('[data-part="welcome"] .copy').evaluate(el => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(14);
+    for (const link of await page.getByRole('navigation', { name: 'Main' }).getByRole('link').all()) {
+      if (await link.isVisible()) expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    }
+    await page.screenshot({ path: 'test-results/home-mobile-welcome.png', animations: 'disabled' });
+    await page.getByRole('button', { name: /Flip the card/ }).tap();
+    await expect(page.locator('[data-grail-card]')).toHaveAttribute('data-flipped', 'true');
+    await page.getByRole('button', { name: /Show card front/ }).tap();
+    await expect(page.locator('[data-grail-card]')).toHaveAttribute('data-flipped', 'false');
+    await page.getByRole('link', { name: /Enter the vault/ }).scrollIntoViewIfNeeded();
     await expect(page.getByRole('link', { name: /Enter the vault/ })).toBeInViewport({ ratio: 1 });
     await expect(page.getByRole('link', { name: /Enter the arena/ })).toBeInViewport({ ratio: 1 });
+    await page.screenshot({ path: 'test-results/home-mobile-full.png', fullPage: true, animations: 'disabled' });
+    for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 430, height: 932 }]) {
+      await page.setViewportSize(viewport);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      const [vault, arena] = await Promise.all(['vault', 'showdown'].map(door => page.locator(`[data-door="${door}"]`).boundingBox()));
+      expect(overlaps(vault!, arena!)).toBe(false);
+      expect(arena!.x + arena!.width).toBeLessThanOrEqual(viewport.width);
+    }
+    await page.getByRole('link', { name: /Browse the Vault/ }).tap();
+    await expect(page).toHaveURL(/\/cards$/);
+    await page.goto('/');
+    await page.getByRole('link', { name: /Play Showdown/ }).tap();
+    await expect(page).toHaveURL(/\/showdown$/);
   });
+});
+
+test('resizing between desktop and mobile clears pinned styles and restores the sequence', async ({ page }) => {
+  await page.goto('/');
+  await scrollToProgress(page, .5);
+  await expect.poll(() => opacity(page, '[data-part="welcome"]')).toBe(0);
+  await page.setViewportSize({ width: 375, height: 812 });
+  await expect(page.locator('section[data-sequenced]')).toHaveCount(0);
+  await expect(page.locator('.pin-spacer')).toHaveCount(0);
+  await expect.poll(() => opacity(page, '[data-part="welcome"]')).toBe(1);
+  await expect(page.locator('[data-part="welcome"]')).not.toHaveAttribute('inert');
+  await expect(page.getByRole('link', { name: /Browse the Vault/ })).toBeVisible();
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await scrollToProgress(page, 1);
+  await expect(page.getByRole('link', { name: /Enter the vault/ })).toBeInViewport();
 });
 
 test.describe('tablet portrait', () => {
@@ -189,24 +229,24 @@ test.describe('tablet portrait', () => {
 });
 
 test.describe('short landscape (phone on its side)', () => {
-  test.use({ viewport: { width: 812, height: 375 } });
-  test('welcome link shows on load, the grail copy clears the headline, and both doors fit', async ({ page }) => {
+  test.use({ viewport: { width: 812, height: 375 }, isMobile: true, hasTouch: true });
+  test('landscape keeps natural scrolling, card controls, and both doors accessible', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('section[data-sequenced]')).toBeAttached();
-    await expect(page.getByRole('link', { name: /Scroll to open the vault/ })).toBeInViewport({ ratio: 1 });
+    await expect(page.locator('section[data-sequenced]')).toHaveCount(0);
     // The nav text ends about 54px down; the welcome meta row must start below it.
     const welcomeMeta = (await page.locator('[data-part="welcome"] .meta').first().boundingBox())!;
     expect(welcomeMeta.y).toBeGreaterThanOrEqual(60);
 
-    await scrollToProgress(page, 0.25);
-    await expect.poll(() => opacity(page, '[data-part="grailCopy"]')).toBe(1);
+    await page.getByRole('button', { name: /Flip the card/ }).scrollIntoViewIfNeeded();
+    await expect(page.getByRole('button', { name: /Flip the card/ })).toBeInViewport({ ratio: 1 });
     const headline = (await page.locator('[data-part="headline"]').boundingBox())!;
     const copy = (await page.locator('[data-part="grailCopy"]').boundingBox())!;
     expect(overlaps(headline, copy)).toBe(false);
 
-    await scrollToProgress(page, 1);
+    await page.getByRole('link', { name: /Enter the vault/ }).scrollIntoViewIfNeeded();
     await expect(page.getByRole('link', { name: /Enter the vault/ })).toBeInViewport({ ratio: 1 });
     await expect(page.getByRole('link', { name: /Enter the arena/ })).toBeInViewport({ ratio: 1 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   });
 });
 

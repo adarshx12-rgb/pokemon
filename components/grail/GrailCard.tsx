@@ -5,9 +5,9 @@ import styles from './grail.module.css';
 const SIZES = '(min-width: 768px) 310px, 62vw';
 
 /** The grail card in CSS 3D. Decorative: the section's text carries the name, set and price. */
-export function GrailCard() {
+export function GrailCard({ flipped = false }: { flipped?: boolean }) {
   return (
-    <div className={styles.card} data-grail-card aria-hidden>
+    <div className={styles.card} data-grail-card data-flipped={flipped} aria-hidden>
       <div className={`${styles.edge} ${styles.edgeL}`} />
       <div className={`${styles.edge} ${styles.edgeR}`} />
       <div className={`${styles.face} ${styles.front}`}>

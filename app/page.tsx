@@ -26,7 +26,7 @@ export default async function Home() {
         cardCount={SHOWCASE.length}
       />
       <footer className="px-6 pb-16 pt-10 text-center">
-        <p className="copy mx-auto max-w-2xl text-indigo">
+        <p className="copy mx-auto max-w-2xl text-indigo max-md:text-xs max-md:normal-case max-md:tracking-normal max-md:text-[#b1afff]">
           Prices are estimates from TCGplayer and Cardmarket via the Pokémon TCG API. Pokémon data from PokéAPI. Not affiliated with Nintendo, Creatures, or Game Freak.
         </p>
       </footer>

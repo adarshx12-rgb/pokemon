@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
 import { GOLDS, emissionCount, emit, step, type Particle } from '@/lib/grail/particles';
 import { grailStore } from '@/lib/grail/store';
 
@@ -32,66 +33,69 @@ export function GlitterCanvas({ className }: { className?: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const canvas = ref.current;
-    const ctx = canvas?.getContext('2d');
-    if (!canvas || !ctx) return;
-    const sprites = GOLDS.map(rgb => ({
-      dust: DUST_RADII.map(r => sprite(rgb, r, false)),
-      mote: MOTE_RADII.map(r => sprite(rgb, r, true)),
-    }));
-    const pool: Particle[] = [];
-    const cap = () => (window.innerWidth < 768 ? 1000 : 2500);
-    let carry = 0;
-    let last = performance.now();
-    let raf = 0;
-    let visible = true;
-    let w = 0;
-    let h = 0;
+    const media = gsap.matchMedia();
+    media.add('(min-width: 768px) and (min-height: 501px) and (prefers-reduced-motion: no-preference)', () => {
+      const canvas = ref.current;
+      const ctx = canvas?.getContext('2d');
+      if (!canvas || !ctx) return;
+      const sprites = GOLDS.map(rgb => ({
+        dust: DUST_RADII.map(r => sprite(rgb, r, false)),
+        mote: MOTE_RADII.map(r => sprite(rgb, r, true)),
+      }));
+      const pool: Particle[] = [];
+      const cap = () => (window.innerWidth < 768 ? 1000 : 2500);
+      let carry = 0;
+      let last = performance.now();
+      let raf = 0;
+      let visible = true;
+      let w = 0;
+      let h = 0;
 
-    const resize = () => {
-      const dpr = Math.min(2, window.devicePixelRatio || 1);
-      w = canvas.clientWidth;
-      h = canvas.clientHeight;
-      canvas.width = Math.round(w * dpr);
-      canvas.height = Math.round(h * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-    const io = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; });
-    // Observe the canvas itself, not the window: it is display:none (0×0) until the sequence starts.
-    const ro = new ResizeObserver(resize);
+      const resize = () => {
+        const dpr = Math.min(2, window.devicePixelRatio || 1);
+        w = canvas.clientWidth;
+        h = canvas.clientHeight;
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      };
+      const io = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; });
+      // Observe the canvas itself, not the window: it is display:none (0×0) until the sequence starts.
+      const ro = new ResizeObserver(resize);
 
-    const frame = (t: number) => {
+      const frame = (t: number) => {
+        raf = requestAnimationFrame(frame);
+        const dt = Math.min(0.05, (t - last) / 1000);
+        last = t;
+        if (!visible && pool.length === 0) return;
+        const { rate, emitter } = grailStore.glitter;
+        if (visible && emitter && rate > 0) {
+          const n = emissionCount(rate, dt, cap(), carry);
+          carry = n.carry;
+          emit(pool, n.count, emitter, cap());
+        }
+        step(pool, dt);
+        ctx.clearRect(0, 0, w, h);
+        for (const p of pool) {
+          const set = sprites[p.color];
+          const img = p.mote ? set.mote[nearest(MOTE_RADII, p.size)] : set.dust[nearest(DUST_RADII, p.size)];
+          ctx.globalAlpha = p.alpha * (1 - p.age / p.life);
+          ctx.drawImage(img, p.x - img.width / 2, p.y - img.height / 2);
+        }
+        ctx.globalAlpha = 1;
+      };
+
+      resize();
+      io.observe(canvas);
+      ro.observe(canvas);
       raf = requestAnimationFrame(frame);
-      const dt = Math.min(0.05, (t - last) / 1000);
-      last = t;
-      if (!visible && pool.length === 0) return;
-      const { rate, emitter } = grailStore.glitter;
-      if (visible && emitter && rate > 0) {
-        const n = emissionCount(rate, dt, cap(), carry);
-        carry = n.carry;
-        emit(pool, n.count, emitter, cap());
-      }
-      step(pool, dt);
-      ctx.clearRect(0, 0, w, h);
-      for (const p of pool) {
-        const set = sprites[p.color];
-        const img = p.mote ? set.mote[nearest(MOTE_RADII, p.size)] : set.dust[nearest(DUST_RADII, p.size)];
-        ctx.globalAlpha = p.alpha * (1 - p.age / p.life);
-        ctx.drawImage(img, p.x - img.width / 2, p.y - img.height / 2);
-      }
-      ctx.globalAlpha = 1;
-    };
-
-    resize();
-    io.observe(canvas);
-    ro.observe(canvas);
-    raf = requestAnimationFrame(frame);
-    return () => {
-      cancelAnimationFrame(raf);
-      io.disconnect();
-      ro.disconnect();
-    };
+      return () => {
+        cancelAnimationFrame(raf);
+        io.disconnect();
+        ro.disconnect();
+      };
+    });
+    return () => media.revert();
   }, []);
 
   return <canvas ref={ref} aria-hidden data-glitter className={className} />;

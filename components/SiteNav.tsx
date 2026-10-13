@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import styles from './SiteNav.module.css';
 
 const LINKS = [
   { href: '/', label: 'The Grail' },
@@ -14,8 +15,8 @@ export function SiteNav() {
   const path = usePathname();
   const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
   return (
-    <header className="fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-4 bg-linear-to-b from-ink/90 to-transparent px-4 py-5 md:px-12">
-      <Link href="/" className={`whitespace-nowrap font-display text-lg uppercase tracking-wide text-red md:text-[22px] ${RING}`}>
+    <header className={`fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-4 bg-linear-to-b from-ink/90 to-transparent px-4 py-5 md:px-12 ${styles.header}`}>
+      <Link href="/" aria-current={path === '/' ? 'page' : undefined} className={`whitespace-nowrap font-display text-lg uppercase tracking-wide text-red md:text-[22px] ${RING}`}>
         Pokémon Vault
       </Link>
       <nav aria-label="Main" className="meta flex gap-3 whitespace-nowrap min-[400px]:gap-5 md:gap-11">
@@ -24,7 +25,7 @@ export function SiteNav() {
             key={link.href}
             href={link.href}
             aria-current={isActive(link.href) ? 'page' : undefined}
-            className={`${isActive(link.href) ? 'text-red underline underline-offset-[6px]' : 'text-indigo transition hover:text-red'} ${RING}`}
+            className={`${link.href === '/' ? styles.homeLink : ''} ${isActive(link.href) ? 'text-red underline underline-offset-[6px]' : 'text-indigo transition hover:text-red'} ${RING}`}
           >
             {link.label}
           </Link>

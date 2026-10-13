@@ -43,4 +43,45 @@ export const SHOWCASE: { id: string }[] = [
   { id: 'sv3pt5-25' },
   { id: 'sv3pt5-4' },
   { id: 'sv3pt5-1' },
+  // Collector favorites: alternate arts, illustration cards, promos, and vintage icons.
+  { id: 'base1-1' }, // Alakazam
+  { id: 'base1-6' }, // Gyarados
+  { id: 'base1-14' }, // Raichu
+  { id: 'base1-16' }, // Zapdos
+  { id: 'base3-4' }, // Dragonite
+  { id: 'base3-5' }, // Gengar
+  { id: 'base3-2' }, // Articuno
+  { id: 'sv3pt5-198' }, // Venusaur ex
+  { id: 'sv3pt5-200' }, // Blastoise ex
+  { id: 'sv3pt5-201' }, // Alakazam ex
+  { id: 'sv3pt5-202' }, // Zapdos ex
+  { id: 'sv3pt5-3' }, // Venusaur ex
+  { id: 'sv3pt5-9' }, // Blastoise ex
+  { id: 'sv3pt5-65' }, // Alakazam ex
+  { id: 'sv3pt5-151' }, // Mew ex
+  { id: 'sv3pt5-166' }, // Bulbasaur
+  { id: 'sv3pt5-167' }, // Ivysaur
+  { id: 'sv3pt5-168' }, // Charmander
+  { id: 'sv3pt5-169' }, // Charmeleon
+  { id: 'sv3pt5-170' }, // Squirtle
+  { id: 'sv3pt5-171' }, // Wartortle
+  { id: 'sv3pt5-173' }, // Pikachu
+  { id: 'swsh7-180' }, // Espeon V
+  { id: 'swsh7-184' }, // Sylveon V
+  { id: 'swsh7-189' }, // Umbreon V
+  { id: 'swsh7-192' }, // Dragonite V
+  { id: 'swsh7-212' }, // Sylveon VMAX
+  { id: 'swsh7-209' }, // Glaceon VMAX
+  { id: 'swsh7-218' }, // Rayquaza VMAX
+  { id: 'swsh8-251' }, // Mew V
+  { id: 'swsh8-270' }, // Espeon VMAX
+  { id: 'swsh8-271' }, // Gengar VMAX
+  { id: 'sv4pt5-232' }, // Mew ex
+  { id: 'sv6-214' }, // Greninja ex
+  { id: 'svp-44' }, // Charmander
+  { id: 'sv7-143' }, // Bulbasaur
+  { id: 'sv7-148' }, // Squirtle
+  { id: 'swshp-SWSH262' }, // Charizard VSTAR
+  { id: 'swsh12pt5gg-GG44' }, // Mewtwo VSTAR
+  { id: 'xyp-XY126' }, // Mew-EX
 ];

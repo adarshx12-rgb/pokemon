@@ -6,6 +6,8 @@ const SOURCE = 'https://raw.githubusercontent.com/PokemonTCG/pokemon-tcg-data/ma
 // This credit is absent from the dataset; verified against the printed card itself.
 const CREDIT_OVERRIDES: Record<string, { artist: string; artistSource: string }> = {
   'sv8-238': { artist: 'GIDORA', artistSource: 'https://images.pokemontcg.io/sv8/238_hires.png' },
+  'sv7-143': { artist: 'Orca', artistSource: 'https://images.pokemontcg.io/sv7/143_hires.png' },
+  'sv7-148': { artist: 'Saboteri', artistSource: 'https://images.pokemontcg.io/sv7/148_hires.png' },
 };
 async function json(path: string) {
   const response = await fetch(`${SOURCE}/${path}`, { signal: AbortSignal.timeout(20000) });

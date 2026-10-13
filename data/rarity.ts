@@ -6,7 +6,7 @@ export const TIER_META: Record<Tier, { label: string; blurb: string }> = {
   grail: { label: 'Grail', blurb: 'Secret, hyper, gold star and special illustration rares — the cards collectors chase for years.' },
   ultra: { label: 'Ultra', blurb: 'Illustration rares, full arts and rule-box Pokémon (V, VMAX, ex, GX).' },
   holo: { label: 'Holo', blurb: 'Classic holofoil rares — the shine that started it all.' },
-  rare: { label: 'Rare', blurb: 'Non-holo rares, marked with a single black star.' },
+  rare: { label: 'Rare', blurb: 'Classic non-holo rares and selected promos — distinctive prints beyond the main-set checklist.' },
   uncommon: { label: 'Uncommon', blurb: 'Marked with a diamond. Plentiful, but key to completing a set.' },
   common: { label: 'Common', blurb: 'Marked with a circle. Every pack has them — but mint vintage commons still surprise.' },
 };

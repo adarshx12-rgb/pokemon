@@ -1108,5 +1108,1386 @@
     "trendPrice": 24.52
    }
   }
+ },
+ {
+  "id": "base1-1",
+  "name": "Alakazam",
+  "number": "1",
+  "rarity": "Rare Holo",
+  "set": {
+   "name": "Base",
+   "series": "Base",
+   "releaseDate": "1999/01/09"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/base1/1.png",
+   "large": "https://images.pokemontcg.io/base1/1_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 43.5,
+     "mid": 56.33,
+     "high": 9999,
+     "market": 70.81,
+     "directLow": 54.51
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2026/07/01",
+   "prices": {
+    "averageSellPrice": 125,
+    "trendPrice": 268.62
+   }
+  }
+ },
+ {
+  "id": "base1-6",
+  "name": "Gyarados",
+  "number": "6",
+  "rarity": "Rare Holo",
+  "set": {
+   "name": "Base",
+   "series": "Base",
+   "releaseDate": "1999/01/09"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/base1/6.png",
+   "large": "https://images.pokemontcg.io/base1/6_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 21.8,
+     "mid": 47.99,
+     "high": 158.48,
+     "market": 49.16,
+     "directLow": 98.27
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2026/07/01",
+   "prices": {
+    "averageSellPrice": 22.95,
+    "trendPrice": 22.82
+   }
+  }
+ },
+ {
+  "id": "base1-14",
+  "name": "Raichu",
+  "number": "14",
+  "rarity": "Rare Holo",
+  "set": {
+   "name": "Base",
+   "series": "Base",
+   "releaseDate": "1999/01/09"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/base1/14.png",
+   "large": "https://images.pokemontcg.io/base1/14_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 42.48,
+     "mid": 60.27,
+     "high": 392.22,
+     "market": 65.07,
+     "directLow": 49.39
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2026/07/01",
+   "prices": {
+    "averageSellPrice": 260.46,
+    "trendPrice": 229.96
+   }
+  }
+ },
+ {
+  "id": "base1-16",
+  "name": "Zapdos",
+  "number": "16",
+  "rarity": "Rare Holo",
+  "set": {
+   "name": "Base",
+   "series": "Base",
+   "releaseDate": "1999/01/09"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/base1/16.png",
+   "large": "https://images.pokemontcg.io/base1/16_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 28.01,
+     "mid": 37.12,
+     "high": 9999,
+     "market": 47.91,
+     "directLow": 99.97
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2026/07/01",
+   "prices": {
+    "averageSellPrice": 38.45,
+    "trendPrice": 21.46
+   }
+  }
+ },
+ {
+  "id": "base3-4",
+  "name": "Dragonite",
+  "number": "4",
+  "rarity": "Rare Holo",
+  "set": {
+   "name": "Fossil",
+   "series": "Base",
+   "releaseDate": "1999/10/10"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/base3/4.png",
+   "large": "https://images.pokemontcg.io/base3/4_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "1stEditionHolofoil": {
+     "low": 418.96,
+     "mid": 549.98,
+     "high": 999.99,
+     "market": 514.87,
+     "directLow": null
+    },
+    "unlimitedHolofoil": {
+     "low": 107.23,
+     "mid": 149.99,
+     "high": 973.22,
+     "market": 191.21,
+     "directLow": null
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2026/07/01",
+   "prices": {
+    "averageSellPrice": 115.58,
+    "trendPrice": 110.31
+   }
+  }
+ },
+ {
+  "id": "base3-5",
+  "name": "Gengar",
+  "number": "5",
+  "rarity": "Rare Holo",
+  "set": {
+   "name": "Fossil",
+   "series": "Base",
+   "releaseDate": "1999/10/10"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/base3/5.png",
+   "large": "https://images.pokemontcg.io/base3/5_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "1stEditionHolofoil": {
+     "low": 250,
+     "mid": 443,
+     "high": 799.99,
+     "market": 663.25,
+     "directLow": null
+    },
+    "unlimitedHolofoil": {
+     "low": 130,
+     "mid": 199.99,
+     "high": 1395.06,
+     "market": 213.46,
+     "directLow": 329.97
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2026/07/01",
+   "prices": {
+    "averageSellPrice": 141,
+    "trendPrice": 199.45
+   }
+  }
+ },
+ {
+  "id": "base3-2",
+  "name": "Articuno",
+  "number": "2",
+  "rarity": "Rare Holo",
+  "set": {
+   "name": "Fossil",
+   "series": "Base",
+   "releaseDate": "1999/10/10"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/base3/2.png",
+   "large": "https://images.pokemontcg.io/base3/2_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "1stEditionHolofoil": {
+     "low": 148,
+     "mid": 196.85,
+     "high": 1949.72,
+     "market": 202.32,
+     "directLow": null
+    },
+    "unlimitedHolofoil": {
+     "low": 36,
+     "mid": 64.31,
+     "high": 305.73,
+     "market": 72.62,
+     "directLow": 89.99
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2026/07/01",
+   "prices": {
+    "averageSellPrice": 59.72,
+    "trendPrice": 67.05
+   }
+  }
+ },
+ {
+  "id": "sv3pt5-198",
+  "name": "Venusaur ex",
+  "number": "198",
+  "rarity": "Special Illustration Rare",
+  "set": {
+   "name": "151",
+   "series": "Scarlet & Violet",
+   "releaseDate": "2023/09/22"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/sv3pt5/198.png",
+   "large": "https://images.pokemontcg.io/sv3pt5/198_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 77.16,
+     "mid": 108.12,
+     "high": 1236.74,
+     "market": 92.26,
+     "directLow": 96.65
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 90.43,
+    "trendPrice": 79.88
+   }
+  }
+ },
+ {
+  "id": "sv3pt5-200",
+  "name": "Blastoise ex",
+  "number": "200",
+  "rarity": "Special Illustration Rare",
+  "set": {
+   "name": "151",
+   "series": "Scarlet & Violet",
+   "releaseDate": "2023/09/22"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/sv3pt5/200.png",
+   "large": "https://images.pokemontcg.io/sv3pt5/200_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 100.92,
+     "mid": 133.98,
+     "high": 20000,
+     "market": 116.55,
+     "directLow": null
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 87.61,
+    "trendPrice": 79.37
+   }
+  }
+ },
+ {
+  "id": "sv3pt5-201",
+  "name": "Alakazam ex",
+  "number": "201",
+  "rarity": "Special Illustration Rare",
+  "set": {
+   "name": "151",
+   "series": "Scarlet & Violet",
+   "releaseDate": "2023/09/22"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/sv3pt5/201.png",
+   "large": "https://images.pokemontcg.io/sv3pt5/201_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 46.93,
+     "mid": 70,
+     "high": 697.54,
+     "market": 57.89,
+     "directLow": 65.04
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 55.08,
+    "trendPrice": 53.05
+   }
+  }
+ },
+ {
+  "id": "sv3pt5-202",
+  "name": "Zapdos ex",
+  "number": "202",
+  "rarity": "Special Illustration Rare",
+  "set": {
+   "name": "151",
+   "series": "Scarlet & Violet",
+   "releaseDate": "2023/09/22"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/sv3pt5/202.png",
+   "large": "https://images.pokemontcg.io/sv3pt5/202_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 73.99,
+     "mid": 93.99,
+     "high": 304.99,
+     "market": 82.75,
+     "directLow": 85.99
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 94.59,
+    "trendPrice": 90.46
+   }
+  }
+ },
+ {
+  "id": "sv3pt5-3",
+  "name": "Venusaur ex",
+  "number": "3",
+  "rarity": "Double Rare",
+  "set": {
+   "name": "151",
+   "series": "Scarlet & Violet",
+   "releaseDate": "2023/09/22"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/sv3pt5/3.png",
+   "large": "https://images.pokemontcg.io/sv3pt5/3_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 0.25,
+     "mid": 1.35,
+     "high": 16.76,
+     "market": 1.3,
+     "directLow": 2
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2026/07/01",
+   "prices": {
+    "averageSellPrice": 2.25,
+    "trendPrice": 2.54
+   }
+  }
+ },
+ {
+  "id": "sv3pt5-9",
+  "name": "Blastoise ex",
+  "number": "9",
+  "rarity": "Double Rare",
+  "set": {
+   "name": "151",
+   "series": "Scarlet & Violet",
+   "releaseDate": "2023/09/22"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/sv3pt5/9.png",
+   "large": "https://images.pokemontcg.io/sv3pt5/9_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 1,
+     "mid": 2.64,
+     "high": 55.55,
+     "market": 2.47,
+     "directLow": 3.67
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2026/07/01",
+   "prices": {
+    "averageSellPrice": 2.62,
+    "trendPrice": 3.03
+   }
+  }
+ },
+ {
+  "id": "sv3pt5-65",
+  "name": "Alakazam ex",
+  "number": "65",
+  "rarity": "Double Rare",
+  "set": {
+   "name": "151",
+   "series": "Scarlet & Violet",
+   "releaseDate": "2023/09/22"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/sv3pt5/65.png",
+   "large": "https://images.pokemontcg.io/sv3pt5/65_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 0.92,
+     "mid": 2.15,
+     "high": 17.5,
+     "market": 1.67,
+     "directLow": 2.44
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2026/01/16",
+   "prices": {
+    "averageSellPrice": 1.81,
+    "trendPrice": 2.18
+   }
+  }
+ },
+ {
+  "id": "sv3pt5-151",
+  "name": "Mew ex",
+  "number": "151",
+  "rarity": "Double Rare",
+  "set": {
+   "name": "151",
+   "series": "Scarlet & Violet",
+   "releaseDate": "2023/09/22"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/sv3pt5/151.png",
+   "large": "https://images.pokemontcg.io/sv3pt5/151_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 4.5,
+     "mid": 8.21,
+     "high": 108.31,
+     "market": 7.07,
+     "directLow": 7.27
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 9.54,
+    "trendPrice": 9.66
+   }
+  }
+ },
+ {
+  "id": "sv3pt5-166",
+  "name": "Bulbasaur",
+  "number": "166",
+  "rarity": "Illustration Rare",
+  "set": {
+   "name": "151",
+   "series": "Scarlet & Violet",
+   "releaseDate": "2023/09/22"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/sv3pt5/166.png",
+   "large": "https://images.pokemontcg.io/sv3pt5/166_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 50.79,
+     "mid": 75.99,
+     "high": 225,
+     "market": 62.37,
+     "directLow": 78.86
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 42.61,
+    "trendPrice": 41.29
+   }
+  }
+ },
+ {
+  "id": "sv3pt5-167",
+  "name": "Ivysaur",
+  "number": "167",
+  "rarity": "Illustration Rare",
+  "set": {
+   "name": "151",
+   "series": "Scarlet & Violet",
+   "releaseDate": "2023/09/22"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/sv3pt5/167.png",
+   "large": "https://images.pokemontcg.io/sv3pt5/167_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 33.93,
+     "mid": 44.6,
+     "high": 454.9,
+     "market": 38,
+     "directLow": 44.98
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 34.98,
+    "trendPrice": 35.26
+   }
+  }
+ },
+ {
+  "id": "sv3pt5-168",
+  "name": "Charmander",
+  "number": "168",
+  "rarity": "Illustration Rare",
+  "set": {
+   "name": "151",
+   "series": "Scarlet & Violet",
+   "releaseDate": "2023/09/22"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/sv3pt5/168.png",
+   "large": "https://images.pokemontcg.io/sv3pt5/168_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 76.7,
+     "mid": 100.21,
+     "high": 299.99,
+     "market": 90.23,
+     "directLow": 100.21
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 54.67,
+    "trendPrice": 48.15
+   }
+  }
+ },
+ {
+  "id": "sv3pt5-169",
+  "name": "Charmeleon",
+  "number": "169",
+  "rarity": "Illustration Rare",
+  "set": {
+   "name": "151",
+   "series": "Scarlet & Violet",
+   "releaseDate": "2023/09/22"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/sv3pt5/169.png",
+   "large": "https://images.pokemontcg.io/sv3pt5/169_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 49.48,
+     "mid": 60.88,
+     "high": 745.44,
+     "market": 55,
+     "directLow": 59.99
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 39.4,
+    "trendPrice": 34.98
+   }
+  }
+ },
+ {
+  "id": "sv3pt5-170",
+  "name": "Squirtle",
+  "number": "170",
+  "rarity": "Illustration Rare",
+  "set": {
+   "name": "151",
+   "series": "Scarlet & Violet",
+   "releaseDate": "2023/09/22"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/sv3pt5/170.png",
+   "large": "https://images.pokemontcg.io/sv3pt5/170_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 78,
+     "mid": 93.46,
+     "high": 956.62,
+     "market": 90.22,
+     "directLow": 84.5
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 50.78,
+    "trendPrice": 42.81
+   }
+  }
+ },
+ {
+  "id": "sv3pt5-171",
+  "name": "Wartortle",
+  "number": "171",
+  "rarity": "Illustration Rare",
+  "set": {
+   "name": "151",
+   "series": "Scarlet & Violet",
+   "releaseDate": "2023/09/22"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/sv3pt5/171.png",
+   "large": "https://images.pokemontcg.io/sv3pt5/171_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 42.95,
+     "mid": 61,
+     "high": 320,
+     "market": 51.81,
+     "directLow": 63.73
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 36.59,
+    "trendPrice": 26.89
+   }
+  }
+ },
+ {
+  "id": "sv3pt5-173",
+  "name": "Pikachu",
+  "number": "173",
+  "rarity": "Illustration Rare",
+  "set": {
+   "name": "151",
+   "series": "Scarlet & Violet",
+   "releaseDate": "2023/09/22"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/sv3pt5/173.png",
+   "large": "https://images.pokemontcg.io/sv3pt5/173_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 63.24,
+     "mid": 78.77,
+     "high": 10000,
+     "market": 67.8,
+     "directLow": 79.74
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/21",
+   "prices": {
+    "averageSellPrice": 53.96,
+    "trendPrice": 44.73
+   }
+  }
+ },
+ {
+  "id": "swsh7-180",
+  "name": "Espeon V",
+  "number": "180",
+  "rarity": "Rare Ultra",
+  "set": {
+   "name": "Evolving Skies",
+   "series": "Sword & Shield",
+   "releaseDate": "2021/08/27"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/swsh7/180.png",
+   "large": "https://images.pokemontcg.io/swsh7/180_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 202.75,
+     "mid": 252.99,
+     "high": 2325.19,
+     "market": 239.71,
+     "directLow": 225.42
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 150.58,
+    "trendPrice": 144.98
+   }
+  }
+ },
+ {
+  "id": "swsh7-184",
+  "name": "Sylveon V",
+  "number": "184",
+  "rarity": "Rare Ultra",
+  "set": {
+   "name": "Evolving Skies",
+   "series": "Sword & Shield",
+   "releaseDate": "2021/08/27"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/swsh7/184.png",
+   "large": "https://images.pokemontcg.io/swsh7/184_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 147.99,
+     "mid": 210.99,
+     "high": 1346.06,
+     "market": 198.08,
+     "directLow": 200
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 163.64,
+    "trendPrice": 168.81
+   }
+  }
+ },
+ {
+  "id": "swsh7-189",
+  "name": "Umbreon V",
+  "number": "189",
+  "rarity": "Rare Ultra",
+  "set": {
+   "name": "Evolving Skies",
+   "series": "Sword & Shield",
+   "releaseDate": "2021/08/27"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/swsh7/189.png",
+   "large": "https://images.pokemontcg.io/swsh7/189_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 335,
+     "mid": 395.25,
+     "high": 1499.99,
+     "market": 380.03,
+     "directLow": 393.94
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 255.22,
+    "trendPrice": 224.96
+   }
+  }
+ },
+ {
+  "id": "swsh7-192",
+  "name": "Dragonite V",
+  "number": "192",
+  "rarity": "Rare Ultra",
+  "set": {
+   "name": "Evolving Skies",
+   "series": "Sword & Shield",
+   "releaseDate": "2021/08/27"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/swsh7/192.png",
+   "large": "https://images.pokemontcg.io/swsh7/192_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 439.97,
+     "mid": 529.27,
+     "high": 2500,
+     "market": 497.16,
+     "directLow": 523.38
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 258.51,
+    "trendPrice": 184.31
+   }
+  }
+ },
+ {
+  "id": "swsh7-212",
+  "name": "Sylveon VMAX",
+  "number": "212",
+  "rarity": "Rare Rainbow",
+  "set": {
+   "name": "Evolving Skies",
+   "series": "Sword & Shield",
+   "releaseDate": "2021/08/27"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/swsh7/212.png",
+   "large": "https://images.pokemontcg.io/swsh7/212_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 325,
+     "mid": 388.83,
+     "high": 4249.73,
+     "market": 384.06,
+     "directLow": 386.24
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 266.43,
+    "trendPrice": 262.46
+   }
+  }
+ },
+ {
+  "id": "swsh7-209",
+  "name": "Glaceon VMAX",
+  "number": "209",
+  "rarity": "Rare Rainbow",
+  "set": {
+   "name": "Evolving Skies",
+   "series": "Sword & Shield",
+   "releaseDate": "2021/08/27"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/swsh7/209.png",
+   "large": "https://images.pokemontcg.io/swsh7/209_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 261,
+     "mid": 312.9,
+     "high": 1200,
+     "market": 307.86,
+     "directLow": 299.98
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 264.99,
+    "trendPrice": 276.46
+   }
+  }
+ },
+ {
+  "id": "swsh7-218",
+  "name": "Rayquaza VMAX",
+  "number": "218",
+  "rarity": "Rare Rainbow",
+  "set": {
+   "name": "Evolving Skies",
+   "series": "Sword & Shield",
+   "releaseDate": "2021/08/27"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/swsh7/218.png",
+   "large": "https://images.pokemontcg.io/swsh7/218_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 989.01,
+     "mid": 1225,
+     "high": 4499.99,
+     "market": 1268.52,
+     "directLow": 1399.99
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 808.52,
+    "trendPrice": 780.69
+   }
+  }
+ },
+ {
+  "id": "swsh8-251",
+  "name": "Mew V",
+  "number": "251",
+  "rarity": "Rare Ultra",
+  "set": {
+   "name": "Fusion Strike",
+   "series": "Sword & Shield",
+   "releaseDate": "2021/11/12"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/swsh8/251.png",
+   "large": "https://images.pokemontcg.io/swsh8/251_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 89.99,
+     "mid": 115.23,
+     "high": 797.26,
+     "market": 103.43,
+     "directLow": 109.98
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 89.75,
+    "trendPrice": 83.27
+   }
+  }
+ },
+ {
+  "id": "swsh8-270",
+  "name": "Espeon VMAX",
+  "number": "270",
+  "rarity": "Rare Rainbow",
+  "set": {
+   "name": "Fusion Strike",
+   "series": "Sword & Shield",
+   "releaseDate": "2021/11/12"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/swsh8/270.png",
+   "large": "https://images.pokemontcg.io/swsh8/270_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 285.81,
+     "mid": 349,
+     "high": 609.27,
+     "market": 341.35,
+     "directLow": 287.14
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 252.13,
+    "trendPrice": 230.96
+   }
+  }
+ },
+ {
+  "id": "swsh8-271",
+  "name": "Gengar VMAX",
+  "number": "271",
+  "rarity": "Rare Rainbow",
+  "set": {
+   "name": "Fusion Strike",
+   "series": "Sword & Shield",
+   "releaseDate": "2021/11/12"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/swsh8/271.png",
+   "large": "https://images.pokemontcg.io/swsh8/271_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 750,
+     "mid": 1049.97,
+     "high": 2749.99,
+     "market": 1034.15,
+     "directLow": 880
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 805.37,
+    "trendPrice": 962.3
+   }
+  }
+ },
+ {
+  "id": "sv4pt5-232",
+  "name": "Mew ex",
+  "number": "232",
+  "rarity": "Special Illustration Rare",
+  "set": {
+   "name": "Paldean Fates",
+   "series": "Scarlet & Violet",
+   "releaseDate": "2024/01/26"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/sv4pt5/232.png",
+   "large": "https://images.pokemontcg.io/sv4pt5/232_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 730,
+     "mid": 950,
+     "high": 10000,
+     "market": 865.73,
+     "directLow": 820
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 461.03,
+    "trendPrice": 506.96
+   }
+  }
+ },
+ {
+  "id": "sv6-214",
+  "name": "Greninja ex",
+  "number": "214",
+  "rarity": "Special Illustration Rare",
+  "set": {
+   "name": "Twilight Masquerade",
+   "series": "Scarlet & Violet",
+   "releaseDate": "2024/05/24"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/sv6/214.png",
+   "large": "https://images.pokemontcg.io/sv6/214_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 266.51,
+     "mid": 331.05,
+     "high": 1999.98,
+     "market": 320.74,
+     "directLow": 278.13
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 225.79,
+    "trendPrice": 223.93
+   }
+  }
+ },
+ {
+  "id": "svp-44",
+  "name": "Charmander",
+  "number": "44",
+  "rarity": "Promo",
+  "set": {
+   "name": "Scarlet & Violet Black Star Promos",
+   "series": "Scarlet & Violet",
+   "releaseDate": "2023/01/01"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/svp/44.png",
+   "large": "https://images.pokemontcg.io/svp/44_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 39.99,
+     "mid": 58.61,
+     "high": 508.77,
+     "market": 50.86,
+     "directLow": 61.98
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2026/02/21",
+   "prices": {
+    "averageSellPrice": 32.93,
+    "trendPrice": 33.29
+   }
+  }
+ },
+ {
+  "id": "sv7-143",
+  "name": "Bulbasaur",
+  "number": "143",
+  "rarity": "Illustration Rare",
+  "set": {
+   "name": "Stellar Crown",
+   "series": "Scarlet & Violet",
+   "releaseDate": "2024/09/13"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/sv7/143.png",
+   "large": "https://images.pokemontcg.io/sv7/143_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 88.71,
+     "mid": 101.01,
+     "high": 795.22,
+     "market": 89.19,
+     "directLow": null
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/21",
+   "prices": {
+    "averageSellPrice": 54.2,
+    "trendPrice": 50.83
+   }
+  }
+ },
+ {
+  "id": "sv7-148",
+  "name": "Squirtle",
+  "number": "148",
+  "rarity": "Illustration Rare",
+  "set": {
+   "name": "Stellar Crown",
+   "series": "Scarlet & Violet",
+   "releaseDate": "2024/09/13"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/sv7/148.png",
+   "large": "https://images.pokemontcg.io/sv7/148_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 84.5,
+     "mid": 107,
+     "high": 1043.19,
+     "market": 92.74,
+     "directLow": null
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/21",
+   "prices": {
+    "averageSellPrice": 61.42,
+    "trendPrice": 59.99
+   }
+  }
+ },
+ {
+  "id": "swshp-SWSH262",
+  "name": "Charizard VSTAR",
+  "number": "SWSH262",
+  "rarity": "Promo",
+  "set": {
+   "name": "SWSH Black Star Promos",
+   "series": "Sword & Shield",
+   "releaseDate": "2019/11/15"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/swshp/SWSH262.png",
+   "large": "https://images.pokemontcg.io/swshp/SWSH262_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 54.65,
+     "mid": 77.53,
+     "high": 1166.37,
+     "market": 67.99,
+     "directLow": 74.44
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/18",
+   "prices": {
+    "averageSellPrice": 65.55,
+    "trendPrice": 35.31
+   }
+  }
+ },
+ {
+  "id": "swsh12pt5gg-GG44",
+  "name": "Mewtwo VSTAR",
+  "number": "GG44",
+  "rarity": "Rare Holo VSTAR",
+  "set": {
+   "name": "Crown Zenith Galarian Gallery",
+   "series": "Sword & Shield",
+   "releaseDate": "2023/01/20"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/swsh12pt5gg/GG44.png",
+   "large": "https://images.pokemontcg.io/swsh12pt5gg/GG44_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 221,
+     "mid": 269.69,
+     "high": 2495.24,
+     "market": 239.5,
+     "directLow": 254.99
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2026/02/24",
+   "prices": {
+    "averageSellPrice": 159.14,
+    "trendPrice": 144.1
+   }
+  }
+ },
+ {
+  "id": "xyp-XY126",
+  "name": "Mew-EX",
+  "number": "XY126",
+  "rarity": "Promo",
+  "set": {
+   "name": "XY Black Star Promos",
+   "series": "XY",
+   "releaseDate": "2013/10/12"
+  },
+  "images": {
+   "small": "https://images.pokemontcg.io/xyp/XY126.png",
+   "large": "https://images.pokemontcg.io/xyp/XY126_hires.png"
+  },
+  "tcgplayer": {
+   "updatedAt": "2026/10/12",
+   "prices": {
+    "holofoil": {
+     "low": 271.4,
+     "mid": 328.25,
+     "high": 1414.72,
+     "market": 273.79,
+     "directLow": null
+    }
+   }
+  },
+  "cardmarket": {
+   "updatedAt": "2025/11/21",
+   "prices": {
+    "averageSellPrice": 180,
+    "trendPrice": 146.85
+   }
+  }
  }
 ]

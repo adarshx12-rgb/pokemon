@@ -10,7 +10,8 @@ export function collectorInfo(card: Card) {
     artist: identity?.artist ?? null,
     artistSource: identity?.artistSource ?? null,
     language: identity?.language ?? 'Not recorded',
-    number: identity?.printedTotal ? `${card.number}/${identity.printedTotal}` : card.number,
+    number: identity?.printedTotal && card.rarity !== 'Promo'
+      ? `${card.number}/${card.number.match(/^[A-Za-z]+/)?.[0] ?? ''}${identity.printedTotal}` : card.number,
     source: `https://github.com/PokemonTCG/pokemon-tcg-data/blob/master/cards/en/${card.id.split('-')[0]}.json`,
     note: COLLECTOR_NOTES[card.id] ?? {
       appeal: `A ${card.name} from ${card.setName}, for a favourite-Pokémon collection or set checklist.`,

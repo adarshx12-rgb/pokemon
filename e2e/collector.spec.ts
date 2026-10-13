@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { SHOWCASE } from '../data/showcase';
 
 test('each tier has inline notes and cards open an accessible window without losing the grid', async ({ page }) => {
   await page.goto('/cards');
+  await expect(page.getByTestId('card-tile')).toHaveCount(SHOWCASE.length);
   const bands = page.getByTestId('tier-band');
   for (const band of await bands.all()) {
     await expect(band.locator('[data-featured] [data-testid="collector-notes"]')).toHaveCount(1);
@@ -28,6 +30,14 @@ test('each tier has inline notes and cards open an accessible window without los
   await expect(dialog).toBeVisible();
   await dialog.getByRole('button', { name: 'Close card details' }).click();
   await expect(dialog).not.toBeVisible();
+  for (const [id, number] of [['sv4pt5-232', '232/91'], ['swsh8-271', '271/264'], ['swshp-SWSH262', 'SWSH262'], ['swsh12pt5gg-GG44', 'GG44/GG70']]) {
+    await page.locator(`[data-testid="card-tile"][href="/cards/${id}"]`).click();
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByText(`#${number} · English`, { exact: true })).toBeVisible();
+    await expect(dialog.getByTestId('collector-notes')).toBeVisible();
+    await expect.poll(() => dialog.locator('img').evaluateAll(images => images.length > 0 && images.every(image => (image as HTMLImageElement).complete && (image as HTMLImageElement).naturalWidth > 0))).toBe(true);
+    await page.keyboard.press('Escape');
+  }
 });
 
 test('owned and wishlist choices persist, stay independent, and sync across inline and detail views', async ({ page }) => {

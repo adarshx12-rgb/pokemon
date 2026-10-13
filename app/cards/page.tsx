@@ -25,7 +25,7 @@ export default async function CardsPage() {
           {shelves && <div aria-hidden className="absolute inset-0 bg-linear-to-r from-ink via-ink/70 to-transparent" />}
           <div aria-hidden className="halftone-fade absolute inset-0" />
           <div className="relative max-w-3xl">
-            <p className="caption-box">A collector’s index · six curated tiers</p>
+            <p className="caption-box">{groups.reduce((total, group) => total + group.cards.length, 0)} cards · six curated tiers</p>
             <h1 className="mt-4 font-display text-6xl uppercase sm:text-7xl md:text-9xl">The <span className="text-gold-gradient emph">Vault</span></h1>
             <p className="mt-6 max-w-xl text-muted">
               Discover the artwork, understand the printing, and keep track of the cards you love. Open any card for collector notes and a dated market estimate.

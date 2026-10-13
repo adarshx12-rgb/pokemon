@@ -12,7 +12,8 @@ describe('collector content coverage', () => {
       expect(COLLECTOR_NOTES[id], id).toBeDefined();
       const info = collectorInfo(card);
       expect(info.artist, id).toBeTruthy();
-      expect(info.number, id).toMatch(/^\d+\/\d+$/);
+      if (card.rarity === 'Promo') expect(info.number, id).toBe(card.number);
+      else expect(info.number, id).toMatch(/^[A-Za-z]*\d+\/[A-Za-z]*\d+$/);
       expect(info.language).toBe('English');
       expect(info.note.appeal.length).toBeGreaterThan(40);
       expect(info.note.check.length).toBeGreaterThan(40);

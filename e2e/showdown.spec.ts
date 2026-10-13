@@ -192,3 +192,29 @@ test('live species learnsets keep Blastoise and Pikachu moves separate', async (
   await expect(page.getByTestId('move-A-ice-beam')).toBeVisible();
   await expect(page.locator('[data-testid^="move-B-hydro-pump"]')).toHaveCount(0);
 });
+
+test.describe('phone emulation', () => {
+  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 3 });
+
+  test('fields avoid iOS focus zoom and only the next mover’s buttons sit under the arena', async ({ page }) => {
+    await page.goto('/showdown');
+    expect(await page.getByTestId('search-A').evaluate(el => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(16);
+    await add(page, 'A', 'cyndaquil');
+    await add(page, 'B', 'chikorita');
+    expect(await page.getByRole('region', { name: /My team/ }).locator('select').first().evaluate(el => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(16);
+    await page.screenshot({ path: 'test-results/showdown-mobile-build.png', fullPage: true, animations: 'disabled', caret: 'initial' });
+    await page.getByTestId('battle-start').tap();
+    await expect(page.getByTestId('battle-stage')).toBeInViewport();
+    for (let turn = 0; turn < 2; turn++) {
+      const ready = page.locator('[data-testid^="move-"]:enabled');
+      await expect(ready).toHaveCount(4);
+      await expect(page.locator('[data-testid^="move-"]:visible')).toHaveCount(4);
+      await expect(ready.first()).toBeInViewport();
+      await page.screenshot({ path: `test-results/showdown-mobile-turn-${turn}.png`, animations: 'disabled', caret: 'initial' });
+      const before = await page.getByTestId('turn-prompt').textContent();
+      await ready.first().tap();
+      await expect(page.getByTestId('turn-prompt')).not.toHaveText(before!, { timeout: 30_000 });
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  });
+});

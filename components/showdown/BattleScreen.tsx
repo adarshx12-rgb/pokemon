@@ -66,6 +66,11 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
     if (!playing) busy.current = false;
   }, [playing]);
 
+  // On phones the page header pushes the arena below the fold; start the battle with it in view.
+  useEffect(() => {
+    if (matchMedia('(max-width: 640px)').matches) document.querySelector('[data-testid="battle-stage"]')?.scrollIntoView({ block: 'start' });
+  }, []);
+
   const attack = (side: Side, moveName: string) => {
     if (busy.current || playing || end) return;
     const next = battle.playMove(side, moveName);
@@ -125,7 +130,7 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
             const member = (side === 'A' ? teamA : teamB)[idx];
             const moves = member.moves.length ? member.moves : [STRUGGLE];
             const ready = !playing && !end && nextSide === side;
-            return <section key={side} className={styles.moveMenu} aria-label={`${side === 'A' ? 'Your' : 'Opponent'} ${displayName(member.pokemon.name)} moves`} data-active={ready}>
+            return <section key={side} className={styles.moveMenu} aria-label={`${side === 'A' ? 'Your' : 'Opponent'} ${displayName(member.pokemon.name)} moves`} data-active={ready} data-next={nextSide === side}>
               <h2><span>{side === 'A' ? 'Your' : 'Opponent'} {displayName(member.pokemon.name)}</span><small>{ready ? 'Choose a move' : playing ? 'Playing move…' : end ? 'Battle over' : 'Waiting'}</small></h2>
               <div className={styles.moveButtons}>
                 {moves.map(move => <button key={move.name} type="button" data-testid={`move-${side}-${move.name}`} disabled={!ready}

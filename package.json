@@ -12,6 +12,7 @@
     "e2e": "playwright test",
     "verify:showcase": "tsx scripts/verify-showcase.ts",
     "snapshot:showcase": "tsx scripts/snapshot-showcase.ts",
+    "snapshot:pokedex": "tsx scripts/snapshot-pokedex.ts",
     "build:grail": "tsx scripts/build-grail-assets.ts"
   },
   "dependencies": {

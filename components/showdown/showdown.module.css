@@ -227,6 +227,21 @@
   .stats dt { font-size: 7px; }
   .rules { margin-top: 15px; padding-top: 15px; font-size: 10px; }
   .toast { font-size: 10px; gap: 12px; padding: 12px; }
+  .battle .screenFrame { scroll-margin-top: 72px; }
+  /* Only the side about to move keeps its buttons, directly under the arena, so a phone never scrolls between turns. */
+  .moveMenu[data-next="true"] { order: -1; }
+  .moveMenu[data-next="false"] h2 { flex-direction: row; justify-content: space-between; align-items: baseline; margin-bottom: 0; font-size: 12px; }
+  .moveMenu[data-next="false"] .moveButtons { display: none; }
+  .moveButtons { gap: 6px; }
+  .moveButtons button { min-height: 64px; padding: 8px 7px; gap: 4px; }
+  .moveButtons span, .moveButtons small { font-size: 9px; line-height: 1.4; }
+  .battleHelp { margin-top: 16px; padding-inline: 8px; }
+}
+/* Touch screens: 16px text stops iOS from zooming into focused fields, and taller controls are easier to hit. */
+@media (pointer: coarse) and (max-width: 1150px) {
+  .search input { font-size: 16px; min-height: 42px; }
+  .moves select { font-size: 16px; height: 40px; }
+  .search li { padding-block: 13px; font-size: 14px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .page *, .page *::before, .page *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }

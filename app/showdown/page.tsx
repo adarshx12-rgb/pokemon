@@ -10,10 +10,6 @@ export const metadata: Metadata = pageMetadata({
   path: '/showdown',
 });
 
-// Errors propagate on purpose: ISR then keeps serving the last good page instead of caching
-// an empty Pokédex for the whole revalidate window.
 export default async function ShowdownPage() {
-  const names = await getPokemonNames();
-  if (names.length === 0) throw new Error('PokéAPI returned no Pokémon names');
-  return <Showdown names={names} />;
+  return <Showdown names={await getPokemonNames()} />;
 }

@@ -62,3 +62,17 @@ test('crawl endpoints and social preview image are available', async ({ request 
   expect(png.readUInt32BE(16)).toBe(1200);
   expect(png.readUInt32BE(20)).toBe(630);
 });
+
+test('AI crawlers are allowed and llms.txt maps the site', async ({ request }) => {
+  const robots = await request.get('/robots.txt');
+  const rules = await robots.text();
+  for (const bot of ['GPTBot', 'ClaudeBot', 'PerplexityBot', 'Google-Extended']) expect(rules).toContain(`User-Agent: ${bot}`);
+  for (const path of ['/llms.txt', '/llm.txt']) {
+    const llms = await request.get(path);
+    expect(llms.ok()).toBe(true);
+    expect(llms.headers()['content-type']).toContain('text/plain');
+    const text = await llms.text();
+    expect(text).toMatch(/^# HIPOKÉMON\n\n> /);
+    for (const page of ['/cards', '/showdown', '/cards/ex8-107', '/about']) expect(text).toContain(`(https://hipokemon.com${page})`);
+  }
+});

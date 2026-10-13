@@ -10,9 +10,14 @@ import { decorSrc } from '@/lib/manga/decor';
 import { SHAPES } from '@/lib/manga/panel';
 import { getCards } from '@/lib/tcg/client';
 import { groupByTier } from '@/lib/tcg/rank';
+import { pageMetadata } from '@/lib/seo';
 
 export const revalidate = 86400;
-export const metadata: Metadata = { title: 'The Vault — Pokémon Vault' };
+export const metadata: Metadata = pageMetadata({
+  title: 'Rare Pokemon Cards & Card Prices',
+  description: 'Browse Pokémon cards across six curated tiers. Explore rare cards, artwork, set details, collector notes, and dated market estimates in the hipokémon Vault.',
+  path: '/cards',
+});
 
 export default async function CardsPage() {
   const groups = groupByTier(await getCards(SHOWCASE.map(s => s.id)));
@@ -28,7 +33,7 @@ export default async function CardsPage() {
             <p className="caption-box">{groups.reduce((total, group) => total + group.cards.length, 0)} cards · six curated tiers</p>
             <h1 className="mt-4 font-display text-6xl uppercase sm:text-7xl md:text-9xl">The <span className="text-gold-gradient emph">Vault</span></h1>
             <p className="mt-6 max-w-xl text-muted">
-              Discover the artwork, understand the printing, and keep track of the cards you love. Open any card for collector notes and a dated market estimate.
+              Explore Pokémon cards and rare finds: discover the artwork, understand the printing, and keep track of the cards you love. Open any card for collector notes and a dated market estimate.
             </p>
             <p className="mt-4 max-w-xl text-xs leading-relaxed text-muted">Our tiers are editorial groupings, not official rarity rankings. Prices refer to raw, ungraded cards; check the finish and source date on each card.</p>
           </div>

@@ -92,7 +92,7 @@ export function Showdown({ names }: { names: string[] }) {
   return (
     <main className={styles.page}>
       <header className={styles.header}>
-        <div><h1>Showdown<span>.</span></h1><p>Pick your favorites. Choose every move. Play both sides.</p></div>
+        <div><h1>Showdown<span>.</span></h1><p>Your Pokémon showdown. Pick your favorites. Play both sides.</p></div>
         <div className={styles.visualMode} role="group" aria-label="Pokémon appearance">
           <button type="button" aria-pressed={!classic} onClick={() => setClassic(false)}>HD artwork</button>
           <button type="button" aria-pressed={classic} onClick={() => setClassic(true)}>Classic sprites</button>

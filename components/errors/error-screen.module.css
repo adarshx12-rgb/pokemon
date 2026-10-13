@@ -1,0 +1,12 @@
+.screen { box-sizing: border-box; min-height: 85svh; display: grid; place-items: center; padding: 120px 24px 72px; background: #050507; color: #ede6d6; font-family: var(--font-mono, ui-monospace, monospace); }
+.content { max-width: 800px; width: 100%; text-align: center; }
+.brand { color: #b1afff; font-size: 14px; letter-spacing: .12em; margin: 0; }
+.code { font-family: var(--font-display, 'Arial Narrow', sans-serif); font-size: clamp(110px, 23vw, 220px); line-height: 1; font-weight: 700; color: #ff2b2b; margin: 24px 0; }
+.screen h1 { font-family: var(--font-display, 'Arial Narrow', sans-serif); font-size: clamp(30px, 5vw, 56px); line-height: 1.15; margin: 0; }
+.description { max-width: 54ch; margin: 24px auto; color: #c8c3ce; font-size: 14px; line-height: 1.9; }
+.actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px 28px; margin-top: 32px; }
+.screen a, .screen button { font: inherit; font-size: 13px; color: #b1afff; text-decoration: underline; text-underline-offset: 6px; }
+.screen button { border: 0; padding: 0; background: transparent; cursor: pointer; }
+.screen a:hover, .screen button:hover { color: #ff2b2b; }
+.screen a:focus-visible, .screen button:focus-visible { outline: 2px solid #b1afff; outline-offset: 6px; }
+.help { margin-top: 36px; font-size: 12px; color: #c8c3ce; }

@@ -5,6 +5,7 @@ import { CardInspector } from '@/components/cards/CardInspector';
 import { CardDetails } from '@/components/cards/CardDetails';
 import { SHOWCASE } from '@/data/showcase';
 import { getCard } from '@/lib/tcg/client';
+import { pageMetadata } from '@/lib/seo';
 
 export const revalidate = 86400;
 
@@ -16,7 +17,13 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const card = await getCard((await params).id);
-  return { title: card ? `${card.name} (${card.setName}) — Pokémon Vault` : 'Card not found — Pokémon Vault' };
+  if (!card) notFound();
+  return pageMetadata({
+    title: `${card.name} #${card.number} — ${card.setName} Pokemon Card`,
+    description: `Explore the ${card.name} Pokémon card #${card.number} from ${card.setName}. View artwork, rarity, collector notes, and available dated price estimates.`,
+    path: `/cards/${card.id}`,
+    image: { url: card.images.large, alt: `${card.name} #${card.number} Pokémon card from ${card.setName}` },
+  });
 }
 
 export default async function CardPage({ params }: Params) {

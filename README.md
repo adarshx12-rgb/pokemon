@@ -1,6 +1,12 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+## Public contact details
+
+Edit `lib/site-contact.ts` to set the public email address, website operator, and country. The current `.example` address and operator name are marked as placeholders. Set `placeholder` to `false` after replacing them; this enables the email link on `/contact`. The Privacy Policy and Terms pages use the same operator details.
+
+Information pages live at `/about`, `/contact`, `/privacy-policy`, and `/terms-and-conditions`. Missing routes use `app/not-found.tsx`; unexpected page and root-layout failures use `app/error.tsx` and `app/global-error.tsx`.
+
+## Local development
 
 First, run the development server:
 

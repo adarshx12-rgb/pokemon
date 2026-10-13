@@ -17,7 +17,7 @@ export function SiteNav() {
   return (
     <header className={`fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-4 bg-linear-to-b from-ink/90 to-transparent px-4 py-5 md:px-12 ${styles.header}`}>
       <Link href="/" aria-current={path === '/' ? 'page' : undefined} className={`whitespace-nowrap font-display text-lg uppercase tracking-wide text-red md:text-[22px] ${RING}`}>
-        Pokémon Vault
+        HIPOKÉMON
       </Link>
       <nav aria-label="Main" className="meta flex gap-3 whitespace-nowrap min-[400px]:gap-5 md:gap-11">
         {LINKS.map(link => (

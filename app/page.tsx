@@ -3,6 +3,9 @@ import { TIER_ORDER } from '@/data/rarity';
 import { GRAIL, SHOWCASE } from '@/data/showcase';
 import { getCard } from '@/lib/tcg/client';
 import { formatPrice } from '@/lib/tcg/normalize';
+import { FieldGuide } from '@/components/home/FieldGuide';
+import { Faq } from '@/components/home/Faq';
+import { HOME_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/seo';
 
 export const revalidate = 86400;
 
@@ -18,6 +21,15 @@ export default async function Home() {
   const price = await grailPrice();
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: SITE_NAME,
+        alternateName: 'HIPOKÉMON',
+        url: SITE_URL.href,
+        description: HOME_DESCRIPTION,
+        inLanguage: 'en',
+      }).replace(/</g, '\\u003c') }} />
       <GrailSequence
         price={price ? formatPrice(price) : null}
         priceSource={price?.source ?? null}
@@ -25,11 +37,8 @@ export default async function Home() {
         tierCount={TIER_ORDER.length}
         cardCount={SHOWCASE.length}
       />
-      <footer className="px-6 pb-16 pt-10 text-center">
-        <p className="copy mx-auto max-w-2xl text-indigo max-md:text-xs max-md:normal-case max-md:tracking-normal max-md:text-[#b1afff]">
-          Prices are estimates from TCGplayer and Cardmarket via the Pokémon TCG API. Pokémon data from PokéAPI. Not affiliated with Nintendo, Creatures, or Game Freak.
-        </p>
-      </footer>
+      <FieldGuide />
+      <Faq />
     </main>
   );
 }

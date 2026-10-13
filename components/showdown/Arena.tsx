@@ -15,7 +15,7 @@ interface Props {
 export function Arena({ player, opponent, playerPanel, opponentPanel, dialogue, commands, overlay, preview }: Props) {
   return (
     <div className={styles.screenFrame} data-testid={preview ? 'arena-preview' : 'battle-stage'}>
-      <div className={styles.screenLabel}><span>Pokémon Vault</span><span>{preview ? 'Team selection' : 'Battle in progress'}</span></div>
+      <div className={styles.screenLabel}><span>HIPOKÉMON</span><span>{preview ? 'Team selection' : 'Battle in progress'}</span></div>
       <div className={styles.screen}>
         <div className={styles.field}>
           <div className={styles.farPlatform} aria-hidden />

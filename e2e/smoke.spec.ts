@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('home renders the welcome screen', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName('Pokémon Vault');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName('HIPOKÉMON');
   await expect(page.getByRole('link', { name: /Enter the vault/ })).toBeAttached();
 });
 

@@ -1,0 +1,64 @@
+import { test, expect } from '@playwright/test';
+
+test('home exposes readable guide content and complete sharing metadata without JavaScript', async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await expect(page).toHaveTitle('Pokemon Cards, Rare Cards & Showdown | hipokémon');
+  const guide = page.locator('#field-guide');
+  const words = (await guide.innerText()).trim().split(/\s+/).length;
+  expect(words).toBeGreaterThanOrEqual(800);
+  expect(words).toBeLessThanOrEqual(1200);
+  console.log(`Homepage guide: ${words} words`);
+  await expect(guide.getByRole('heading', { level: 3 })).toHaveCount(6);
+  await expect(page.locator('h1')).toHaveCount(1);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /^https:\/\/hipokemon\.com\/?$/);
+  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', /^https:\/\/hipokemon\.com\/?$/);
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', 'https://hipokemon.com/social-image');
+  await expect(page.locator('meta[property="og:image:width"]')).toHaveAttribute('content', '1200');
+  await expect(page.locator('meta[property="og:image:height"]')).toHaveAttribute('content', '630');
+  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image');
+  const schema = JSON.parse(await page.locator('script[type="application/ld+json"]').innerText());
+  expect(schema['@type']).toBe('WebSite');
+  expect(schema.url).toBe('https://hipokemon.com/');
+  await context.close();
+});
+
+test('guide fits mobile and desktop with working chapter links', async ({ page }, testInfo) => {
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  for (const width of [375, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    const guide = page.locator('#field-guide');
+    await expect(page.locator('.page-in')).toHaveCSS('opacity', '1');
+    await page.locator('#field-guide-title').scrollIntoViewIfNeeded();
+    await expect(guide).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: testInfo.outputPath(`guide-${width}.png`), animations: 'disabled' });
+  }
+  await page.getByRole('link', { name: 'Learn the matchup', exact: true }).click();
+  await expect(page.locator('#battle-matchups')).toBeInViewport();
+});
+
+test('card pages have unique metadata and use card artwork for sharing', async ({ page }) => {
+  await page.goto('/cards/ex8-107', { waitUntil: 'domcontentloaded' });
+  await expect(page).toHaveTitle(/Rayquaza.*Deoxys.*hipokémon/);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://hipokemon.com/cards/ex8-107');
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /images\.pokemontcg\.io\/ex8\/107/);
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /Rayquaza.*Deoxys/);
+});
+
+test('crawl endpoints and social preview image are available', async ({ request }) => {
+  const robots = await request.get('/robots.txt');
+  expect(robots.ok()).toBe(true);
+  expect(await robots.text()).toContain('Sitemap: https://hipokemon.com/sitemap.xml');
+  const sitemap = await request.get('/sitemap.xml');
+  expect(sitemap.ok()).toBe(true);
+  const xml = await sitemap.text();
+  for (const path of ['/cards', '/showdown', '/cards/ex8-107']) expect(xml).toContain(`https://hipokemon.com${path}</loc>`);
+  const image = await request.get('/social-image');
+  expect(image.ok()).toBe(true);
+  expect(image.headers()['content-type']).toContain('image/png');
+  const png = await image.body();
+  expect(png.readUInt32BE(16)).toBe(1200);
+  expect(png.readUInt32BE(20)).toBe(630);
+});

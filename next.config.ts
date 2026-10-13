@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { cardImagePatterns } from "./lib/tcg/imageAllowlist";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -32,7 +33,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  images: { remotePatterns: [{ protocol: "https", hostname: "images.pokemontcg.io" }] },
+  images: { remotePatterns: cardImagePatterns() },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

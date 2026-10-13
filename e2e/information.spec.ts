@@ -30,8 +30,8 @@ for (const [path, name] of [
     const response = await page.goto(path, { waitUntil: 'domcontentloaded' });
     expect(response?.status()).toBe(200);
     await expect(page.getByRole('heading', { level: 1, name, exact: true })).toBeVisible();
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `https://hipokemon.com${path}`);
-    await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', `https://hipokemon.com${path}`);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `https://pokefame.com${path}`);
+    await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', `https://pokefame.com${path}`);
     await expect(page.locator('footer')).toHaveCount(1);
     await expect(page.getByRole('navigation', { name: 'Site information' }).getByRole('link', { name: 'Contact us', exact: true })).toHaveAttribute('href', '/contact');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -47,14 +47,14 @@ test('unknown routes return a real 404 with recovery links and noindex', async (
   expect(robots.some(value => value?.includes('noindex'))).toBe(true);
   await page.getByRole('link', { name: 'Back to home', exact: true }).click();
   await expect(page).toHaveURL('/');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName('HIPOKÉMON');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName('POKEFAME');
 });
 
 test('sitemap includes information pages and excludes error pages', async ({ request }) => {
   const response = await request.get('/sitemap.xml');
   const xml = await response.text();
   for (const path of ['/about', '/contact', '/privacy-policy', '/terms-and-conditions']) {
-    expect(xml).toContain(`https://hipokemon.com${path}</loc>`);
+    expect(xml).toContain(`https://pokefame.com${path}</loc>`);
   }
   expect(xml).not.toMatch(/\/(404|500|not-a-real-page)<\/loc>/);
 });

@@ -328,14 +328,14 @@ export function GrailSequence({ price, priceSource, updatedAt, tierCount, cardCo
   }, []);
 
   return (
-    <section ref={rootRef} className={styles.root} aria-label="HIPOKÉMON">
+    <section ref={rootRef} className={styles.root} aria-label="POKEFAME">
       <div ref={stageRef} className={styles.stage}>
         <div className={styles.welcome} data-part="welcome">
           <div className={`meta ${styles.metaRow}`} data-depth="front">
             <span>Ed. 01 — The collector’s index</span>
             <span>Rare cards · ranked · dated estimates</span>
           </div>
-          <h1 className={`grain ${styles.siteName}`} data-depth="back" aria-label="HIPOKÉMON">HI<br className="md:hidden" />POKÉMON</h1>
+          <h1 className={`grain ${styles.siteName}`} data-depth="back" aria-label="POKEFAME">POKE<br className="md:hidden" />FAME</h1>
           <p className={styles.subhead} data-depth="middle">Rare by design /<br />priced by the market</p>
           <div className={styles.intro} data-depth="front">
             <p className="copy">{DESCRIPTION}</p>

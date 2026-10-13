@@ -16,7 +16,7 @@ export function FieldGuide() {
     <section className={styles.guide} aria-labelledby="field-guide-title" id="field-guide">
       <header className={styles.header}>
         <h2 id="field-guide-title">Pokémon cards.<br />A world to explore.</h2>
-        <p>From the card you remember to the team you have yet to try. A field guide to collecting and playing with HIPOKÉMON.</p>
+        <p>From the card you remember to the team you have yet to try. A field guide to collecting and playing with POKEFAME.</p>
       </header>
       <div className={styles.layout}>
         <nav className={`meta ${styles.contents}`} aria-label="Collector and battle guide">
@@ -28,7 +28,7 @@ export function FieldGuide() {
         <div className={styles.chapters}>
           <section id="pokemon-cards">
             <h3>Pokémon cards, with the details in view</h3>
-            <p>Every collection begins with something that catches your eye. It might be a familiar Pokémon, a striking illustration, or a card you remember pulling years ago. hipokémon brings those discoveries into a visual card vault, alongside a browser battle tool for trying your favorite creatures in action. You can explore Pokémon cards, read about individual printings, and then build a team for a different kind of encounter. Start with whichever side of Pokémon you enjoy most.</p>
+            <p>Every collection begins with something that catches your eye. It might be a familiar Pokémon, a striking illustration, or a card you remember pulling years ago. pokefame brings those discoveries into a visual card vault, alongside a browser battle tool for trying your favorite creatures in action. You can explore Pokémon cards, read about individual printings, and then build a team for a different kind of encounter. Start with whichever side of Pokémon you enjoy most.</p>
             <p>The <Link href="/cards">Pokémon card vault</Link> is a curated selection rather than a complete checklist of every release. Open a card to see its artwork, set, card number, recorded rarity, and available collector notes. Those details help distinguish cards that share a character but belong to different releases. Follow the dedicated card link when you want a page to bookmark or share. Looking closely at one printing is often more useful than comparing several cards by name alone.</p>
           </section>
           <section id="rare-pokemon-cards">
@@ -38,18 +38,18 @@ export function FieldGuide() {
           </section>
           <section id="card-prices">
             <h3>Read the card price, then read the context</h3>
-            <p>A number becomes more useful when you know what it describes. Where pricing is available, hipokémon shows a market estimate with its source, currency, variant, and update date. The card data comes through the Pokémon TCG API, with estimates sourced from TCGplayer or Cardmarket. Check that date before making comparisons: the displayed figure is a dated reference, not a live offer or a promise that a seller will accept that amount.</p>
+            <p>A number becomes more useful when you know what it describes. Where pricing is available, pokefame shows a market estimate with its source, currency, variant, and update date. The card data comes through the Pokémon TCG API, with estimates sourced from TCGplayer or Cardmarket. Check that date before making comparisons: the displayed figure is a dated reference, not a live offer or a promise that a seller will accept that amount.</p>
             <p>Compare the same printing and finish whenever possible. A raw card and a professionally graded copy are different comparisons, and the condition of an individual card cannot be established from catalog artwork. The vault’s estimates refer to raw, ungraded cards. For a copy you are considering, inspect the seller’s photos and description as well as the card identity. If a price is unavailable, the artwork and collector information still give you a useful place to begin your research.</p>
           </section>
           <section id="your-collection">
             <h3>A collection that follows your interests</h3>
             <p>Use the card controls to mark what you own and what you would like to find. A card can be both owned and wanted, which is useful when you are looking for another copy. These choices are saved in the browser you are using. They do not require an account, but they also do not automatically travel to another device. Clearing site storage can remove those saved marks.</p>
-            <p>A focused collection is easier to explore than an endless shopping list. Try following a favorite Pokémon across sets, comparing the work of an illustrator, or revisiting the artwork from a childhood release. Open the collector notes and check the printed identity before adding a card to your plans. hipokémon is a reference and discovery tool, so browsing does not reserve a card or place an order. You can take your time and return to the details that matter to you.</p>
+            <p>A focused collection is easier to explore than an endless shopping list. Try following a favorite Pokémon across sets, comparing the work of an illustrator, or revisiting the artwork from a childhood release. Open the collector notes and check the printed identity before adding a card to your plans. pokefame is a reference and discovery tool, so browsing does not reserve a card or place an order. You can take your time and return to the details that matter to you.</p>
           </section>
           <section id="pokemon-showdown">
             <h3>Build your own Pokémon showdown</h3>
             <p>When you want to move from collecting to playing, open the <Link href="/showdown">Pokémon showdown battle tool</Link>. Search for Pokémon and add between one and six to each team. Choose supported moves, arrange the team order, and put your intended lead in the first slot. You can build the opposing team yourself or use its randomize control for a fresh matchup. Switch between HD artwork and classic sprites to choose the look you prefer.</p>
-            <p>This is hipokémon’s own simplified, local battle simulator, separate from the Pokémon Showdown service. You control both teams in the same browser rather than joining an online matchmaking ladder. Select Fight, then choose an attack for the highlighted Pokémon. Each attack waits for your input, so you can pause to consider the available moves. When a Pokémon faints, the next member in its lineup enters; the last team with a Pokémon standing wins.</p>
+            <p>This is pokefame’s own simplified, local battle simulator, separate from the Pokémon Showdown service. You control both teams in the same browser rather than joining an online matchmaking ladder. Select Fight, then choose an attack for the highlighted Pokémon. Each attack waits for your input, so you can pause to consider the available moves. When a Pokémon faints, the next member in its lineup enters; the last team with a Pokémon standing wins.</p>
           </section>
           <section id="battle-matchups">
             <h3>Learn a matchup, one move at a time</h3>

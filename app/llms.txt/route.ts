@@ -10,11 +10,11 @@ const url = (path: string) => new URL(path, SITE_URL).href;
 // llms.txt (https://llmstxt.org): a Markdown map of the site for language-model crawlers.
 export async function GET() {
   const cards = await getCards(SHOWCASE.map(s => s.id));
-  const body = `# HIPOKÉMON
+  const body = `# POKEFAME
 
 > ${HOME_DESCRIPTION}
 
-hipokémon is an independent fan project with two parts: a curated vault of Pokémon trading cards and a simplified, local Pokémon battle simulator. Card data comes from the Pokémon TCG API; price estimates are attributed to TCGplayer or Cardmarket, refer to raw ungraded cards, and carry a source date. Vault tiers are editorial groupings, not official rarity rankings. Pokémon stats and moves come from PokéAPI. Not affiliated with Nintendo, Creatures, Game Freak, or The Pokémon Company, and separate from the Pokémon Showdown service.
+pokefame is an independent fan project with two parts: a curated vault of Pokémon trading cards and a simplified, local Pokémon battle simulator. Card data comes from the Pokémon TCG API; price estimates are attributed to TCGplayer or Cardmarket, refer to raw ungraded cards, and carry a source date. Vault tiers are editorial groupings, not official rarity rankings. Pokémon stats and moves come from PokéAPI. Not affiliated with Nintendo, Creatures, Game Freak, or The Pokémon Company, and separate from the Pokémon Showdown service.
 
 ## Main pages
 

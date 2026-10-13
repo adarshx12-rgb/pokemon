@@ -51,11 +51,11 @@ export function Faq() {
           <summary>Where can I buy rare Pokémon cards?</summary>
           <div>
             <p>Individual cards are sold by card shops, specialist marketplaces, and auction houses. Compare seller history, buyer protection, return terms, and clear photos of the actual copy. For graded cards, check the certification with the grading company. Buying a sealed pack does not guarantee a particular rare card.</p>
-            <p>For official sealed products, <a href="https://support.pokemon.com/hc/en-us/articles/360000634514-How-can-I-find-where-Pok%C3%A9mon-products-are-available-to-buy">Pokémon Support lists shopping options and a retail locator</a>. hipokémon is a reference tool; we do not sell cards or arrange transactions.</p>
+            <p>For official sealed products, <a href="https://support.pokemon.com/hc/en-us/articles/360000634514-How-can-I-find-where-Pok%C3%A9mon-products-are-available-to-buy">Pokémon Support lists shopping options and a retail locator</a>. pokefame is a reference tool; we do not sell cards or arrange transactions.</p>
           </div>
         </details>
         <details>
-          <summary>Is hipokémon the same as Pokémon Showdown?</summary>
+          <summary>Is pokefame the same as Pokémon Showdown?</summary>
           <div>
             <p>No. Our <Link href="/showdown">Pokémon showdown tool</Link> is an independent, simplified battle simulator. You build two teams and control both sides in the same browser. It has no online matchmaking ladder and does not simulate items, abilities, weather, or status effects. It is separate from the Pokémon Showdown service.</p>
           </div>

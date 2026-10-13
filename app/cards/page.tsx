@@ -15,7 +15,7 @@ import { pageMetadata } from '@/lib/seo';
 export const revalidate = 86400;
 export const metadata: Metadata = pageMetadata({
   title: 'Rare Pokemon Cards & Card Prices',
-  description: 'Browse Pokémon cards across six curated tiers. Explore rare cards, artwork, set details, collector notes, and dated market estimates in the hipokémon Vault.',
+  description: 'Browse Pokémon cards across six curated tiers. Explore rare cards, artwork, set details, collector notes, and dated market estimates in the pokefame Vault.',
   path: '/cards',
 });
 

@@ -1,9 +1,17 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"main": ".open-next/worker.js",
-	"name": "hipokemon",
+	"name": "pokefame",
 	"compatibility_date": "2026-10-01",
 	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	// Served only on the custom domains below
+	"workers_dev": false,
+	"preview_urls": false,
+	"routes": [
+		{ "pattern": "pokefame.com", "custom_domain": true },
+		// Redirected to the apex by next.config.ts
+		{ "pattern": "www.pokefame.com", "custom_domain": true }
+	],
 	"assets": {
 		"directory": ".open-next/assets",
 		"binding": "ASSETS"
@@ -13,15 +21,7 @@
 			// Self-reference service binding, the service name must match the worker name
 			// see https://opennext.js.org/cloudflare/caching
 			"binding": "WORKER_SELF_REFERENCE",
-			"service": "hipokemon"
-		}
-	],
-	"kv_namespaces": [
-		{
-			// KV incremental cache (R2 is not enabled on this account)
-			// see https://opennext.js.org/cloudflare/caching
-			"binding": "NEXT_INC_CACHE_KV",
-			"id": "4c5d49798e7c4298837e092dc551b811"
+			"service": "pokefame"
 		}
 	],
 	"images": {

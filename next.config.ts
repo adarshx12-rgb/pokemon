@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: { remotePatterns: [{ protocol: "https", hostname: "images.pokemontcg.io" }] },
+  async redirects() {
+    // One canonical host: www.pokefame.com → pokefame.com.
+    return [{ source: "/:path*", has: [{ type: "host", value: "www.pokefame.com" }], destination: "https://pokefame.com/:path*", permanent: true }];
+  },
   turbopack: {
     rules: {
       "*.css": {

@@ -3,14 +3,14 @@ import { InfoPage } from '@/components/info/InfoPage';
 import { pageMetadata } from '@/lib/seo';
 import { SITE_CONTACT } from '@/lib/site-contact';
 
-export const metadata = pageMetadata({ title: 'Terms & Conditions', description: 'Terms for using pokéfame’s Pokémon card reference and battle tool, including price information, acceptable use, third-party content, and availability.', path: '/terms-and-conditions' });
+export const metadata = pageMetadata({ title: 'Terms & Conditions', description: 'Terms for using Pokéfame’s Pokémon card reference and battle tool, including price information, acceptable use, third-party content, and availability.', path: '/terms-and-conditions' });
 
 export default function TermsPage() {
   return (
-    <InfoPage title="Terms & conditions" intro="The terms for browsing the collection and using the pokéfame battle tool." updated>
+    <InfoPage title="Terms & conditions" intro="The terms for browsing the collection and using the Pokéfame battle tool." updated>
       <section>
-        <h2>Using pokéfame</h2>
-        <p>These terms apply to pokefame.com. By using the site, you agree to these terms. If you do not agree, please stop using it. pokéfame provides a free card reference and a simplified browser battle tool for information and entertainment.</p>
+        <h2>Using Pokéfame</h2>
+        <p>These terms apply to pokefame.com. By using the site, you agree to these terms. If you do not agree, please stop using it. Pokéfame provides a free card reference and a simplified browser battle tool for information and entertainment.</p>
         <p>Website operator: {SITE_CONTACT.operator}.{SITE_CONTACT.placeholder && ' This operator name is a placeholder; verified details will be published on the Contact Us page.'}</p>
         <p>We do not sell cards, take payments, authenticate physical copies, or arrange transactions between collectors. The <Link href="/privacy-policy">Privacy Policy</Link> explains how information is handled when you use the site.</p>
       </section>
@@ -26,13 +26,13 @@ export default function TermsPage() {
       </section>
       <section>
         <h2>Respectful and lawful use</h2>
-        <p>Use the site lawfully. Do not attempt to bypass security controls, gain unauthorized access, disrupt the service, submit malicious content, or overload the site or its data providers. Do not misrepresent pokéfame as an official Pokémon service.</p>
+        <p>Use the site lawfully. Do not attempt to bypass security controls, gain unauthorized access, disrupt the service, submit malicious content, or overload the site or its data providers. Do not misrepresent Pokéfame as an official Pokémon service.</p>
         <p>When reporting a problem or supplying a reference, share only information you are entitled to provide. Avoid sending personal information about other people unless it is necessary and you have a lawful reason to do so.</p>
       </section>
       <section>
         <h2>Content, trademarks, and external links</h2>
         <p>Pokémon names, characters, card artwork, and other third-party materials remain the property of their respective rights holders. The presence of a card image or source link does not grant permission to reproduce or commercially exploit it. Any reuse must respect applicable rights and licenses.</p>
-        <p>External services operate under their own terms and policies. We do not control their availability, listings, prices, or transactions. pokéfame is an independent fan project and is not affiliated with Nintendo, Creatures, Game Freak, The Pokémon Company, or Pokémon Showdown.</p>
+        <p>External services operate under their own terms and policies. We do not control their availability, listings, prices, or transactions. Pokéfame is an independent fan project and is not affiliated with Nintendo, Creatures, Game Freak, The Pokémon Company, or Pokémon Showdown.</p>
       </section>
       <section>
         <h2>Availability and responsibility</h2>

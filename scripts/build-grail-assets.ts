@@ -8,6 +8,8 @@ import { FACE_SIZE } from '../lib/grail/assets';
 const SRC = join(process.cwd(), 'design-assets', 'grail');
 const OUT = join(process.cwd(), 'public', 'grail');
 const FACES = { front: 'front-rounded.png', back: 'back-rounded.png' } as const;
+const OG_FACE_WIDTH = 400;
+const OG_OUT = join(process.cwd(), 'app', 'social-image');
 
 async function main() {
   mkdirSync(OUT, { recursive: true });
@@ -21,6 +23,13 @@ async function main() {
       .webp({ quality: 92, alphaQuality: 100 })
       .toFile(out);
     console.log(`${out} ${Math.round(info.size / 1024)} KB`);
+    // The social image is drawn by next/og (Satori), which cannot decode WebP, so it gets a small PNG.
+    const og = join(OG_OUT, `rayquaza-${face}-${OG_FACE_WIDTH}.png`);
+    const ogInfo = await sharp(src)
+      .resize({ width: OG_FACE_WIDTH, height: Math.round((OG_FACE_WIDTH * FACE_SIZE.height) / FACE_SIZE.width), fit: 'fill' })
+      .png({ compressionLevel: 9, palette: false })
+      .toFile(og);
+    console.log(`${og} ${Math.round(ogInfo.size / 1024)} KB`);
   }
 }
 

@@ -3,14 +3,14 @@ import { InfoPage } from '@/components/info/InfoPage';
 import { pageMetadata } from '@/lib/seo';
 import { SITE_CONTACT } from '@/lib/site-contact';
 
-export const metadata = pageMetadata({ title: 'Privacy Policy', description: 'How pokéfame handles browser-saved collections, technical requests, external services, and messages, plus your choices about stored information.', path: '/privacy-policy' });
+export const metadata = pageMetadata({ title: 'Privacy Policy', description: 'How Pokéfame handles browser-saved collections, technical requests, external services, and messages, plus your choices about stored information.', path: '/privacy-policy' });
 
 export default function PrivacyPage() {
   return (
     <InfoPage title="Privacy policy" intro="What happens to information when you browse the vault, build a team, or get in touch." updated>
       <section>
         <h2>Who this notice covers</h2>
-        <p>This notice covers pokéfame at pokefame.com, including its card reference pages and browser battle tool. For questions about this notice or a privacy request, use our <Link href="/contact">Contact Us page</Link>.</p>
+        <p>This notice covers Pokéfame at pokefame.com, including its card reference pages and browser battle tool. For questions about this notice or a privacy request, use our <Link href="/contact">Contact Us page</Link>.</p>
         <p>Operator: {SITE_CONTACT.operator}. Contact email: {SITE_CONTACT.email}. Country: {SITE_CONTACT.country}.{SITE_CONTACT.placeholder && ' These are placeholder details, not a working contact channel. They will be replaced with verified operator information.'}</p>
       </section>
       <section>

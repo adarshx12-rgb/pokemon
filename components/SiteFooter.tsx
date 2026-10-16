@@ -15,7 +15,7 @@ export function SiteFooter() {
           {SITE_PAGES.map(page => <Link key={page.href} href={page.href}>{page.label}</Link>)}
         </nav>
       </div>
-      <p className={styles.note}>Prices are dated estimates from TCGplayer and Cardmarket via the Pokémon TCG API. Pokémon stats and artwork from PokéAPI. pokéfame is an independent fan project, not affiliated with Nintendo, Creatures, Game Freak, The Pokémon Company, or Pokémon Showdown. Pokémon names and artwork belong to their respective owners.</p>
+      <p className={styles.note}>Prices are dated estimates from TCGplayer and Cardmarket via the Pokémon TCG API. Pokémon stats and artwork from PokéAPI. Pokéfame is an independent fan project, not affiliated with Nintendo, Creatures, Game Freak, The Pokémon Company, or Pokémon Showdown. Pokémon names and artwork belong to their respective owners.</p>
     </footer>
   );
 }

@@ -3,7 +3,7 @@ import { InfoPage } from '@/components/info/InfoPage';
 import { pageMetadata } from '@/lib/seo';
 import { SITE_CONTACT } from '@/lib/site-contact';
 
-export const metadata = pageMetadata({ title: 'Contact Us', description: 'Contact pokéfame about card corrections, website problems, privacy questions, or artwork rights. Find what to include with your request.', path: '/contact' });
+export const metadata = pageMetadata({ title: 'Contact Us', description: 'Contact Pokéfame about card corrections, website problems, privacy questions, or artwork rights. Find what to include with your request.', path: '/contact' });
 
 export default function ContactPage() {
   return (
@@ -19,7 +19,7 @@ export default function ContactPage() {
       <section>
         <h2>Card corrections</h2>
         <p>Include the card’s page address, set and collector number, the detail you believe is incorrect, and a link to a reliable source. For a price question, include the displayed source, currency, finish, and update date.</p>
-        <p>pokéfame cannot value, authenticate, buy, or sell an individual card. The <Link href="/#faq">card FAQ</Link> explains how to begin comparing rarity and market information.</p>
+        <p>Pokéfame cannot value, authenticate, buy, or sell an individual card. The <Link href="/#faq">card FAQ</Link> explains how to begin comparing rarity and market information.</p>
       </section>
       <section>
         <h2>Website and battle problems</h2>

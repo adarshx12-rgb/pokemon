@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { ErrorScreen } from '@/components/errors/ErrorScreen';
 
 export const metadata: Metadata = {
-  title: 'Page not found | pokéfame',
+  title: 'Page not found | Pokéfame',
   robots: { index: false, follow: true },
   alternates: { canonical: null },
 };

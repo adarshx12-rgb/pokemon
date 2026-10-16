@@ -14,7 +14,7 @@ export async function GET() {
 
 > ${HOME_DESCRIPTION}
 
-pokéfame is an independent fan project with two parts: a curated vault of Pokémon trading cards and a simplified, local Pokémon battle simulator. Card data comes from the Pokémon TCG API; price estimates are attributed to TCGplayer or Cardmarket, refer to raw ungraded cards, and carry a source date. Vault tiers are editorial groupings, not official rarity rankings. Pokémon stats and moves come from PokéAPI. Not affiliated with Nintendo, Creatures, Game Freak, or The Pokémon Company, and separate from the Pokémon Showdown service.
+Pokéfame is an independent fan project with two parts: a curated vault of Pokémon trading cards and a simplified, local Pokémon battle simulator. Card data comes from the Pokémon TCG API; price estimates are attributed to TCGplayer or Cardmarket, refer to raw ungraded cards, and carry a source date. Vault tiers are editorial groupings, not official rarity rankings. Pokémon stats and moves come from PokéAPI. Not affiliated with Nintendo, Creatures, Game Freak, or The Pokémon Company, and separate from the Pokémon Showdown service.
 
 ## Main pages
 

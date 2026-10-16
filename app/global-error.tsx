@@ -6,7 +6,7 @@ export default function GlobalError({ retry }: { error: Error & { digest?: strin
   return (
     <html lang="en">
       <head>
-        <title>Something went wrong | pokéfame</title>
+        <title>Something went wrong | Pokéfame</title>
         <meta name="robots" content="noindex" />
       </head>
       <body style={{ margin: 0, background: '#050507' }}>

@@ -6,7 +6,7 @@ import { pageMetadata } from '@/lib/seo';
 export const revalidate = 604800;
 export const metadata: Metadata = pageMetadata({
   title: 'Pokemon Showdown — Local Battle Simulator',
-  description: 'Build teams of up to six Pokémon, choose moves, and control both sides in pokéfame’s simplified Pokémon showdown. Explore stats and type matchups in your browser.',
+  description: 'Build teams of up to six Pokémon, choose moves, and control both sides in Pokéfame’s simplified Pokémon showdown. Explore stats and type matchups in your browser.',
   path: '/showdown',
 });
 

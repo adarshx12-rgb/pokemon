@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('home opens on the site name and description', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName('POKÉFAME');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveAccessibleName('Pokéfame: rare Pokémon cards, prices and battles');
   await expect(page.getByText(/A vault of rare Pokémon cards, from Base Set holos to Gold Stars\./)).toBeVisible();
   await expect(page.getByRole('heading', { level: 2, name: 'Rayquaza' })).toBeAttached();
 });

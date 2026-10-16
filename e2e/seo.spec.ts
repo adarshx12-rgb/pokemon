@@ -19,8 +19,10 @@ test('home exposes readable guide content and complete sharing metadata without 
   await expect(page.locator('meta[property="og:image:height"]')).toHaveAttribute('content', '630');
   await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image');
   const schema = JSON.parse(await page.locator('script[type="application/ld+json"]').innerText());
-  expect(schema['@type']).toBe('WebSite');
-  expect(schema.url).toBe('https://pokefame.com/');
+  const [site, org] = schema['@graph'];
+  expect(site['@type']).toBe('WebSite');
+  expect(site.url).toBe('https://pokefame.com/');
+  expect(org).toMatchObject({ '@type': 'Organization', logo: 'https://pokefame.com/apple-icon.png' });
   await context.close();
 });
 
@@ -45,6 +47,9 @@ test('card pages have unique metadata and use card artwork for sharing', async (
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://pokefame.com/cards/ex8-107');
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /images\.pokemontcg\.io\/ex8\/107/);
   await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /Rayquaza.*Deoxys/);
+  const trail = JSON.parse(await page.locator('script[type="application/ld+json"]').innerText());
+  expect(trail.itemListElement.map((i: { name: string }) => i.name)).toEqual(['Home', 'The Vault', 'Rayquaza ★ #107']);
+  await expect(page.getByRole('heading', { level: 2, name: /More from|More .* cards/ }).first()).toBeAttached();
 });
 
 test('crawl endpoints and social preview image are available', async ({ request }) => {

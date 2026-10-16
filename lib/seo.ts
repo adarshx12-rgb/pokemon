@@ -40,3 +40,16 @@ export function pageMetadata({ title, description, path, image }: {
     },
   };
 }
+
+/** Props for an inline JSON-LD <script>; `<` is escaped so card or page text can't close the tag. */
+export function jsonLd(data: Record<string, unknown>) {
+  return { __html: JSON.stringify({ '@context': 'https://schema.org', ...data }).replace(/</g, '\u003c') };
+}
+
+/** Breadcrumb trail for search results, e.g. Home › The Vault › Charizard ex. */
+export function breadcrumbs(items: { name: string; path: string }[]) {
+  return {
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, i) => ({ '@type': 'ListItem', position: i + 1, name: item.name, item: new URL(item.path, SITE_URL).href })),
+  };
+}

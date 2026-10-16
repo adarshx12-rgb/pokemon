@@ -335,7 +335,8 @@ export function GrailSequence({ price, priceSource, updatedAt, tierCount, cardCo
             <span>Ed. 01 — The collector’s index</span>
             <span>Rare cards · ranked · dated estimates</span>
           </div>
-          <h1 className={`grain ${styles.siteName}`} data-depth="back" aria-label="POKÉFAME">POKÉ<br className="md:hidden" />FAME</h1>
+          {/* The wordmark is drawn; the hidden line tells search engines and screen readers what the site is. */}
+          <h1 className={`grain ${styles.siteName}`} data-depth="back"><span aria-hidden>POKÉ<br className="md:hidden" />FAME</span><span className="sr-only">Pokéfame: rare Pokémon cards, prices and battles</span></h1>
           <p className={styles.subhead} data-depth="middle">Rare by design /<br />priced by the market</p>
           <div className={styles.intro} data-depth="front">
             <p className="copy">{DESCRIPTION}</p>

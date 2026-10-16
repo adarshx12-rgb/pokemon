@@ -4,8 +4,10 @@ import { notFound } from 'next/navigation';
 import { CardInspector } from '@/components/cards/CardInspector';
 import { CardDetails } from '@/components/cards/CardDetails';
 import { SHOWCASE } from '@/data/showcase';
-import { getCard } from '@/lib/tcg/client';
-import { pageMetadata } from '@/lib/seo';
+import { RelatedCards } from '@/components/cards/RelatedCards';
+import { getCard, getCards } from '@/lib/tcg/client';
+import { relatedCards } from '@/lib/tcg/related';
+import { breadcrumbs, jsonLd, pageMetadata } from '@/lib/seo';
 
 export const revalidate = 86400;
 
@@ -33,12 +35,18 @@ export default async function CardPage({ params }: Params) {
 
   return (
     <main className="px-4 pb-32 pt-28 md:px-10">
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(breadcrumbs([
+        { name: 'Home', path: '/' },
+        { name: 'The Vault', path: '/cards' },
+        { name: `${card.name} #${card.number}`, path: `/cards/${card.id}` },
+      ]))} />
       <Link href="/cards" className="eyebrow transition hover:text-gold-light">← Back to the Vault</Link>
       <div className="mt-12">
         <CardInspector card={card}>
           <CardDetails card={card} />
         </CardInspector>
       </div>
+      <RelatedCards card={card} groups={relatedCards(card, await getCards(SHOWCASE.map(s => s.id)))} />
     </main>
   );
 }

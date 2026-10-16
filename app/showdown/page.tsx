@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Showdown } from '@/components/showdown/Showdown';
+import { ShowdownGuide } from '@/components/showdown/ShowdownGuide';
 import { getPokemonNames } from '@/lib/pokeapi/client';
 import { pageMetadata } from '@/lib/seo';
 
@@ -11,5 +12,10 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default async function ShowdownPage() {
-  return <Showdown names={await getPokemonNames()} />;
+  return (
+    <>
+      <Showdown names={await getPokemonNames()} />
+      <ShowdownGuide />
+    </>
+  );
 }

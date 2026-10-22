@@ -31,6 +31,16 @@ export function autoMoveset(pool: Move[], types: TypeName[]): Move[] {
   return picked;
 }
 
+// The four moves a species knows at `level`: the latest level-up moves learned by then.
+export function levelMoveset(pool: Move[], types: TypeName[], level = 50): Move[] {
+  const unique = [...new Map(pool.map(move => [move.name, move])).values()];
+  const known = unique
+    .filter(move => move.level !== undefined && move.level <= level)
+    .sort((a, b) => (a.level ?? 0) - (b.level ?? 0));
+  if (known.length === 0) return autoMoveset(pool, types);
+  return known.slice(-4);
+}
+
 export function chooseMove(moves: Move[], attacker: Combatant, defender: Combatant): Move {
   if (moves.length === 0) return STRUGGLE;
   let best = moves[0];

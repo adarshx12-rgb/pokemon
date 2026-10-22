@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { autoMoveset, chooseMove, STRUGGLE } from './moves';
+import { autoMoveset, chooseMove, levelMoveset, STRUGGLE } from './moves';
 import type { Combatant } from './damage';
 import type { Move } from './types';
 
@@ -38,6 +38,37 @@ describe('autoMoveset', () => {
   });
   it('returns fewer than 4 when the pool is smaller', () => {
     expect(autoMoveset([m('a', 'fire', 100)], ['fire'])).toHaveLength(1);
+  });
+});
+
+describe('levelMoveset', () => {
+  const levelPool = [
+    { ...m('tackle', 'normal', 40, 'physical'), level: 1 },
+    { ...m('growl', 'normal', 0, 'status'), level: 1 },
+    { ...m('ember', 'fire', 40), level: 9 },
+    { ...m('smokescreen', 'normal', 0, 'status'), level: 15 },
+    { ...m('flamethrower', 'fire', 90), level: 28 },
+    { ...m('flare-blitz', 'fire', 120, 'physical'), level: 46 },
+    { ...m('inferno', 'fire', 100, 'special', 50), level: 54 },
+  ];
+  it('takes the last four level-up moves at or below 50', () => {
+    expect(levelMoveset(levelPool, ['fire']).map(x => x.name))
+      .toEqual(['ember', 'smokescreen', 'flamethrower', 'flare-blitz']);
+  });
+  it('includes stat moves', () => {
+    expect(levelMoveset(levelPool, ['fire']).map(x => x.name)).toContain('smokescreen');
+  });
+  it('falls back to autoMoveset without level data', () => {
+    const pool = [m('a', 'fire', 100), m('b', 'fire', 90), m('c', 'water', 60)];
+    expect(levelMoveset(pool, ['fire'])).toEqual(autoMoveset(pool, ['fire']));
+  });
+  it('falls back to autoMoveset when no level-up move is at or below the level', () => {
+    const pool = [{ ...m('a', 'fire', 100), level: 55 }, m('b', 'fire', 90)];
+    expect(levelMoveset(pool, ['fire'])).toEqual(autoMoveset(pool, ['fire']));
+  });
+  it('never repeats a move', () => {
+    const selected = levelMoveset([...levelPool, levelPool[2]], ['fire']);
+    expect(new Set(selected.map(x => x.name)).size).toBe(selected.length);
   });
 });
 

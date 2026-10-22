@@ -1,4 +1,4 @@
-import { autoMoveset } from '@/lib/battle/moves';
+import { levelMoveset } from '@/lib/battle/moves';
 import type { BattlePokemon, TeamMember } from '@/lib/battle/types';
 
 const TIMEOUT_MS = 30_000;
@@ -26,5 +26,5 @@ export async function loadMember(name: string): Promise<TeamMember> {
     pokemon.catch(() => cache.delete(name));
   }
   const loaded = await pokemon;
-  return { pokemon: loaded, moves: autoMoveset(loaded.movePool, loaded.types) };
+  return { pokemon: loaded, moves: levelMoveset(loaded.movePool, loaded.types) };
 }

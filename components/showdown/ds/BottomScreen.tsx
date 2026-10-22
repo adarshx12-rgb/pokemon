@@ -4,6 +4,7 @@ import { TYPE_COLORS } from '@/data/typeColors';
 import type { Side, TeamMember } from '@/lib/battle/types';
 import { hpColor } from '@/lib/battle/view';
 import { displayName } from '@/lib/pokeapi/names';
+import { battleCue, type Cue } from '@/lib/showdown/cues';
 import { fightOptions, type MenuState } from '@/lib/showdown/menu';
 import styles from './ds.module.css';
 
@@ -18,11 +19,18 @@ interface Props {
 export function BottomScreen({ side, layout, state, onState, member, team, hp, maxHp, fainted, active, ppLeft, onMove, onSwitch, onReplace, onRun, disabled }: Props) {
   // Touch browsers can swallow the compatibility click after a scroll, so a completed touch tap acts on
   // pointerup; the click that may follow is then ignored (cleared again by the next pointerdown/key).
+  // Disabled buttons can still see pointer events, so the touch path checks them itself.
   const touched = useRef(false);
-  const tap = (fn: () => void) => ({
-    onClick: () => { if (touched.current) { touched.current = false; return; } fn(); },
-    onPointerUp: (e: React.PointerEvent) => { if (e.pointerType === 'touch') { touched.current = true; fn(); } },
-  });
+  const tap = (fn: () => void, cue: Cue = 'menuSelect') => {
+    const act = () => { battleCue(cue); fn(); };
+    return {
+      onClick: () => { if (touched.current) { touched.current = false; return; } act(); },
+      onPointerUp: (e: React.PointerEvent<HTMLButtonElement>) => {
+        if (e.pointerType !== 'touch' || disabled || e.currentTarget.disabled) return;
+        touched.current = true; act();
+      },
+    };
+  };
   // Side layout has no main menu: the Fight menu is always open.
   const shown = layout === 'side' && state === 'main' ? 'fight' : state;
   const options = fightOptions(member.moves, ppLeft);
@@ -68,11 +76,11 @@ export function BottomScreen({ side, layout, state, onState, member, team, hp, m
             </button>
           ))}
         </div>
-        {layout === 'ds' && <button type="button" className={styles.backBtn} data-testid="menu-back" disabled={disabled} {...tap(() => onState('main'))}>BACK</button>}
+        {layout === 'ds' && <button type="button" className={styles.backBtn} data-testid="menu-back" disabled={disabled} {...tap(() => onState('main'), 'menuBack')}>BACK</button>}
       </>}
       {shown === 'party' && <>
         {slots(onSwitch, false)}
-        <button type="button" className={styles.backBtn} data-testid="menu-back" disabled={disabled} {...tap(() => onState('main'))}>BACK</button>
+        <button type="button" className={styles.backBtn} data-testid="menu-back" disabled={disabled} {...tap(() => onState('main'), 'menuBack')}>BACK</button>
       </>}
       {shown === 'replace' && <>
         <p className={styles.prompt}>Send out which Pokémon?</p>
@@ -82,7 +90,7 @@ export function BottomScreen({ side, layout, state, onState, member, team, hp, m
         <p className={styles.prompt}>Give up the battle?</p>
         <div>
           <button type="button" className={`${styles.smallBtn} ${styles.runBtn}`} data-testid="run-yes" disabled={disabled} {...tap(onRun)}>YES</button>
-          <button type="button" className={`${styles.smallBtn} ${styles.pokeBtn}`} data-testid="run-no" disabled={disabled} {...tap(() => onState('main'))}>NO</button>
+          <button type="button" className={`${styles.smallBtn} ${styles.pokeBtn}`} data-testid="run-no" disabled={disabled} {...tap(() => onState('main'), 'menuBack')}>NO</button>
         </div>
       </div>}
     </div>

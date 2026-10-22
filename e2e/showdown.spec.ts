@@ -21,8 +21,8 @@ async function add(page: Page, side: 'A' | 'B', name: string) {
 
 async function finishAttack(page: Page) {
   await expect(page.locator('[data-testid^="move-"]:enabled')).toHaveCount(0);
-  // Jump between battle events without replaying thousands of unrelated scroll frames.
-  for (let event = 0; event < 7; event++) await page.clock.fastForward(5_000);
+  // Jump between battle events (and the timed parts of send-outs) without replaying thousands of unrelated scroll frames.
+  for (let event = 0; event < 10; event++) await page.clock.fastForward(5_000);
 }
 
 // A menu that is waiting for input: the main menu or the replace-after-faint picker.
@@ -50,6 +50,28 @@ async function finishBattle(page: Page) {
   await page.getByRole('button', { name: 'View result', exact: true }).click();
   await expect(page.getByTestId('result-banner')).toHaveText(/VICTORY|DEFEAT/);
 }
+
+// Logs, in order, each new text-box message and the first appearance of the watched elements in the battle stage.
+async function watchBattle(page: Page) {
+  await page.evaluate(() => {
+    const w = window as unknown as { battleLog: string[]; battleSeen: Set<string> };
+    w.battleLog = [];
+    w.battleSeen = new Set();
+    let last = '';
+    const check = () => {
+      const stage = document.querySelector('[data-testid="battle-stage"]');
+      if (!stage) { last = ''; w.battleSeen.clear(); return; }
+      const message = stage.querySelector('[data-testid="text-box"] [aria-live]')?.textContent ?? '';
+      if (message && message !== last) { last = message; w.battleLog.push(`text:${message}`); }
+      for (const id of ['pokeball-throw-A', 'pokeball-throw-B', 'arena-pokemon-A', 'arena-pokemon-B', 'battle-fx']) {
+        if (!w.battleSeen.has(id) && stage.querySelector(`[data-testid="${id}"]`)) { w.battleSeen.add(id); w.battleLog.push(id); }
+      }
+    };
+    new MutationObserver(check).observe(document.body, { subtree: true, childList: true, characterData: true });
+  });
+}
+const battleLog = (page: Page) => page.evaluate(() => (window as unknown as { battleLog: string[] }).battleLog);
+const clearBattleLog = (page: Page) => page.evaluate(() => { (window as unknown as { battleLog: string[] }).battleLog = []; });
 
 test.beforeEach(async ({ page }) => {
   await page.route('**/api/pokemon/*', async route => {
@@ -102,11 +124,12 @@ test('empty opening, artwork, pointer/keyboard order, battle, rematch and reset'
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
   await page.screenshot({ path: 'test-results/showdown-teams.png', fullPage: true, animations: 'disabled', caret: 'initial' });
+  await watchBattle(page);
   await page.clock.install();
   await page.getByTestId('battle-start').click();
   await expect(page.getByTestId('battle-stage')).toBeVisible();
   await expect(page.getByTestId('arena-pokemon-A')).toHaveAttribute('alt', 'Pikachu');
-  await expect(page.getByTestId('menu-fight')).toBeVisible();
+  await expect(page.getByTestId('menu-fight')).toBeEnabled(); // the opening send-outs have played
   const hp = page.getByRole('progressbar');
   const hpValues = () => hp.evaluateAll(bars => bars.map(bar => bar.getAttribute('aria-valuenow')));
   const before = await hpValues();
@@ -120,12 +143,14 @@ test('empty opening, artwork, pointer/keyboard order, battle, rematch and reset'
   await expect(page.locator('[data-testid^="move-"]:enabled')).toHaveCount(0);
   await finishAttack(page);
   expect(await hpValues()).not.toEqual(before);
-  await expect(page.getByTestId('battle-stage')).toContainText(selectedId!.split('-').slice(2).join(' ').toUpperCase());
+  // A later message (a critical hit, say) may replace it, so check the log rather than the current text.
+  expect(await battleLog(page)).toContain(`text:PIKACHU used ${selectedId!.split('-').slice(2).join(' ').toUpperCase()}!`);
   const after = await hpValues();
   await page.clock.fastForward(30_000);
   expect(await hpValues()).toEqual(after);
   await page.screenshot({ path: 'test-results/showdown-manual-desktop.png', fullPage: true, caret: 'initial' });
   await page.getByRole('button', { name: 'Reset battle', exact: true }).click();
+  await expect(page.getByTestId('menu-fight')).toBeEnabled(); // the opening replays first
   expect(await hpValues()).toEqual(before);
   await finishBattle(page);
   await page.getByRole('button', { name: 'Rematch', exact: true }).click();
@@ -430,4 +455,101 @@ test('offers Struggle when no PP is left', async ({ page }) => {
   }
   await expect(page.getByTestId('move-A-struggle')).toBeEnabled();
   await expect(page.locator('[data-testid^="move-"]')).toHaveCount(1);
+});
+
+test('opening sends out both Pokémon with ball throws', async ({ page }) => {
+  await page.goto('/showdown');
+  await add(page, 'A', 'pikachu');
+  await add(page, 'B', 'blastoise');
+  const start = new Date('2026-10-23T10:00:00Z').getTime();
+  await page.clock.install({ time: start });
+  await page.clock.pauseAt(start + 10_000);
+  await watchBattle(page);
+  await page.getByTestId('battle-start').click();
+  await expect(page.getByTestId('battle-stage')).toBeVisible();
+  // Flash, slide-in, then both send-outs: about 3.6 s before the first command. (Small steps let React schedule each next timer.)
+  const run = async (ms: number) => { for (let t = 0; t < ms; t += 50) await page.clock.runFor(50); };
+  await run(3_300);
+  await expect(page.getByTestId('menu-fight')).toBeDisabled();
+  await run(500);
+  await expect(page.getByTestId('menu-fight')).toBeEnabled();
+  const log = await battleLog(page);
+  const at = (entry: string) => log.indexOf(entry);
+  expect(at('text:RIVAL sent out BLASTOISE!')).toBeGreaterThan(-1);
+  expect(at('text:RIVAL sent out BLASTOISE!')).toBeLessThan(at('text:Go! PIKACHU!'));
+  expect(at('pokeball-throw-B')).toBeGreaterThan(-1);
+  expect(at('pokeball-throw-B')).toBeLessThan(at('arena-pokemon-B'));
+  expect(at('arena-pokemon-B')).toBeLessThan(at('pokeball-throw-A'));
+  expect(at('pokeball-throw-A')).toBeLessThan(at('arena-pokemon-A'));
+  await expect(page.locator('[data-testid^="pokeball-throw-"]')).toHaveCount(0);
+  await expect(page.getByTestId('text-box')).toContainText('What will PIKACHU do?');
+});
+
+test('skip finishes the step without losing events', async ({ page }) => {
+  await page.goto('/showdown');
+  await add(page, 'A', 'pikachu');
+  await add(page, 'B', 'blastoise');
+  const start = new Date('2026-10-23T10:00:00Z').getTime();
+  await page.clock.install({ time: start });
+  await page.clock.pauseAt(start + 10_000);
+  await watchBattle(page);
+  const hp = () => page.getByRole('progressbar').evaluateAll(bars => bars.map(bar => bar.getAttribute('aria-valuenow')));
+  const typed = () => page.getByTestId('text-box').locator('p[aria-hidden]').textContent();
+  const full = () => page.getByTestId('text-box').locator('[aria-live]').textContent();
+  const foe = async () => ({
+    shown: Number(await page.getByTestId('hp-number-B').textContent()),
+    now: Number(await page.getByTestId('hp-box-B').getByRole('progressbar').getAttribute('aria-valuenow')),
+  });
+  const tapAt = [100, 700, 1_200, 1_700, 2_200];
+  const run = async (taps: boolean) => {
+    // Date.now is frozen at the same instant for both runs, so both battles get the same seed.
+    await page.clock.setSystemTime(start + 10_000);
+    await page.getByTestId('battle-start').click();
+    for (let i = 0; i < 100 && !(await page.getByTestId('menu-fight').isEnabled()); i++) await page.clock.runFor(100);
+    await page.getByTestId('menu-fight').click();
+    await clearBattleLog(page);
+    await page.locator('[data-testid^="move-A-"]').last().click();
+    let drainSkipped = false;
+    for (let t = 50; t <= 12_000; t += 50) {
+      await page.clock.runFor(50);
+      if (taps && tapAt.includes(t)) {
+        const before = await foe();
+        await page.getByTestId('text-box').tap();
+        // The clock is paused, so only the skip can have finished the typing.
+        expect(await typed()).toBe(await full());
+        await page.clock.runFor(20); // one frame for the HP bar to jump
+        const after = await foe();
+        expect(after.shown).toBe(after.now);
+        if (before.shown !== before.now) drainSkipped = true;
+      }
+      if (t > 2_200 && (await page.getByTestId('menu-fight').isEnabled())) break;
+    }
+    await expect(page.getByTestId('menu-fight')).toBeEnabled();
+    if (taps) expect(drainSkipped).toBe(true);
+    return { log: await battleLog(page), hp: await hp() };
+  };
+  const plain = await run(false);
+  expect(plain.log.filter(entry => entry.startsWith('text:')).length).toBeGreaterThan(1);
+  await page.getByRole('button', { name: 'Edit teams', exact: true }).click();
+  const tapped = await run(true);
+  expect(tapped.log).toEqual(plain.log);
+  expect(tapped.hp).toEqual(plain.hp);
+});
+
+test('reduced motion shows no throw', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/showdown');
+  await add(page, 'A', 'pikachu');
+  await add(page, 'B', 'blastoise');
+  await watchBattle(page);
+  await page.getByTestId('battle-start').click();
+  await expect(page.getByTestId('menu-fight')).toBeEnabled();
+  await expect(page.getByTestId('arena-pokemon-B')).toBeVisible();
+  await page.getByTestId('menu-fight').click();
+  await page.locator('[data-testid^="move-A-"]').first().click();
+  await expect(page.getByTestId('menu-fight')).toBeEnabled();
+  const log = await battleLog(page);
+  expect(log).toContain('arena-pokemon-B');
+  expect(log).toContain('arena-pokemon-A');
+  expect(log.filter(entry => entry.startsWith('pokeball-throw') || entry === 'battle-fx')).toEqual([]);
 });

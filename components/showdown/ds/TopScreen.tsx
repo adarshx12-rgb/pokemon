@@ -9,12 +9,13 @@ interface Props {
   message: ReactNode;
   overlay?: ReactNode;
   onAdvance?: () => void;
+  intro?: boolean; // the platforms slide in
 }
 
 /** The DS top screen: HGSS-style battle scene with the red-framed text box along the bottom. */
-export function TopScreen({ player, opponent, playerBox, opponentBox, message, overlay, onAdvance }: Props) {
+export function TopScreen({ player, opponent, playerBox, opponentBox, message, overlay, onAdvance, intro = false }: Props) {
   return (
-    <div className={styles.top}>
+    <div className={styles.top} data-intro={intro || undefined}>
       <div className={`${styles.platform} ${styles.far}`} aria-hidden />
       <div className={`${styles.platform} ${styles.near}`} aria-hidden />
       <div className={styles.opponentBox}>{opponentBox}</div>

@@ -4,10 +4,10 @@ import type { Side } from '@/lib/battle/types';
 import { useHpDrain } from './useHpDrain';
 import styles from './ds.module.css';
 
-interface Props { name: string; hp: number; maxHp: number; showNumbers: boolean; fainted: boolean[]; side: Side }
+interface Props { name: string; hp: number; maxHp: number; showNumbers: boolean; fainted: boolean[]; side: Side; skip?: boolean }
 
-export function HpBox({ name, hp, maxHp, showNumbers, fainted, side }: Props) {
-  const shown = useHpDrain(hp, maxHp);
+export function HpBox({ name, hp, maxHp, showNumbers, fainted, side, skip = false }: Props) {
+  const shown = useHpDrain(hp, maxHp, skip);
   const pct = maxHp ? Math.max(0, Math.min(1, shown / maxHp)) : 0;
   const left = fainted.filter(f => !f).length;
   // The foe's number stays out of sight (as in the games) but is still readable by assistive tech.

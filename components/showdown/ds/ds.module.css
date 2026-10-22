@@ -12,6 +12,10 @@
 .platform { position: absolute; border-radius: 50%; background: radial-gradient(#b8e090, #88c060 60%, #70a848); }
 .far { right: 6%; top: 34%; width: 40%; height: 13%; }
 .near { left: -4%; bottom: 26%; width: 52%; height: 15%; }
+.top[data-intro] .far { animation: slide-far 480ms 320ms cubic-bezier(.2, .7, .3, 1) both; }
+.top[data-intro] .near { animation: slide-near 480ms 320ms cubic-bezier(.2, .7, .3, 1) both; }
+@keyframes slide-far { from { transform: translateX(-250%); } }
+@keyframes slide-near { from { transform: translateX(200%); } }
 .foeSprite, .meSprite { position: absolute; aspect-ratio: 1; }
 .foeSprite { right: 13%; top: 8%; width: 26%; }
 .meSprite { left: 8%; bottom: 22%; width: 28%; }

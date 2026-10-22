@@ -260,11 +260,8 @@ test('phone touch ordering, empty slots focus search, and no horizontal overflow
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   const mobileHp = () => page.getByRole('progressbar').evaluateAll(bars => bars.map(bar => bar.getAttribute('aria-valuenow')));
   const beforeAttack = await mobileHp();
-  // The page may still be settling its scroll-into-view; retry the tap until the Fight menu opens.
-  await expect(async () => {
-    await page.getByTestId('menu-fight').tap();
-    await expect(page.locator('[data-testid^="move-"]')).toHaveCount(4, { timeout: 2_000 });
-  }).toPass();
+  await page.getByTestId('menu-fight').tap();
+  await expect(page.locator('[data-testid^="move-"]')).toHaveCount(4);
   await page.locator('[data-testid^="move-"]:enabled').first().tap();
   await expect.poll(mobileHp).not.toEqual(beforeAttack);
   await expect(page.getByTestId('turn-label')).toBeVisible();
@@ -307,10 +304,7 @@ test.describe('phone emulation', () => {
     await page.getByTestId('battle-start').tap();
     await expect(page.getByTestId('battle-stage')).toBeInViewport();
     for (let turn = 0; turn < 2; turn++) {
-      await expect(async () => { // the page may still be settling its scroll-into-view
-        await page.getByTestId('menu-fight').tap();
-        await expect(page.locator('[data-testid^="move-"]')).toHaveCount(4, { timeout: 2_000 });
-      }).toPass();
+      await page.getByTestId('menu-fight').tap();
       const ready = page.locator('[data-testid^="move-"]:enabled');
       await expect(ready).toHaveCount(4);
       await expect(page.locator('[data-testid^="move-"]:visible')).toHaveCount(4);
@@ -371,26 +365,48 @@ test('run returns to the builder', async ({ page }) => {
 });
 
 test('a fainted Pokémon is replaced from the party menu', async ({ page }) => {
+  // A lone strong Pikachu one-shots the weak foes, so the first faint is deterministic.
+  await page.unroute('**/api/pokemon/*');
+  await page.route('**/api/pokemon/*', async route => {
+    const name = decodeURIComponent(new URL(route.request().url()).pathname.split('/').at(-1)!);
+    const base = pokemon(name);
+    const strong = name === 'pikachu';
+    const stat = strong ? 250 : 20;
+    await route.fulfill({ json: {
+      ...base, baseStats: { hp: strong ? 100 : 20, atk: stat, def: stat, spa: stat, spd: stat, spe: stat },
+      movePool: base.movePool.map(move => ({ ...move, power: 250 })),
+    } });
+  });
   await page.goto('/showdown');
   await add(page, 'A', 'pikachu');
-  await add(page, 'A', 'charizard');
   await add(page, 'B', 'blastoise');
-  await add(page, 'B', 'gengar'); // two per side: the first knockout always needs a replacement
+  await add(page, 'B', 'gengar');
   await page.clock.install();
   await page.getByTestId('battle-start').click();
-  await expect(page.getByTestId('battle-stage')).toBeVisible();
-  for (let turn = 0; turn < 100; turn++) {
-    const party = page.locator('[data-testid^="party-"]:enabled');
-    if (await party.count()) {
-      await expect(page.getByTestId('menu-fight')).toHaveCount(0);
-      await party.first().click();
-      return;
-    }
-    await openFight(page);
-    await page.locator('[data-testid^="move-"]:enabled').first().click();
-    await finishAttack(page);
-  }
-  throw new Error('no replacement prompt');
+  await openFight(page);
+  await page.locator('[data-testid^="move-A-"]:enabled').first().click();
+  await finishAttack(page);
+  // The foe fainted: the bottom screen asks side B which Pokémon to send out.
+  await expect(page.getByTestId('turn-label')).toHaveText("RIVAL'S TURN");
+  await expect(page.getByText('Send out which Pokémon?')).toBeVisible();
+  await expect(page.locator('[data-testid^="party-B-"]')).toHaveCount(2);
+  await expect(page.getByTestId('party-B-0')).toBeDisabled(); // fainted
+  await expect(page.getByTestId('party-B-0')).toContainText('FAINTED');
+  await expect(page.getByTestId('party-B-1')).toBeEnabled();
+  await expect(page.getByTestId('menu-back')).toHaveCount(0);
+  await expect(page.getByTestId('menu-fight')).toHaveCount(0);
+  await page.getByTestId('party-B-1').click();
+  await expect(page.locator('[data-testid^="party-"]:enabled')).toHaveCount(0); // inert while playing
+  await page.clock.fastForward(10_000);
+  // Gengar is on the field at full HP, Pikachu is untouched (the foe did not act), and a new round starts.
+  await expect(page.getByTestId('arena-pokemon-B')).toHaveAttribute('alt', 'Gengar');
+  const full = async (side: 'A' | 'B') => page.getByTestId(`hp-box-${side}`).getByRole('progressbar').evaluate(bar => bar.getAttribute('aria-valuenow') === bar.getAttribute('aria-valuemax'));
+  await expect(page.getByTestId('hp-box-B')).toContainText('GENGAR');
+  expect(await full('B')).toBe(true);
+  expect(await full('A')).toBe(true);
+  await expect(page.getByTestId('turn-label')).toHaveText('YOUR TURN');
+  await expect(page.getByTestId('menu-fight')).toBeVisible();
+  await expect(page.locator('[data-testid^="party-"]')).toHaveCount(0);
 });
 
 test('offers Struggle when no PP is left', async ({ page }) => {

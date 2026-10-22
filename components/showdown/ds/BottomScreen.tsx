@@ -1,4 +1,5 @@
 'use client';
+import { useRef } from 'react';
 import { TYPE_COLORS } from '@/data/typeColors';
 import type { Side, TeamMember } from '@/lib/battle/types';
 import { hpColor } from '@/lib/battle/view';
@@ -15,6 +16,13 @@ interface Props {
 
 /** The DS touch screen: whichever menu fits the current state, always for the side whose turn it is. */
 export function BottomScreen({ side, layout, state, onState, member, team, hp, maxHp, fainted, active, ppLeft, onMove, onSwitch, onReplace, onRun, disabled }: Props) {
+  // Touch browsers can swallow the compatibility click after a scroll, so a completed touch tap acts on
+  // pointerup; the click that may follow is then ignored (cleared again by the next pointerdown/key).
+  const touched = useRef(false);
+  const tap = (fn: () => void) => ({
+    onClick: () => { if (touched.current) { touched.current = false; return; } fn(); },
+    onPointerUp: (e: React.PointerEvent) => { if (e.pointerType === 'touch') { touched.current = true; fn(); } },
+  });
   // Side layout has no main menu: the Fight menu is always open.
   const shown = layout === 'side' && state === 'main' ? 'fight' : state;
   const options = fightOptions(member.moves, ppLeft);
@@ -29,7 +37,7 @@ export function BottomScreen({ side, layout, state, onState, member, team, hp, m
         const src = m.pokemon.sprites.front ?? m.pokemon.sprites.artwork;
         return (
           <button key={i} type="button" className={styles.slot} data-testid={`party-${side}-${i}`} data-selected={replace && i === firstHealthy}
-            disabled={disabled || out || i === active} onClick={() => pick(i)} aria-label={`${name}${out ? ' (fainted)' : i === active ? ' (in battle)' : ''}`}>
+            disabled={disabled || out || i === active} {...tap(() => pick(i))} aria-label={`${name}${out ? ' (fainted)' : i === active ? ' (in battle)' : ''}`}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             {src && <img src={src} alt="" draggable={false} />}
             <span className={styles.slotName}>{name}</span>
@@ -42,29 +50,29 @@ export function BottomScreen({ side, layout, state, onState, member, team, hp, m
   );
 
   return (
-    <div className={styles.menu} data-side={side} data-state={shown}>
+    <div className={styles.menu} data-side={side} data-state={shown} onPointerDown={() => { touched.current = false; }} onKeyDown={() => { touched.current = false; }}>
       <h3 className={styles.turnLabel} data-testid="turn-label">{side === 'A' ? 'YOUR TURN' : "RIVAL'S TURN"}</h3>
       {shown === 'main' && <div className={styles.mainMenu}>
-        <button type="button" className={styles.fightBtn} data-testid="menu-fight" disabled={disabled} onClick={() => onState('fight')}>FIGHT</button>
-        <button type="button" className={`${styles.smallBtn} ${styles.pokeBtn}`} data-testid="menu-pokemon" disabled={disabled} onClick={() => onState('party')}>POKéMON</button>
-        <button type="button" className={`${styles.smallBtn} ${styles.runBtn}`} data-testid="menu-run" disabled={disabled} onClick={() => onState('run')}>RUN</button>
+        <button type="button" className={styles.fightBtn} data-testid="menu-fight" disabled={disabled} {...tap(() => onState('fight'))}>FIGHT</button>
+        <button type="button" className={`${styles.smallBtn} ${styles.pokeBtn}`} data-testid="menu-pokemon" disabled={disabled} {...tap(() => onState('party'))}>POKéMON</button>
+        <button type="button" className={`${styles.smallBtn} ${styles.runBtn}`} data-testid="menu-run" disabled={disabled} {...tap(() => onState('run'))}>RUN</button>
       </div>}
       {shown === 'fight' && <>
         <div className={styles.moveGrid}>
           {options.map(({ move, pp, disabled: empty }) => (
             <button key={move.name} type="button" className={styles.moveBtn} data-testid={`move-${side}-${move.name}`}
-              style={{ background: TYPE_COLORS[move.type] }} disabled={disabled || empty} onClick={() => onMove(move.name)}>
+              style={{ background: TYPE_COLORS[move.type] }} disabled={disabled || empty} {...tap(() => onMove(move.name))}>
               <strong>{displayName(move.name).toUpperCase()}</strong>
               <span>{move.type.toUpperCase()}</span>
               <small>PP {pp}/{move.pp}</small>
             </button>
           ))}
         </div>
-        {layout === 'ds' && <button type="button" className={styles.backBtn} data-testid="menu-back" disabled={disabled} onClick={() => onState('main')}>BACK</button>}
+        {layout === 'ds' && <button type="button" className={styles.backBtn} data-testid="menu-back" disabled={disabled} {...tap(() => onState('main'))}>BACK</button>}
       </>}
       {shown === 'party' && <>
         {slots(onSwitch, false)}
-        <button type="button" className={styles.backBtn} data-testid="menu-back" disabled={disabled} onClick={() => onState('main')}>BACK</button>
+        <button type="button" className={styles.backBtn} data-testid="menu-back" disabled={disabled} {...tap(() => onState('main'))}>BACK</button>
       </>}
       {shown === 'replace' && <>
         <p className={styles.prompt}>Send out which Pokémon?</p>
@@ -73,8 +81,8 @@ export function BottomScreen({ side, layout, state, onState, member, team, hp, m
       {shown === 'run' && <div className={styles.runConfirm}>
         <p className={styles.prompt}>Give up the battle?</p>
         <div>
-          <button type="button" className={`${styles.smallBtn} ${styles.runBtn}`} data-testid="run-yes" disabled={disabled} onClick={onRun}>YES</button>
-          <button type="button" className={`${styles.smallBtn} ${styles.pokeBtn}`} data-testid="run-no" disabled={disabled} onClick={() => onState('main')}>NO</button>
+          <button type="button" className={`${styles.smallBtn} ${styles.runBtn}`} data-testid="run-yes" disabled={disabled} {...tap(onRun)}>YES</button>
+          <button type="button" className={`${styles.smallBtn} ${styles.pokeBtn}`} data-testid="run-no" disabled={disabled} {...tap(() => onState('main'))}>NO</button>
         </div>
       </div>}
     </div>

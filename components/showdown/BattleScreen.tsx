@@ -148,7 +148,7 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
             <button type="button" onClick={onEdit}>Edit teams</button>
           </div>
         </>} />
-      <p className={styles.battleHelp}>You control both teams. Choose a move for the highlighted Pokémon. Every attack waits for your click.</p>
+      <p className={styles.battleHelp}>You control both teams. Use the touch screen to fight, switch or give up for whoever&rsquo;s turn it is; nothing happens until you choose.</p>
     </div>
   );
 }

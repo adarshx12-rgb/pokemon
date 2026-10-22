@@ -2,13 +2,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useReducedMotion } from 'framer-motion';
 import { TYPE_COLORS } from '@/data/typeColors';
-import { createBattle, replaceFirstHealthy } from '@/lib/battle/engine';
-import { STRUGGLE } from '@/lib/battle/moves';
-import { displayName } from '@/lib/pokeapi/names';
+import { createBattle } from '@/lib/battle/engine';
+import { menuFor, type MenuState } from '@/lib/showdown/menu';
 import { eventDelay } from '@/lib/battle/pacing';
 import type { BattleEvent, EndEvent, Side, TeamMember } from '@/lib/battle/types';
 import { applyEvent, initView, teamNames, type BattleView } from '@/lib/battle/view';
+import { BottomScreen } from './ds/BottomScreen';
 import { HpBox } from './ds/HpBox';
+import dsStyles from './ds/ds.module.css';
 import { DsConsole } from './ds/DsConsole';
 import { TopScreen } from './ds/TopScreen';
 import { TextBox } from './TextBox';
@@ -44,6 +45,8 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
   const sequence = useRef(0);
   const [fx, setFx] = useState<Fx | null>(null); // latest effect, drives the screen flash
   const [sideFx, setSideFx] = useState<Record<Side, Fx | null>>({ A: null, B: null }); // latest effect per sprite
+  const [turn, setTurn] = useState<{ side: Side }>(() => ({ side: battle.nextSide ?? 'A' }));
+  const [menu, setMenu] = useState<MenuState>(() => menuFor({ replacing: !!battle.replacing, layout: 'ds' }));
   const playing = events.length > 0 && index <= events.length;
   const end = events.find((event): event is EndEvent => event.kind === 'end');
 
@@ -54,6 +57,9 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
     const delay = prev ? eventDelay(prev, view.message, speed, maxHp, reduced) : 0;
     const t = setTimeout(() => {
       if (index === events.length) {
+        // Playback is over: the menu serves whoever acts next (or must replace a fainted Pokémon).
+        setTurn(t => ({ side: battle.replacing ?? battle.nextSide ?? t.side }));
+        setMenu(menuFor({ replacing: !!battle.replacing, layout: 'ds' }));
         setIndex(i => i + 1);
         return;
       }
@@ -65,7 +71,7 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
       setIndex(i => i + 1);
     }, delay);
     return () => clearTimeout(t);
-  }, [playing, index, speed, reduced, events, names, view.message, view.maxHp]);
+  }, [playing, index, speed, reduced, events, names, battle, view.message, view.maxHp]);
 
   useEffect(() => {
     if (!playing) busy.current = false;
@@ -76,13 +82,9 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
     if (matchMedia('(max-width: 640px)').matches) document.querySelector('[data-testid="battle-stage"]')?.scrollIntoView({ block: 'start' });
   }, []);
 
-  const attack = (side: Side, moveName: string) => {
-    if (busy.current || playing || end) return;
-    const next = battle.playMove(side, moveName);
-    if (!next.length) return;
-    // Until the party screen exists, a fainted Pokémon is replaced by the first healthy teammate.
-    const replacing = battle.replacing;
-    if (replacing) next.push(...replaceFirstHealthy(battle, (replacing === 'A' ? teamA : teamB).length));
+  // Plays whatever the engine just produced; ignores empty (invalid) results.
+  const play = (next: BattleEvent[]) => {
+    if (busy.current || playing || end || !next.length) return;
     busy.current = true;
     setEvents(next);
     setIndex(0);
@@ -119,9 +121,11 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
     );
   };
 
-  const nextSide = battle.nextSide;
-  const nextName = nextSide ? names[nextSide][view.active[nextSide] ?? 0] : '';
-  const prompt = !events.length ? `What will ${nextName} do? Choose a move.` : view.message;
+  const turnSide = turn.side;
+  const turnName = names[turnSide][view.active[turnSide] ?? 0];
+  const prompt = !events.length ? `What will ${turnName} do? Choose a move.` : view.message;
+  const member = (turnSide === 'A' ? teamA : teamB)[view.active[turnSide] ?? 0];
+  const sideTeam = turnSide === 'A' ? teamA : teamB;
 
   return (
     <div className={styles.battle}>
@@ -131,36 +135,17 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
           overlay={fx?.kind === 'hit' && <div key={fx.key} aria-hidden className="pointer-events-none absolute inset-0"
           style={{ backgroundColor: fx.color, animation: `hit-flash ${animMs} ease-out both` }} />} />}
         bottom={<>
-          {!playing && !end && <p className={styles.turnPrompt} data-testid="turn-prompt">Turn {battle.turn} · {nextSide === 'A' ? 'Your' : 'Opponent'} {nextName}: choose a move.</p>}
-          <div className={styles.commands}>
-          {(['A', 'B'] as const).map(side => {
-            const idx = view.active[side] ?? 0;
-            const member = (side === 'A' ? teamA : teamB)[idx];
-            // No moves or no PP left: Struggle is the only legal choice (ppLeft is [] when there are no moves).
-            const moves = battle.ppLeft(side, idx).every(p => p <= 0) ? [STRUGGLE] : member.moves;
-            const ready = !playing && !end && nextSide === side;
-            return <section key={side} className={styles.moveMenu} aria-label={`${side === 'A' ? 'Your' : 'Opponent'} ${displayName(member.pokemon.name)} moves`} data-active={ready} data-next={nextSide === side}>
-              <h2><span>{side === 'A' ? 'Your' : 'Opponent'} {displayName(member.pokemon.name)}</span><small>{ready ? 'Choose a move' : playing ? 'Playing move…' : end ? 'Battle over' : 'Waiting'}</small></h2>
-              <div className={styles.moveButtons}>
-                {moves.map(move => <button key={move.name} type="button" data-testid={`move-${side}-${move.name}`} disabled={!ready}
-                  onClick={() => attack(side, move.name)}
-                  onPointerUp={event => {
-                    // Touch browsers can consume the compatibility click after scrolling.
-                    // A pan cancels the pointer; a completed tap plays the move immediately.
-                    if (event.pointerType === 'touch' && ready) attack(side, move.name);
-                  }} style={{ borderLeftColor: TYPE_COLORS[move.type] }}>
-                  <strong>{displayName(move.name)}</strong>
-                  <span>{displayName(move.type)} · {move.damageClass}</span>
-                  <small>Power {move.power} · Accuracy {move.accuracy === null ? '—' : `${move.accuracy}%`}</small>
-                </button>)}
-              </div>
-            </section>;
-          })}
-          <div className={styles.battleActions}>
-            {end && !playing && <button type="button" onClick={() => onFinish(end)}>View result</button>}
+          <BottomScreen side={turnSide} layout="ds" state={menu} onState={setMenu} member={member} team={sideTeam}
+            hp={view.hp[turnSide]} maxHp={view.maxHp[turnSide]} fainted={view.fainted[turnSide]} active={view.active[turnSide]}
+            ppLeft={view.pp[turnSide][view.active[turnSide] ?? 0]} disabled={playing || !!end}
+            onMove={name => play(battle.playMove(turnSide, name))}
+            onSwitch={i => play(battle.switchTo(turnSide, i))}
+            onReplace={i => play(battle.replace(turnSide, i))}
+            onRun={onEdit} />
+          {end && !playing && <button type="button" className={dsStyles.result} onClick={() => onFinish(end)}>View result</button>}
+          <div className={dsStyles.extras}>
             <button type="button" onClick={onReset}>Reset battle</button>
             <button type="button" onClick={onEdit}>Edit teams</button>
-          </div>
           </div>
         </>} />
       <p className={styles.battleHelp}>You control both teams. Choose a move for the highlighted Pokémon. Every attack waits for your click.</p>

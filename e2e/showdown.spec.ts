@@ -25,10 +25,26 @@ async function finishAttack(page: Page) {
   for (let event = 0; event < 7; event++) await page.clock.fastForward(5_000);
 }
 
+// A menu that is waiting for input: the main menu or the replace-after-faint picker.
+const waiting = (page: Page) => page.locator('[data-testid="menu-fight"]:enabled, [data-testid^="party-"]:enabled');
+
+/** Opens FIGHT from the main menu and waits for the move buttons. */
+async function openFight(page: Page) {
+  const fight = page.getByTestId('menu-fight');
+  if (await fight.isVisible()) await fight.click();
+  await expect(page.locator('[data-testid^="move-"]:enabled').first()).toBeVisible();
+}
+
 async function finishBattle(page: Page) {
-  for (let turn = 0; turn < 100; turn++) {
+  for (let turn = 0; turn < 200; turn++) {
     if (await page.getByRole('button', { name: 'View result', exact: true }).isVisible()) break;
-    await page.locator('[data-testid^="move-"]:enabled').first().click();
+    const party = page.locator('[data-testid^="party-"]:enabled');
+    if (await party.count()) {
+      await party.first().click(); // replacement prompt: the preselected first healthy slot
+    } else {
+      await openFight(page);
+      await page.locator('[data-testid^="move-"]:enabled').first().click();
+    }
     await finishAttack(page);
   }
   await page.getByRole('button', { name: 'View result', exact: true }).click();
@@ -90,12 +106,14 @@ test('empty opening, artwork, pointer/keyboard order, battle, rematch and reset'
   await page.getByTestId('battle-start').click();
   await expect(page.getByTestId('battle-stage')).toBeVisible();
   await expect(page.getByTestId('arena-pokemon-A')).toHaveAttribute('alt', 'Pikachu');
-  await expect(page.locator('[data-testid^="move-"]')).toHaveCount(8);
+  await expect(page.getByTestId('menu-fight')).toBeVisible();
   const hp = page.getByRole('progressbar');
   const hpValues = () => hp.evaluateAll(bars => bars.map(bar => bar.getAttribute('aria-valuenow')));
   const before = await hpValues();
   await page.clock.fastForward(30_000);
   expect(await hpValues()).toEqual(before);
+  await page.getByTestId('menu-fight').click();
+  await expect(page.locator('[data-testid^="move-"]')).toHaveCount(4);
   const selected = page.locator('[data-testid^="move-"]:enabled').last();
   const selectedId = await selected.getAttribute('data-testid');
   await selected.click();
@@ -131,6 +149,7 @@ test('hp number counts down instead of jumping', async ({ page }) => {
   const target = async () => Number(await page.getByRole('progressbar', { name: /BLASTOISE HP/ }).getAttribute('aria-valuenow'));
   const start = await number();
   expect(start).toBe(await target());
+  await page.getByTestId('menu-fight').click();
   await page.locator('[data-testid^="move-A-"]:enabled').last().click();
   // Step the clock until the hit lands (the bar's target changes), then watch the number drain.
   for (let i = 0; i < 600 && (await target()) === start; i++) await page.clock.runFor(16);
@@ -158,14 +177,19 @@ test('a switch-in shows its HP bar at full value immediately', async ({ page }) 
   });
   const first = { A: (await read('A')).label, B: (await read('B')).label };
   for (let turn = 0; turn < 60; turn++) {
-    await page.locator('[data-testid^="move-"]:enabled').first().click();
+    const party = page.locator('[data-testid^="party-"]:enabled');
+    if (await party.count()) await party.first().click();
+    else {
+      await page.getByTestId('menu-fight').click();
+      await page.locator('[data-testid^="move-"]:enabled').first().click();
+    }
     for (let i = 0; i < 800; i++) {
       await page.clock.runFor(16);
       for (const side of ['A', 'B'] as const) {
         const hp = await read(side);
         if (hp.label !== first[side]) { expect(hp.shown).toBe(hp.now); return; }
       }
-      if (i > 0 && (await page.locator('[data-testid^="move-"]:enabled').count()) > 0) break;
+      if (i > 0 && (await waiting(page).count()) > 0) break;
     }
   }
   throw new Error('no Pokémon fainted');
@@ -182,6 +206,7 @@ test('reduced motion jumps the HP number to its target', async ({ page }) => {
   const number = async () => Number(await page.getByTestId('hp-number-B').textContent());
   const target = async () => Number(await page.getByRole('progressbar', { name: /BLASTOISE HP/ }).getAttribute('aria-valuenow'));
   const start = await number();
+  await page.getByTestId('menu-fight').click();
   await page.locator('[data-testid^="move-A-"]:enabled').last().click();
   for (let i = 0; i < 600 && (await target()) === start; i++) await page.clock.runFor(16);
   const final = await target();
@@ -231,13 +256,18 @@ test('phone touch ordering, empty slots focus search, and no horizontal overflow
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
   await page.screenshot({ path: 'test-results/showdown-phone.png', fullPage: true, animations: 'disabled', caret: 'initial' });
   await page.getByTestId('battle-start').click();
-  await expect(page.locator('[data-testid^="move-"]')).toHaveCount(8);
+  await expect(page.getByTestId('menu-fight')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   const mobileHp = () => page.getByRole('progressbar').evaluateAll(bars => bars.map(bar => bar.getAttribute('aria-valuenow')));
   const beforeAttack = await mobileHp();
+  // The page may still be settling its scroll-into-view; retry the tap until the Fight menu opens.
+  await expect(async () => {
+    await page.getByTestId('menu-fight').tap();
+    await expect(page.locator('[data-testid^="move-"]')).toHaveCount(4, { timeout: 2_000 });
+  }).toPass();
   await page.locator('[data-testid^="move-"]:enabled').first().tap();
   await expect.poll(mobileHp).not.toEqual(beforeAttack);
-  await expect(page.getByTestId('turn-prompt')).toBeVisible();
+  await expect(page.getByTestId('turn-label')).toBeVisible();
   await page.screenshot({ path: 'test-results/showdown-manual-phone.png', fullPage: true, caret: 'initial' });
 });
 
@@ -259,6 +289,7 @@ test('live species learnsets keep Blastoise and Pikachu moves separate', async (
   await expect(opponent.locator('option[value="thunderbolt"]')).toHaveCount(4);
   await expect(opponent.locator('option[value="hydro-pump"]')).toHaveCount(0);
   await page.getByTestId('battle-start').click();
+  await page.getByTestId('menu-fight').click();
   await expect(page.getByTestId('move-A-ice-beam')).toBeVisible();
   await expect(page.locator('[data-testid^="move-B-hydro-pump"]')).toHaveCount(0);
 });
@@ -276,15 +307,111 @@ test.describe('phone emulation', () => {
     await page.getByTestId('battle-start').tap();
     await expect(page.getByTestId('battle-stage')).toBeInViewport();
     for (let turn = 0; turn < 2; turn++) {
+      await expect(async () => { // the page may still be settling its scroll-into-view
+        await page.getByTestId('menu-fight').tap();
+        await expect(page.locator('[data-testid^="move-"]')).toHaveCount(4, { timeout: 2_000 });
+      }).toPass();
       const ready = page.locator('[data-testid^="move-"]:enabled');
       await expect(ready).toHaveCount(4);
       await expect(page.locator('[data-testid^="move-"]:visible')).toHaveCount(4);
       await expect(ready.first()).toBeInViewport();
       await page.screenshot({ path: `test-results/showdown-mobile-turn-${turn}.png`, animations: 'disabled', caret: 'initial' });
-      const before = await page.getByTestId('turn-prompt').textContent();
       await ready.first().tap();
-      await expect(page.getByTestId('turn-prompt')).not.toHaveText(before!, { timeout: 30_000 });
+      // The move plays out, then the main menu comes back for whoever acts next.
+      await expect(page.getByTestId('menu-fight')).toBeVisible({ timeout: 30_000 });
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   });
+});
+
+test('fight menu opens moves and back returns', async ({ page }) => {
+  await page.goto('/showdown');
+  await add(page, 'A', 'pikachu');
+  await add(page, 'B', 'blastoise');
+  await page.getByTestId('battle-start').click();
+  await expect(page.getByTestId('turn-label')).toHaveText('YOUR TURN');
+  await expect(page.locator('[data-testid^="move-"]')).toHaveCount(0);
+  await page.getByTestId('menu-fight').click();
+  await expect(page.locator('[data-testid^="move-A-"]')).toHaveCount(4);
+  await expect(page.getByTestId('move-A-tackle')).toContainText('PP 10/10');
+  await page.getByTestId('menu-back').click();
+  await expect(page.getByTestId('menu-fight')).toBeVisible();
+  await expect(page.locator('[data-testid^="move-"]')).toHaveCount(0);
+});
+
+test('switching from the POKéMON menu uses the turn', async ({ page }) => {
+  await page.goto('/showdown');
+  await add(page, 'A', 'pikachu');
+  await add(page, 'A', 'charizard');
+  await add(page, 'B', 'blastoise');
+  await page.clock.install();
+  await page.getByTestId('battle-start').click();
+  await page.getByTestId('menu-pokemon').click();
+  await expect(page.getByTestId('party-A-0')).toBeDisabled(); // already in battle
+  await page.getByTestId('party-A-1').click();
+  await expect(page.locator('[data-testid^="party-"]:enabled')).toHaveCount(0);
+  await page.clock.fastForward(10_000);
+  await expect(page.getByTestId('turn-label')).toHaveText("RIVAL'S TURN");
+  await expect(page.getByTestId('arena-pokemon-A')).toHaveAttribute('alt', 'Charizard');
+});
+
+test('run returns to the builder', async ({ page }) => {
+  await page.goto('/showdown');
+  await add(page, 'A', 'pikachu');
+  await add(page, 'B', 'blastoise');
+  await page.getByTestId('battle-start').click();
+  await page.getByTestId('menu-run').click();
+  await expect(page.getByText('Give up the battle?')).toBeVisible();
+  await page.getByRole('button', { name: 'NO', exact: true }).click();
+  await expect(page.getByTestId('menu-fight')).toBeVisible();
+  await page.getByTestId('menu-run').click();
+  await page.getByTestId('run-yes').click();
+  await expect(page.getByTestId('battle-stage')).toHaveCount(0);
+  await expect(page.getByTestId('battle-start')).toBeVisible();
+});
+
+test('a fainted Pokémon is replaced from the party menu', async ({ page }) => {
+  await page.goto('/showdown');
+  await add(page, 'A', 'pikachu');
+  await add(page, 'A', 'charizard');
+  await add(page, 'B', 'blastoise');
+  await add(page, 'B', 'gengar'); // two per side: the first knockout always needs a replacement
+  await page.clock.install();
+  await page.getByTestId('battle-start').click();
+  await expect(page.getByTestId('battle-stage')).toBeVisible();
+  for (let turn = 0; turn < 100; turn++) {
+    const party = page.locator('[data-testid^="party-"]:enabled');
+    if (await party.count()) {
+      await expect(page.getByTestId('menu-fight')).toHaveCount(0);
+      await party.first().click();
+      return;
+    }
+    await openFight(page);
+    await page.locator('[data-testid^="move-"]:enabled').first().click();
+    await finishAttack(page);
+  }
+  throw new Error('no replacement prompt');
+});
+
+test('offers Struggle when no PP is left', async ({ page }) => {
+  await page.unroute('**/api/pokemon/*');
+  await page.route('**/api/pokemon/*', async route => {
+    const name = decodeURIComponent(new URL(route.request().url()).pathname.split('/').at(-1)!);
+    const base = pokemon(name);
+    await route.fulfill({ json: { ...base, movePool: [{ ...base.movePool[0], pp: 1 }] } });
+  });
+  await page.goto('/showdown');
+  await add(page, 'A', 'pikachu');
+  await add(page, 'B', 'blastoise');
+  await page.clock.install();
+  await page.getByTestId('battle-start').click();
+  // Each side spends its only PP, then the next A turn offers Struggle (B may move first in round two).
+  for (let turn = 0; turn < 6; turn++) {
+    await openFight(page);
+    if (await page.getByTestId('move-A-struggle').isVisible()) break;
+    await page.locator('[data-testid^="move-"]:enabled').first().click();
+    await finishAttack(page);
+  }
+  await expect(page.getByTestId('move-A-struggle')).toBeEnabled();
+  await expect(page.locator('[data-testid^="move-"]')).toHaveCount(1);
 });

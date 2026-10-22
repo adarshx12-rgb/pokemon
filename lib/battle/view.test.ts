@@ -35,7 +35,7 @@ describe('battle view', () => {
   });
 
   it('prefixes enemy moves with "Enemy"', () => {
-    const v = run([{ kind: 'useMove', side: 'B', index: 0, move: flamethrower }]);
+    const v = run([{ kind: 'useMove', side: 'B', index: 0, move: flamethrower, ppLeft: 14 }]);
     expect(v.message).toBe('Enemy AZUMARILL used FLAMETHROWER!');
   });
 
@@ -46,7 +46,7 @@ describe('battle view', () => {
   });
 
   it('keeps the previous message (and id) for plain neutral damage', () => {
-    const before = run([{ kind: 'useMove', side: 'A', index: 0, move: flamethrower }]);
+    const before = run([{ kind: 'useMove', side: 'A', index: 0, move: flamethrower, ppLeft: 14 }]);
     const after = applyEvent(before, { kind: 'damage', side: 'B', index: 0, amount: 10, hpAfter: 143, effectiveness: 1, crit: false }, names);
     expect(after.message).toBe('CHARIZARD used FLAMETHROWER!');
     expect(after.messageId).toBe(before.messageId);

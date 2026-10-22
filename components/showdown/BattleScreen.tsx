@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { TYPE_COLORS } from '@/data/typeColors';
-import { createBattle } from '@/lib/battle/engine';
+import { createBattle, replaceFirstHealthy } from '@/lib/battle/engine';
 import { STRUGGLE } from '@/lib/battle/moves';
 import { displayName } from '@/lib/pokeapi/names';
 import { eventDelay } from '@/lib/battle/pacing';
@@ -75,6 +75,9 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
     if (busy.current || playing || end) return;
     const next = battle.playMove(side, moveName);
     if (!next.length) return;
+    // Until the party screen exists, a fainted Pokémon is replaced by the first healthy teammate.
+    const replacing = battle.replacing;
+    if (replacing) next.push(...replaceFirstHealthy(battle, (replacing === 'A' ? teamA : teamB).length));
     busy.current = true;
     setEvents(next);
     setIndex(0);

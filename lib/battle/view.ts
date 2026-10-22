@@ -64,6 +64,11 @@ export function applyEvent(view: BattleView, event: BattleEvent, names: TeamName
       else if (event.effectiveness < 1) parts.push("It's not very effective…");
       return parts.length ? say(next, parts.join(' ')) : next;
     }
+    case 'recoil': // messages for recoil, stat changes and withdrawals arrive with the new battle UI
+      return { ...view, hp: withSide(view.hp, event.side, event.index, event.hpAfter) };
+    case 'stat':
+    case 'withdraw':
+      return view;
     case 'faint':
       return say({ ...view, fainted: withSide(view.fainted, event.side, event.index, true) },
         `${label(names, event.side, event.index)} fainted!`);

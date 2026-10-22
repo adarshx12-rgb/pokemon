@@ -40,12 +40,15 @@ export interface TeamMember { pokemon: BattlePokemon; moves: Move[] }
 
 export type Side = 'A' | 'B';
 
-// In a `damage` event, side/index identify the target; in every other event, the actor.
+// In `damage` and `stat` events, side/index identify the affected Pokémon; in every other event, the actor.
 export type BattleEvent =
   | { kind: 'switchIn'; side: Side; index: number; hp: number; maxHp: number }
-  | { kind: 'useMove'; side: Side; index: number; move: Move }
+  | { kind: 'useMove'; side: Side; index: number; move: Move; ppLeft: number }
   | { kind: 'miss'; side: Side; index: number }
   | { kind: 'damage'; side: Side; index: number; amount: number; hpAfter: number; effectiveness: number; crit: boolean }
+  | { kind: 'stat'; side: Side; index: number; stat: StageStat; change: number; applied: number }
+  | { kind: 'recoil'; side: Side; index: number; amount: number; hpAfter: number }
+  | { kind: 'withdraw'; side: Side; index: number }
   | { kind: 'faint'; side: Side; index: number }
   | { kind: 'end'; winner: Side; reason: 'knockout' | 'turnCap'; damageDealt: Record<Side, number[]> };
 

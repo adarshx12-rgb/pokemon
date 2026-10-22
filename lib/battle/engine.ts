@@ -53,8 +53,10 @@ export function createBattle(teamA: TeamMember[], teamB: TeamMember[], seed: num
       return;
     }
     turn++;
+    // The player always opens the battle; speed decides every later round.
+    const order: Side[] = turn === 1 ? ['A', 'B'] : turnOrder(sides.A[active.A], sides.B[active.B], rng);
     // A replacement cannot act in the round in which its teammate fainted.
-    actors = turnOrder(sides.A[active.A], sides.B[active.B], rng).map(side => ({ side, index: active[side] }));
+    actors = order.map(side => ({ side, index: active[side] }));
   };
   advance();
 

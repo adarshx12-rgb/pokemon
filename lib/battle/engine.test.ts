@@ -59,9 +59,15 @@ describe('simulate', () => {
     expect(events.at(-1)).toMatchObject({ kind: 'end', winner: 'A', reason: 'knockout' });
   });
 
-  it('lets the faster Pokémon act first', () => {
-    const events = simulate([weakSlow('w1')], [strongFast], 1);
-    expect(events.find(e => e.kind === 'useMove')).toMatchObject({ side: 'B' });
+  it('gives the player the opening move, then lets the faster Pokémon act first', () => {
+    const slow = member('slow', ['normal'], base({ spe: 10 }), [move('tackle', 'normal', 10)]);
+    const fast = member('fast', ['normal'], base({ spe: 200 }), [move('tackle', 'normal', 10)]);
+    const battle = createBattle([slow], [fast], 1);
+    expect(battle.nextSide).toBe('A');
+    battle.playMove('A', 'tackle');
+    battle.playMove('B', 'tackle');
+    expect(battle.turn).toBe(2);
+    expect(battle.nextSide).toBe('B');
   });
 
   it('is deterministic for a seed', () => {

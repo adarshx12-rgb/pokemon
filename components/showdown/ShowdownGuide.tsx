@@ -31,7 +31,7 @@ export function ShowdownGuide() {
           </section>
           <section id="stats-and-speed">
             <h3>How stats and speed decide each round</h3>
-            <p>Every Pokémon fights at level 50 with the same individual values and no training, so a battle compares the species themselves. Speed sets the order of attacks in each round. Attack and Special Attack raise the damage a move deals, while Defense and Special Defense reduce what a Pokémon takes. HP is how much damage it can absorb before it faints.</p>
+            <p>Every Pokémon fights at level 50 with the same individual values and no training, so a battle compares the species themselves. You make the opening move, then Speed sets the order of attacks in each later round. Attack and Special Attack raise the damage a move deals, while Defense and Special Defense reduce what a Pokémon takes. HP is how much damage it can absorb before it faints.</p>
             <p>That is why a fast, fragile attacker can win one matchup and lose the next: striking first only helps if the hit lands hard enough before the opponent replies.</p>
           </section>
           <section id="type-matchups">

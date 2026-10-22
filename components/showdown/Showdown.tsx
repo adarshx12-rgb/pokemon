@@ -114,8 +114,8 @@ export function Showdown({ names }: { names: string[] }) {
             <MatchupPreview a={teams.A} b={teams.B} />
             <details className={styles.rules}>
               <summary>How the battle works</summary>
-              <p>Everyone fights at level 50 with 31 IVs, no EVs, and a neutral nature. Speed decides who moves first; Attack, Defense, special stats, and type matchups decide damage. HP keeps you in the fight.</p>
-              <p>You control both teams. Select Fight, then click a move for the highlighted Pokémon to play its attack. Speed decides the order each round; neither side attacks automatically. When a Pokémon faints, the next Poké Ball in its lineup enters. The last team standing wins.</p>
+              <p>Everyone fights at level 50 with 31 IVs, no EVs, and a neutral nature. You always make the first move; after that, Speed decides who moves first. Attack, Defense, special stats, and type matchups decide damage. HP keeps you in the fight.</p>
+              <p>You control both teams. Select Fight, then click a move for the highlighted Pokémon to play its attack. Your Pokémon opens the battle, then Speed decides the order each round; neither side attacks automatically. When a Pokémon faints, the next Poké Ball in its lineup enters. The last team standing wins.</p>
               <p>Moves come from each species’ recorded learnset across the games. Default movesets favor naturally learned attacks; the menus also include compatible TM, tutor, and inherited moves. Some Pokémon can legitimately learn attacks of other types. Only damaging moves supported by this battle are included; Pokémon with none use Struggle.</p>
               <p>This is a simplified stat battle: no items, abilities, weather, or status effects. Accuracy, critical hits, and damage rolls mean rematches can end differently.</p>
               <a href="https://pokeapi.co/" target="_blank" rel="noreferrer">Stats & artwork from PokéAPI</a>

@@ -24,9 +24,9 @@ interface Step { id: number; event: BattleEvent; fx: FxPlay | null; out: boolean
 
 const sideOrder = (e: BattleEvent) => ('side' in e && e.side === 'A' ? 1 : 0);
 
-interface Props { teamA: TeamMember[]; teamB: TeamMember[]; seed: number; classic: boolean; onFinish: (end: EndEvent, lead: number) => void; onEdit: () => void; onReset: () => void }
+interface Props { teamA: TeamMember[]; teamB: TeamMember[]; seed: number; classic: boolean; layout?: 'ds' | 'side'; onFinish: (end: EndEvent, lead: number) => void; onEdit: () => void; onReset: () => void }
 
-export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, onReset }: Props) {
+export function BattleScreen({ teamA, teamB, seed, classic, layout = 'ds', onFinish, onEdit, onReset }: Props) {
   const [battle] = useState(() => createBattle(teamA, teamB, seed));
   // The opening plays the engine's two initial send-outs like any other events: the rival's first, as in the games.
   const [events, setEvents] = useState<BattleEvent[]>(() => [...battle.initialEvents].sort((a, b) => sideOrder(a) - sideOrder(b)));
@@ -45,7 +45,7 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
   const [typedId, setTypedId] = useState(-1); // the message a skip finished typing
   const [played, setPlayed] = useState(false); // false until the first command (the opening is still on)
   const [turn, setTurn] = useState<{ side: Side }>(() => ({ side: battle.nextSide ?? 'A' }));
-  const [menu, setMenu] = useState<MenuState>(() => menuFor({ replacing: !!battle.replacing, layout: 'ds' }));
+  const [menu, setMenu] = useState<MenuState>(() => menuFor({ replacing: !!battle.replacing, layout }));
   const playing = events.length > 0 && index <= events.length;
   const end = events.find((event): event is EndEvent => event.kind === 'end');
   const skipNow = playing && skipped === index;
@@ -70,7 +70,7 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
       if (index === events.length) {
         // Playback is over: the menu serves whoever acts next (or must replace a fainted Pokémon).
         setTurn(t => ({ side: battle.replacing ?? battle.nextSide ?? t.side }));
-        setMenu(menuFor({ replacing: !!battle.replacing, layout: 'ds' }));
+        setMenu(menuFor({ replacing: !!battle.replacing, layout }));
         setIndex(i => i + 1);
         return;
       }
@@ -96,7 +96,7 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
       setIndex(i => i + 1);
     }, delay);
     return () => clearTimeout(t);
-  }, [playing, index, speed, reduced, events, names, species, battle, played, skipNow, view.message, view.maxHp]);
+  }, [playing, index, speed, reduced, events, names, species, battle, played, skipNow, view.message, view.maxHp, layout]);
 
   useEffect(() => {
     if (!playing) busy.current = false;
@@ -190,12 +190,12 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
 
   return (
     <div className={styles.battle}>
-      <DsConsole layout="ds" testId="battle-stage"
+      <DsConsole layout={layout} testId="battle-stage"
         top={<TopScreen player={sprite('A')} opponent={sprite('B')} playerBox={panel('A')} opponentBox={panel('B')} intro={opening}
           message={<TextBox key={asking ? 'prompt' : view.messageId} message={prompt} speed={speed} complete={!asking && typedId === view.messageId} />}
           overlay={<>{opening && <IntroFlash />}{overlay}</>} onAdvance={skip} />}
         bottom={<>
-          <BottomScreen side={turnSide} layout="ds" state={menu} onState={setMenu} member={member} team={sideTeam}
+          <BottomScreen side={turnSide} layout={layout} state={menu} onState={setMenu} member={member} team={sideTeam}
             hp={view.hp[turnSide]} maxHp={view.maxHp[turnSide]} fainted={view.fainted[turnSide]} active={view.active[turnSide]}
             ppLeft={view.pp[turnSide][view.active[turnSide] ?? 0]} disabled={playing || !!end}
             onMove={name => play(battle.playMove(turnSide, name))}

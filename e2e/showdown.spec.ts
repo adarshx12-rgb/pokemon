@@ -362,6 +362,31 @@ test.describe('phone emulation', () => {
   });
 });
 
+test.describe('phone battle layout', () => {
+  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 3 });
+
+  test('phone shows both screens without scrolling during battle', async ({ page }) => {
+    await page.goto('/showdown');
+    await add(page, 'A', 'pikachu');
+    await add(page, 'B', 'blastoise');
+    await page.getByTestId('battle-start').tap();
+    await expect(page.getByTestId('menu-fight')).toBeEnabled({ timeout: 30_000 });
+    await expect(page.getByTestId('text-box')).toBeInViewport({ ratio: 1 });
+    await expect(page.getByTestId('menu-fight')).toBeInViewport({ ratio: 1 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= 390)).toBe(true);
+  });
+});
+
+test('side layout fallback renders moves beside the screen', async ({ page }) => {
+  await page.goto('/showdown?layout=side');
+  await add(page, 'A', 'pikachu');
+  await add(page, 'B', 'blastoise');
+  await page.getByTestId('battle-start').click();
+  await expect(page.getByTestId('battle-stage')).toHaveAttribute('data-layout', 'side');
+  await expect(page.locator('[data-testid^="move-A-"]').first()).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId('menu-fight')).toHaveCount(0);
+});
+
 test('fight menu opens moves and back returns', async ({ page }) => {
   await page.goto('/showdown');
   await add(page, 'A', 'pikachu');

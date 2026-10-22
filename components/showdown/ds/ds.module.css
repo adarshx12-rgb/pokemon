@@ -3,6 +3,16 @@
 .hinge { height: 8px; background: #8a8e92; border-radius: 4px; margin: 0 20%; flex-shrink: 0; }
 .screen { position: relative; min-width: 0; border-radius: 4px; overflow: hidden; }
 .bottom { background: repeating-linear-gradient(45deg, #283038 0 6px, #303840 6px 12px); padding: 8px; overflow: visible; }
+@media (min-width: 900px) {
+  .shell, .resultWrap { max-width: 600px; }
+  .resultWrap { width: min(600px, 100%); }
+}
+@media (max-width: 480px) {
+  .shell { padding: 6px; gap: 6px; border-radius: 10px; }
+  .menu, .builderMenu { min-height: 0; gap: 6px; }
+  .fightBtn { min-height: 84px; }
+  .moveBtn { min-height: 60px; }
+}
 @media (min-width: 640px) {
   .shell[data-layout="side"] { display: grid; grid-template-columns: 1.6fr 1fr; align-items: stretch; }
   .shell[data-layout="side"] .hinge { display: none; }

@@ -131,7 +131,8 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
           {(['A', 'B'] as const).map(side => {
             const idx = view.active[side] ?? 0;
             const member = (side === 'A' ? teamA : teamB)[idx];
-            const moves = member.moves.length ? member.moves : [STRUGGLE];
+            // No moves or no PP left: Struggle is the only legal choice (ppLeft is [] when there are no moves).
+            const moves = battle.ppLeft(side, idx).every(p => p <= 0) ? [STRUGGLE] : member.moves;
             const ready = !playing && !end && nextSide === side;
             return <section key={side} className={styles.moveMenu} aria-label={`${side === 'A' ? 'Your' : 'Opponent'} ${displayName(member.pokemon.name)} moves`} data-active={ready} data-next={nextSide === side}>
               <h2><span>{side === 'A' ? 'Your' : 'Opponent'} {displayName(member.pokemon.name)}</span><small>{ready ? 'Choose a move' : playing ? 'Playing move…' : end ? 'Battle over' : 'Waiting'}</small></h2>

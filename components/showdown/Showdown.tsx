@@ -34,7 +34,7 @@ export function Showdown({ names }: { names: string[] }) {
   const [phase, setPhase] = useState<Phase>('build');
   const [seed, setSeed] = useState(0);
   // ?layout=side is a dev-only switch, read client-side ('ds' during server render).
-  const layout = useSyncExternalStore<'ds' | 'side'>(noSubscribe, () => (new URLSearchParams(window.location.search).get('layout') === 'side' ? 'side' : 'ds'), () => 'ds');
+  const layout = useSyncExternalStore<'ds' | 'side'>(noSubscribe, () => (process.env.NODE_ENV !== 'production' && new URLSearchParams(window.location.search).get('layout') === 'side' ? 'side' : 'ds'), () => 'ds');
   const [classic, setClassic] = useState(true); // pixel sprites by default
   const [result, setResult] = useState<{ end: EndEvent; lead: number } | null>(null);
   const [loading, setLoading] = useState<Record<Side, boolean>>({ A: false, B: false });

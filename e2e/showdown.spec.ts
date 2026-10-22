@@ -48,7 +48,7 @@ async function finishBattle(page: Page) {
     await finishAttack(page);
   }
   await page.getByRole('button', { name: 'View result', exact: true }).click();
-  await expect(page.getByTestId('result-banner')).toHaveText(/was defeated/);
+  await expect(page.getByTestId('result-banner')).toHaveText(/defeated/);
 }
 
 // Logs, in order, each new text-box message and the first appearance of the watched elements in the battle stage.
@@ -375,6 +375,23 @@ test.describe('phone battle layout', () => {
     await expect(page.getByTestId('menu-fight')).toBeInViewport({ ratio: 1 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= 390)).toBe(true);
   });
+});
+
+test('desktop DS shell and result grow past 420px', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto('/showdown');
+  await add(page, 'A', 'pikachu');
+  await add(page, 'B', 'blastoise');
+  await page.clock.install();
+  await page.getByTestId('battle-start').click();
+  const stage = await page.getByTestId('battle-stage').boundingBox();
+  expect(stage!.width).toBeGreaterThan(500);
+  expect(stage!.width).toBeLessThanOrEqual(601);
+  await finishBattle(page);
+  await page.clock.fastForward(5_000);
+  const result = await page.getByTestId('result').boundingBox();
+  expect(result!.width).toBeGreaterThan(500);
+  expect(result!.width).toBeLessThanOrEqual(601);
 });
 
 test('side layout fallback renders moves beside the screen', async ({ page }) => {

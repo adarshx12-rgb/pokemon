@@ -10,7 +10,7 @@ const pokemon = (name: string) => ({
     front: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${ids[name] ?? 25}.png`,
     back: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${ids[name] ?? 25}.png`,
   },
-  movePool: ['tackle', 'body-slam', 'quick-attack', 'hyper-fang'].map((name, index) => ({ name, power: 40 + index * 10, accuracy: 100, type: 'normal', damageClass: 'physical' })),
+  movePool: ['tackle', 'body-slam', 'quick-attack', 'hyper-fang'].map((name, index) => ({ name, power: 40 + index * 10, accuracy: 100, type: 'normal', damageClass: 'physical', pp: 10 })),
 });
 
 async function add(page: Page, side: 'A' | 'B', name: string) {
@@ -120,9 +120,35 @@ test('empty opening, artwork, pointer/keyboard order, battle, rematch and reset'
   expect(errors).toEqual([]);
 });
 
+test('hp number counts down instead of jumping', async ({ page }) => {
+  await page.goto('/showdown');
+  await add(page, 'A', 'pikachu');
+  await add(page, 'B', 'blastoise');
+  await page.clock.install();
+  await page.getByTestId('battle-start').click();
+  await expect(page.getByTestId('battle-stage')).toBeVisible();
+  const number = async () => Number(await page.getByTestId('hp-number-B').textContent());
+  const target = async () => Number(await page.getByRole('progressbar', { name: /BLASTOISE HP/ }).getAttribute('aria-valuenow'));
+  const start = await number();
+  expect(start).toBe(await target());
+  await page.locator('[data-testid^="move-A-"]:enabled').last().click();
+  // Step the clock until the hit lands (the bar's target changes), then watch the number drain.
+  for (let i = 0; i < 600 && (await target()) === start; i++) await page.clock.runFor(16);
+  const final = await target();
+  expect(final).toBeLessThan(start);
+  await page.clock.runFor(48);
+  const first = await number();
+  expect(first).toBeLessThan(start);
+  expect(first).toBeGreaterThan(final);
+  await page.clock.runFor(200);
+  expect(await number()).toBeLessThan(first);
+  await page.clock.runFor(2_000);
+  expect(await number()).toBe(final);
+});
+
 test('six-slot cap, removal, and recoverable data failure', async ({ page }) => {
   await page.goto('/showdown');
-  await page.route('**/api/pokemon/pikachu', route => route.fulfill({ status: 503, json: { error: 'upstream' } }), { times: 1 });
+  await page.route('**/api/pokemon/pikachu*', route => route.fulfill({ status: 503, json: { error: 'upstream' } }), { times: 1 });
   await add(page, 'A', 'pikachu');
   await expect(page.getByRole('alert').filter({ hasText: 'Could not load' })).toBeVisible();
   await expect(page.getByTestId('battle-start')).toBeDisabled();

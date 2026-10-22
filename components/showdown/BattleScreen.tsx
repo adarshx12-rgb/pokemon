@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useReducedMotion } from 'framer-motion';
 import { TYPE_COLORS } from '@/data/typeColors';
 import { createBattle, replaceFirstHealthy } from '@/lib/battle/engine';
 import { STRUGGLE } from '@/lib/battle/moves';
@@ -7,9 +8,10 @@ import { displayName } from '@/lib/pokeapi/names';
 import { eventDelay } from '@/lib/battle/pacing';
 import type { BattleEvent, EndEvent, Side, TeamMember } from '@/lib/battle/types';
 import { applyEvent, initView, teamNames, type BattleView } from '@/lib/battle/view';
-import { HpPanel } from './HpPanel';
+import { HpBox } from './ds/HpBox';
+import { DsConsole } from './ds/DsConsole';
+import { TopScreen } from './ds/TopScreen';
 import { TextBox } from './TextBox';
-import { Arena } from './Arena';
 import { PokemonSprite } from './PokemonSprite';
 import styles from './showdown.module.css';
 
@@ -37,6 +39,7 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
   const [view, setView] = useState<BattleView>(() => battle.initialEvents.reduce((v, e) => applyEvent(v, e, names), initView(teamA, teamB)));
   const [index, setIndex] = useState(0);
   const speed = 2;
+  const reduced = !!useReducedMotion();
   const busy = useRef(false);
   const sequence = useRef(0);
   const [fx, setFx] = useState<Fx | null>(null); // latest effect, drives the screen flash
@@ -48,7 +51,7 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
     if (!playing) return;
     const prev = index === 0 ? null : events[index - 1];
     const maxHp = prev && 'side' in prev && 'index' in prev ? view.maxHp[prev.side][prev.index] : undefined;
-    const delay = prev ? eventDelay(prev, view.message, speed, maxHp) : 0;
+    const delay = prev ? eventDelay(prev, view.message, speed, maxHp, reduced) : 0;
     const t = setTimeout(() => {
       if (index === events.length) {
         setIndex(i => i + 1);
@@ -62,7 +65,7 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
       setIndex(i => i + 1);
     }, delay);
     return () => clearTimeout(t);
-  }, [playing, index, speed, events, names, view.message, view.maxHp]);
+  }, [playing, index, speed, reduced, events, names, view.message, view.maxHp]);
 
   useEffect(() => {
     if (!playing) busy.current = false;
@@ -111,8 +114,8 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
     const idx = view.active[side];
     if (idx === null) return null;
     return (
-      <HpPanel name={names[side][idx]} hp={view.hp[side][idx]} maxHp={view.maxHp[side][idx]} showNumbers
-        fainted={view.fainted[side]} />
+      <HpBox name={names[side][idx]} hp={view.hp[side][idx]} maxHp={view.maxHp[side][idx]} showNumbers
+        fainted={view.fainted[side]} side={side} />
     );
   };
 
@@ -122,14 +125,14 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
 
   return (
     <div className={styles.battle}>
-      <Arena player={sprite('A')} opponent={sprite('B')} playerPanel={panel('A')} opponentPanel={panel('B')}
-        overlay={fx?.kind === 'hit' && <div key={fx.key} aria-hidden className="pointer-events-none absolute inset-0"
-          style={{ backgroundColor: fx.color, animation: `hit-flash ${animMs} ease-out both` }} />}
-        dialogue={<div>
-          <TextBox key={view.messageId} message={prompt} speed={speed} />
+      <DsConsole layout="ds" testId="battle-stage"
+        top={<TopScreen player={sprite('A')} opponent={sprite('B')} playerBox={panel('A')} opponentBox={panel('B')}
+          message={<TextBox key={view.messageId} message={prompt} speed={speed} />}
+          overlay={fx?.kind === 'hit' && <div key={fx.key} aria-hidden className="pointer-events-none absolute inset-0"
+          style={{ backgroundColor: fx.color, animation: `hit-flash ${animMs} ease-out both` }} />} />}
+        bottom={<>
           {!playing && !end && <p className={styles.turnPrompt} data-testid="turn-prompt">Turn {battle.turn} · {nextSide === 'A' ? 'Your' : 'Opponent'} {nextName}: choose a move.</p>}
-        </div>}
-        commands={<>
+          <div className={styles.commands}>
           {(['A', 'B'] as const).map(side => {
             const idx = view.active[side] ?? 0;
             const member = (side === 'A' ? teamA : teamB)[idx];
@@ -157,6 +160,7 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
             {end && !playing && <button type="button" onClick={() => onFinish(end)}>View result</button>}
             <button type="button" onClick={onReset}>Reset battle</button>
             <button type="button" onClick={onEdit}>Edit teams</button>
+          </div>
           </div>
         </>} />
       <p className={styles.battleHelp}>You control both teams. Choose a move for the highlighted Pokémon. Every attack waits for your click.</p>

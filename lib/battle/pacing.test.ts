@@ -23,6 +23,10 @@ describe('eventDelay', () => {
     const rec = { kind: 'recoil', side: 'B', index: 0, amount: 25, hpAfter: 75 } as BattleEvent;
     expect(eventDelay(rec, '', 1, 100)).toBe(1100 + 375);
   });
+  it('caps the HP drain at 300ms when reduced', () => {
+    const dmg = { kind: 'damage', side: 'B', index: 0, amount: 50, hpAfter: 50, effectiveness: 1, crit: false } as BattleEvent;
+    expect(eventDelay(dmg, '', 1, 100, true)).toBe(1100 + 300);
+  });
 });
 
 describe('drainMs', () => {

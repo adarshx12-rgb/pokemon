@@ -14,7 +14,7 @@ export function drainMs(amount: number, maxHp: number, reduced = false): number 
 }
 
 /** How long to show an event before the next one: its base duration (plus HP drain), or long enough to type and read its message. */
-export function eventDelay(event: BattleEvent, message: string, speed: number, maxHp = 0): number {
-  const drain = event.kind === 'damage' || event.kind === 'recoil' ? drainMs(event.amount, maxHp) : 0;
+export function eventDelay(event: BattleEvent, message: string, speed: number, maxHp = 0, reduced = false): number {
+  const drain = event.kind === 'damage' || event.kind === 'recoil' ? drainMs(event.amount, maxHp, reduced) : 0;
   return (Math.max(DURATION[event.kind], message.length * CHAR_MS + READ_PAUSE_MS) + drain) / speed;
 }

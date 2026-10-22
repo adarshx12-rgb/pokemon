@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { baseDamage, rollDamage, expectedDamage, stab, type Combatant } from './damage';
 import type { Move } from './types';
+import { ZERO_STAGES } from './stages';
 
 const flamethrower: Move = { name: 'flamethrower', type: 'fire', power: 90, accuracy: 100, damageClass: 'special', pp: 10 };
 const stats = (o: Partial<Combatant['stats']>) => ({ hp: 100, atk: 100, def: 100, spa: 100, spd: 100, spe: 100, ...o });
@@ -34,7 +35,7 @@ describe('rollDamage', () => {
   });
   it('applies a critical hit', () => {
     expect(rollDamage(flamethrower, attacker, grassDefender, seq(0.01, 0.999)))
-      .toEqual({ amount: 292, effectiveness: 2, crit: true });
+      .toEqual({ amount: 390, effectiveness: 2, crit: true });
   });
   it('deals 0 to an immune target', () => {
     const tackle: Move = { name: 'tackle', type: 'normal', power: 40, accuracy: 100, damageClass: 'physical', pp: 10 };
@@ -52,5 +53,37 @@ describe('expectedDamage', () => {
   it('uses no randomness or crit and scales by accuracy', () => {
     expect(expectedDamage(flamethrower, attacker, grassDefender)).toBe(195);
     expect(expectedDamage({ ...flamethrower, accuracy: 50 }, attacker, grassDefender)).toBe(97.5);
+  });
+});
+
+describe('stages and crits (Gen 4)', () => {
+  const noCrit = (r: number) => seq(0.5, r);
+  const crit = (r: number) => seq(0.0, r);
+  it('crit doubles damage', () => {
+    const a = rollDamage(flamethrower, attacker, grassDefender, noCrit(0.5));
+    const b = rollDamage(flamethrower, attacker, grassDefender, crit(0.5));
+    expect(b.crit).toBe(true);
+    expect(b.amount).toBe(a.amount * 2);
+  });
+  it("crit ignores the attacker's lowered Attack and the defender's raised Defense", () => {
+    const stages = { attacker: { ...ZERO_STAGES, spa: -3 }, defender: { ...ZERO_STAGES, spd: 3 } };
+    const plain = rollDamage(flamethrower, attacker, grassDefender, crit(0.5));
+    const staged = rollDamage(flamethrower, attacker, grassDefender, crit(0.5), stages);
+    expect(staged.amount).toBe(plain.amount);
+    const nonCrit = rollDamage(flamethrower, attacker, grassDefender, noCrit(0.5), stages);
+    expect(nonCrit.amount).toBeLessThan(plain.amount / 2);
+  });
+  it('+2 Attack doubles the attacking stat', () => {
+    const base = rollDamage(flamethrower, attacker, grassDefender, noCrit(0.5)).amount;
+    const boosted = rollDamage(flamethrower, attacker, grassDefender, noCrit(0.5),
+      { attacker: { ...ZERO_STAGES, spa: 2 }, defender: ZERO_STAGES }).amount;
+    expect(boosted).toBeGreaterThan(base * 1.9);
+    expect(boosted).toBeLessThanOrEqual(base * 2 + 4);
+  });
+  it('struggle is typeless', () => {
+    const struggle: Move = { name: 'struggle', type: 'normal', power: 50, accuracy: null, damageClass: 'physical', pp: 1 };
+    const r = rollDamage(struggle, { types: ['normal'], stats: stats({}) }, ghost, noCrit(0.5));
+    expect(r.effectiveness).toBe(1);
+    expect(r.amount).toBeGreaterThan(0);
   });
 });

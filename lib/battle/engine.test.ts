@@ -3,7 +3,7 @@ import { createBattle, simulate, TURN_CAP } from './engine';
 import type { BattleEvent, Move, StatBlock, TeamMember, TypeName } from './types';
 
 const move = (name: string, type: TypeName, power: number, accuracy: number | null = 100): Move =>
-  ({ name, type, power, accuracy, damageClass: 'physical' });
+  ({ name, type, power, accuracy, damageClass: 'physical', pp: 10 });
 const base = (o: Partial<StatBlock> = {}): StatBlock => ({ hp: 80, atk: 80, def: 80, spa: 80, spd: 80, spe: 80, ...o });
 const member = (name: string, types: TypeName[], stats: StatBlock, moves: Move[]): TeamMember => ({
   pokemon: { id: 1, name, types, baseStats: stats, sprites: { front: null, back: null, artwork: null }, movePool: moves },

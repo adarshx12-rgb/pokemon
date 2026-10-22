@@ -1,4 +1,4 @@
-import { TYPE_NAMES, type BattlePokemon, type Move, type StatBlock, type TypeName } from '@/lib/battle/types';
+import { TYPE_NAMES, type BattlePokemon, type Move, type StageStat, type StatBlock, type TypeName } from '@/lib/battle/types';
 
 export interface RawMove {
   name: string;
@@ -6,6 +6,10 @@ export interface RawMove {
   accuracy: number | null;
   type: { name: string };
   damage_class: { name: string };
+  pp?: number;
+  target?: { name: string };
+  meta?: { category: { name: string } } | null;
+  stat_changes?: { change: number; stat: { name: string } }[];
 }
 
 export interface RawPokemon {
@@ -49,13 +53,61 @@ const EXCLUDED_MOVES = new Set([
   'last-resort', 'belch', 'snore', 'synchronoise', 'burn-up', 'double-shock',
 ]);
 
+const STAGE_STATS: Record<string, StageStat> = {
+  attack: 'atk', defense: 'def', 'special-attack': 'spa', 'special-defense': 'spd',
+  speed: 'spe', accuracy: 'accuracy', evasion: 'evasion',
+};
+
 export function normalizeMove(raw: RawMove): Move | null {
   if (EXCLUDED_MOVES.has(raw.name)) return null;
   const cls = raw.damage_class.name;
+  const pp = raw.pp && raw.pp > 0 ? raw.pp : 5;
+  if (cls === 'status') {
+    const changes = raw.stat_changes ?? [];
+    if (raw.meta?.category.name !== 'net-good-stats' || !changes.length || !isType(raw.type.name)) return null;
+    const statChanges = [];
+    for (const c of changes) {
+      const stat = STAGE_STATS[c.stat.name];
+      if (!stat) return null;
+      statChanges.push({ stat, change: c.change });
+    }
+    return {
+      name: raw.name, type: raw.type.name, power: 0, accuracy: raw.accuracy, damageClass: 'status', pp,
+      target: raw.target?.name === 'user' ? 'self' : 'foe', statChanges,
+    };
+  }
   if (cls !== 'physical' && cls !== 'special') return null;
   if (!raw.power || raw.power <= 0) return null;
   if (!isType(raw.type.name)) return null;
-  return { name: raw.name, type: raw.type.name, power: raw.power, accuracy: raw.accuracy, damageClass: cls };
+  return { name: raw.name, type: raw.type.name, power: raw.power, accuracy: raw.accuracy, damageClass: cls, pp };
+}
+
+const LEVEL_GROUPS = [
+  'heartgold-soulsilver', 'scarlet-violet', 'sword-shield', 'ultra-sun-ultra-moon', 'sun-moon',
+  'omega-ruby-alpha-sapphire', 'x-y', 'black-2-white-2', 'black-white',
+];
+
+// Level-up levels from the first preferred version group in which the species has any level-up entry.
+export function levelUpLevels(raw: RawPokemon): Map<string, number> {
+  const levelUps = raw.moves.flatMap(entry => entry.version_group_details
+    .filter(d => d.move_learn_method.name === 'level-up')
+    .map(d => ({ move: entry.move.name, group: d.version_group.name, level: Math.max(1, d.level_learned_at) })));
+  const group = LEVEL_GROUPS.find(g => levelUps.some(l => l.group === g));
+  const levels = new Map<string, number>();
+  for (const l of levelUps) {
+    if (l.group !== group) continue;
+    const prev = levels.get(l.move);
+    if (prev === undefined || l.level < prev) levels.set(l.move, l.level);
+  }
+  return levels;
+}
+
+const SPRITE_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions';
+
+export function pixelSprites(id: number): { front: string | null; back: string | null } {
+  const dir = id <= 493 ? 'generation-iv/heartgold-soulsilver' : id <= 649 ? 'generation-v/black-white' : null;
+  if (!dir) return { front: null, back: null };
+  return { front: `${SPRITE_BASE}/${dir}/${id}.png`, back: `${SPRITE_BASE}/${dir}/back/${id}.png` };
 }
 
 export function normalizePokemon(raw: RawPokemon, moves: RawMove[]): BattlePokemon {
@@ -69,24 +121,26 @@ export function normalizePokemon(raw: RawPokemon, moves: RawMove[]): BattlePokem
   const learnset = new Map(raw.moves.map(entry => [entry.move.name,
     [...new Set(entry.version_group_details.map(detail => detail.move_learn_method.name))],
   ]));
+  const levels = levelUpLevels(raw);
   const movePool: Move[] = [];
   for (const m of moves) {
     const learnMethods = learnset.get(m.name);
     // A fetched move definition alone is not evidence that this species can learn it.
     if (!learnMethods?.length) continue;
     const move = normalizeMove(m);
-    if (move && !seen.has(move.name)) { seen.add(move.name); movePool.push({ ...move, learnMethods }); }
+    if (move && !seen.has(move.name)) { seen.add(move.name); movePool.push({ ...move, learnMethods, ...(levels.has(move.name) && { level: levels.get(move.name) }) }); }
   }
   const sd = raw.sprites.other?.showdown;
   const art = raw.sprites.other?.['official-artwork']?.front_default ?? null;
+  const pixel = pixelSprites(raw.id);
   return {
     id: raw.id,
     name: raw.name,
     types,
     baseStats,
     sprites: {
-      front: sd?.front_default ?? raw.sprites.front_default ?? art,
-      back: sd?.back_default ?? raw.sprites.back_default ?? art,
+      front: pixel.front ?? sd?.front_default ?? raw.sprites.front_default ?? art,
+      back: pixel.back ?? sd?.back_default ?? raw.sprites.back_default ?? art,
       artwork: art,
     },
     movePool,

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { EMPTY_TEAMS, randomFillCount, teamsReducer } from './teams';
 import type { Move, TeamMember } from '@/lib/battle/types';
 
-const mv = (name: string): Move => ({ name, type: 'normal', power: 40, accuracy: 100, damageClass: 'physical' });
+const mv = (name: string): Move => ({ name, type: 'normal', power: 40, accuracy: 100, damageClass: 'physical', pp: 10 });
 const mon = (name: string): TeamMember => ({
   pokemon: { id: 1, name, types: ['normal'], baseStats: { hp: 1, atk: 1, def: 1, spa: 1, spd: 1, spe: 1 },
     sprites: { front: null, back: null, artwork: null }, movePool: [mv('a'), mv('b')] },

@@ -19,10 +19,13 @@ async function main() {
 
   const list = await getJson<{ results: { name: string; url: string }[] }>(`${API}/move?limit=2000`);
   // Every move is kept (status moves too), so the runtime can tell "not damaging" apart from "newer than the snapshot".
-  const moves: Record<string, [type: string, power: number | null, accuracy: number | null, damageClass: string]> = {};
+  const moves: Record<string, unknown[]> = {};
   for (let i = 0; i < list.results.length; i += CONCURRENCY) {
     const batch = await Promise.all(list.results.slice(i, i + CONCURRENCY).map(m => getJson<RawMove>(m.url)));
-    for (const m of batch) moves[m.name] = [m.type.name, m.power, m.accuracy, m.damage_class.name];
+    for (const m of batch) moves[m.name] = [
+      m.type.name, m.power, m.accuracy, m.damage_class.name, m.pp ?? 5, m.meta?.category.name ?? null,
+      m.target?.name ?? 'selected-pokemon', (m.stat_changes ?? []).map(c => [c.stat.name, c.change]),
+    ];
   }
 
   writeFileSync('data/pokedex-snapshot.json', JSON.stringify({ names, moves }) + '\n');

@@ -16,7 +16,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ name: s
 
   // Edge cache keyed by the normalised slug, so case or spelling variants can't force repeat upstream calls.
   const cache = typeof caches === 'undefined' ? null : await caches.open('pokemon-api');
-  const key = `https://pokefame.com/api/pokemon/${slug}`;
+  const key = `https://pokefame.com/api/pokemon/v2/${slug}`;
   const hit = await cache?.match(key);
   if (hit) return hit;
 

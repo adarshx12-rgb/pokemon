@@ -1,7 +1,7 @@
 import { expectedDamage, stab, type Combatant } from './damage';
 import type { Move, TypeName } from './types';
 
-export const STRUGGLE: Move = { name: 'struggle', type: 'normal', power: 50, accuracy: null, damageClass: 'physical' };
+export const STRUGGLE: Move = { name: 'struggle', type: 'normal', power: 50, accuracy: null, damageClass: 'physical', pp: 1 };
 
 const MAX_PER_TYPE = 2;
 

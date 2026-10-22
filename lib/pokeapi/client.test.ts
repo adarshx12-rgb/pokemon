@@ -34,7 +34,7 @@ describe('fetchPokemon', () => {
     fetchWithRetry.mockResolvedValue(json(200, pikachu(['thunderbolt', 'quick-attack', 'growl'])));
     const pokemon = await fetchPokemon('pikachu');
     expect(fetchWithRetry).toHaveBeenCalledTimes(1);
-    expect(pokemon?.movePool.map(m => m.name).sort()).toEqual(['quick-attack', 'thunderbolt']);
+    expect(pokemon?.movePool.map(m => m.name).sort()).toEqual(['growl', 'quick-attack', 'thunderbolt']);
   });
 
   it('fetches only moves newer than the snapshot', async () => {

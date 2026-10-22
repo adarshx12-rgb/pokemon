@@ -3,7 +3,7 @@ import { coverage } from './matchup';
 import type { Move, TeamMember, TypeName } from '@/lib/battle/types';
 
 const mon = (types: TypeName[], moveTypes: TypeName[]): TeamMember => {
-  const moves: Move[] = moveTypes.map(t => ({ name: t, type: t, power: 50, accuracy: 100, damageClass: 'special' }));
+  const moves: Move[] = moveTypes.map(t => ({ name: t, type: t, power: 50, accuracy: 100, damageClass: 'special', pp: 10 }));
   return { pokemon: { id: 1, name: 'x', types, baseStats: { hp: 1, atk: 1, def: 1, spa: 1, spd: 1, spe: 1 }, sprites: { front: null, back: null, artwork: null }, movePool: moves }, moves };
 };
 

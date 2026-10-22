@@ -11,7 +11,10 @@ const CONCURRENCY = 16;
 
 // Move definitions rarely change, so they ship with the app (`npm run snapshot:pokedex`).
 // Without it a single species needs 100–250 PokéAPI calls, which is slow cold and easily rate-limited.
-const SNAPSHOT_MOVES = SNAPSHOT.moves as unknown as Record<string, [string, number | null, number | null, string]>;
+const SNAPSHOT_MOVES = SNAPSHOT.moves as unknown as Record<string, SnapshotMove>;
+
+// [type, power, accuracy, damageClass, pp, category, target, statChanges]
+type SnapshotMove = [string, number | null, number | null, string, number, string | null, string, [string, number][]];
 
 // In-process memo on top of Next's fetch cache, so a warm server never refetches a move.
 const moveMemo = new Map<string, Promise<RawMove | null>>();
@@ -26,8 +29,12 @@ async function getJson<T>(url: string): Promise<T | null> {
 export function snapshotMove(name: string): RawMove | null {
   const entry = SNAPSHOT_MOVES[name];
   if (!entry) return null;
-  const [type, power, accuracy, damageClass] = entry;
-  return { name, power, accuracy, type: { name: type }, damage_class: { name: damageClass } };
+  const [type, power, accuracy, damageClass, pp, category, target, statChanges] = entry;
+  return {
+    name, power, accuracy, pp, type: { name: type }, damage_class: { name: damageClass },
+    target: { name: target }, meta: category ? { category: { name: category } } : null,
+    stat_changes: statChanges.map(([stat, change]) => ({ change, stat: { name: stat } })),
+  };
 }
 
 function getMove(url: string): Promise<RawMove | null> {

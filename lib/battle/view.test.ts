@@ -11,7 +11,7 @@ const A = [mon('charizard'), mon('mr-mime')];
 const B = [mon('azumarill')];
 const names = teamNames(A, B);
 const run = (events: BattleEvent[], v: BattleView = initView(A, B)) => events.reduce((s, e) => applyEvent(s, e, names), v);
-const flamethrower = { name: 'flamethrower', type: 'fire' as const, power: 90, accuracy: 100, damageClass: 'special' as const };
+const flamethrower = { name: 'flamethrower', type: 'fire' as const, power: 90, accuracy: 100, damageClass: 'special' as const, pp: 10 };
 
 describe('battle view', () => {
   it('starts at full HP with nobody active', () => {

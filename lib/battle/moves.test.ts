@@ -4,7 +4,7 @@ import type { Combatant } from './damage';
 import type { Move } from './types';
 
 const m = (name: string, type: Move['type'], power: number, damageClass: Move['damageClass'] = 'special', accuracy: number | null = 100): Move =>
-  ({ name, type, power, accuracy, damageClass });
+  ({ name, type, power, accuracy, damageClass, pp: 10 });
 
 describe('autoMoveset', () => {
   it('prioritizes natural attacks, fills from legal coverage, and never repeats moves', () => {

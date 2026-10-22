@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeMove, normalizePokemon } from './normalize';
+import { normalizeMove, normalizePokemon, levelUpLevels, pixelSprites } from './normalize';
 import type { RawMove, RawPokemon } from './normalize';
 
 const rawMove = (name: string, type: string, power: number | null, cls: string, accuracy: number | null = 100): RawMove =>
@@ -26,10 +26,9 @@ const raw: RawPokemon = {
 
 describe('normalizeMove', () => {
   it('keeps damaging moves', () => {
-    expect(normalizeMove(rawMove('flamethrower', 'fire', 90, 'special'))).toEqual({ name: 'flamethrower', type: 'fire', power: 90, accuracy: 100, damageClass: 'special' });
+    expect(normalizeMove(rawMove('flamethrower', 'fire', 90, 'special'))).toEqual({ name: 'flamethrower', type: 'fire', power: 90, accuracy: 100, damageClass: 'special', pp: 5 });
   });
-  it('drops status moves, powerless moves, and unknown types', () => {
-    expect(normalizeMove(rawMove('swords-dance', 'normal', null, 'status'))).toBeNull();
+  it('drops powerless moves and unknown types', () => {
     expect(normalizeMove(rawMove('counter', 'fighting', null, 'physical'))).toBeNull();
     expect(normalizeMove(rawMove('tera-blast', 'stellar', 80, 'special'))).toBeNull();
   });
@@ -62,7 +61,64 @@ describe('normalizePokemon', () => {
     const p = normalizePokemon(raw, [rawMove('flamethrower', 'fire', 90, 'special'), rawMove('flamethrower', 'fire', 90, 'special'), rawMove('roost', 'flying', null, 'status')]);
     expect(p.types).toEqual(['fire', 'flying']);
     expect(p.baseStats).toEqual({ hp: 78, atk: 84, def: 78, spa: 109, spd: 85, spe: 100 });
-    expect(p.sprites).toEqual({ front: 'sd-front.gif', back: 'back.png', artwork: 'art.png' });
+    expect(p.sprites).toEqual({ front: expect.stringContaining('heartgold-soulsilver/6.png'), back: expect.stringContaining('back/6.png'), artwork: 'art.png' });
+    expect(normalizePokemon({ ...raw, id: 700 }, []).sprites).toEqual({ front: 'sd-front.gif', back: 'back.png', artwork: 'art.png' });
     expect(p.movePool.map(m => m.name)).toEqual(['flamethrower']);
+  });
+});
+
+const statMove = (name: string, pp: number, target: string, category: string | null, changes: [number, string][]): RawMove => ({
+  name, power: null, accuracy: 100, type: { name: 'normal' }, damage_class: { name: 'status' }, pp,
+  target: { name: target }, meta: category ? { category: { name: category } } : null,
+  stat_changes: changes.map(([change, stat]) => ({ change, stat: { name: stat } })),
+});
+
+describe('stat moves', () => {
+  it('keeps pure stat moves with pp, target and stat changes', () => {
+    expect(normalizeMove(statMove('growl', 40, 'all-opponents', 'net-good-stats', [[-1, 'attack']]))).toEqual({
+      name: 'growl', type: 'normal', power: 0, accuracy: 100, damageClass: 'status', pp: 40, target: 'foe',
+      statChanges: [{ stat: 'atk', change: -1 }],
+    });
+    const sd = normalizeMove(statMove('swords-dance', 20, 'user', 'net-good-stats', [[2, 'attack']]));
+    expect(sd?.target).toBe('self');
+  });
+  it('drops status moves that do more than change stats', () => {
+    expect(normalizeMove(statMove('thunder-wave', 20, 'selected-pokemon', 'ailment', []))).toBeNull();
+    expect(normalizeMove(statMove('odd', 20, 'user', null, [[1, 'attack']]))).toBeNull();
+  });
+});
+
+describe('levelUpLevels', () => {
+  const entry = (name: string, vg: string, level: number, method = 'level-up'): RawPokemon['moves'][number] => ({
+    move: { name, url: '' },
+    version_group_details: [{ move_learn_method: { name: method }, version_group: { name: vg }, level_learned_at: level }],
+  });
+  it('prefers HGSS level-up levels, then the newest version group', () => {
+    const both = { ...raw, moves: [entry('ember', 'heartgold-soulsilver', 10), entry('ember', 'scarlet-violet', 7)] };
+    expect(levelUpLevels(both).get('ember')).toBe(10);
+    const svOnly = { ...raw, moves: [entry('ember', 'scarlet-violet', 7), entry('ember', 'sword-shield', 9)] };
+    expect(levelUpLevels(svOnly).get('ember')).toBe(7);
+    const zero = { ...raw, moves: [entry('tackle', 'heartgold-soulsilver', 0), entry('x', 'heartgold-soulsilver', 5, 'machine')] };
+    expect(levelUpLevels(zero).get('tackle')).toBe(1);
+    expect(levelUpLevels(zero).has('x')).toBe(false);
+  });
+});
+
+describe('pixelSprites', () => {
+  const base = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions';
+  it('uses HGSS, then BW pixel sprites', () => {
+    expect(pixelSprites(6)).toEqual({
+      front: `${base}/generation-iv/heartgold-soulsilver/6.png`,
+      back: `${base}/generation-iv/heartgold-soulsilver/back/6.png`,
+    });
+    expect(pixelSprites(500)).toEqual({
+      front: `${base}/generation-v/black-white/500.png`,
+      back: `${base}/generation-v/black-white/back/500.png`,
+    });
+    expect(pixelSprites(700)).toEqual({ front: null, back: null });
+  });
+  it('is used by normalizePokemon, keeping Showdown sprites past gen 5', () => {
+    expect(normalizePokemon(raw, []).sprites.front).toContain('heartgold-soulsilver/6.png');
+    expect(normalizePokemon({ ...raw, id: 700 }, []).sprites.front).toBe('sd-front.gif');
   });
 });

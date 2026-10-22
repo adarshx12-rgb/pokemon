@@ -4,7 +4,9 @@ export const TYPE_NAMES = [
 ] as const;
 
 export type TypeName = (typeof TYPE_NAMES)[number];
-export type DamageClass = 'physical' | 'special';
+export type DamageClass = 'physical' | 'special' | 'status';
+export type StageStat = 'atk' | 'def' | 'spa' | 'spd' | 'spe' | 'accuracy' | 'evasion';
+export interface StatChange { stat: StageStat; change: number }
 
 export interface Move {
   name: string; // PokéAPI slug, e.g. "fire-blast"
@@ -12,8 +14,14 @@ export interface Move {
   power: number;
   accuracy: number | null; // null = never misses
   damageClass: DamageClass;
+  pp: number;
+  statChanges?: StatChange[]; // stat moves only
+  target?: 'self' | 'foe'; // stat moves only
+  level?: number; // level-up level in the chosen version group; absent when not learned by level-up
   learnMethods?: string[]; // How this particular species learns the move, from PokéAPI.
 }
+
+export const isStatMove = (m: Move) => m.damageClass === 'status';
 
 export interface StatBlock { hp: number; atk: number; def: number; spa: number; spd: number; spe: number }
 

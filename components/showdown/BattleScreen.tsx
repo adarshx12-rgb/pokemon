@@ -46,7 +46,9 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
 
   useEffect(() => {
     if (!playing) return;
-    const delay = index === 0 ? 0 : eventDelay(events[index - 1].kind, view.message, speed);
+    const prev = index === 0 ? null : events[index - 1];
+    const maxHp = prev && 'side' in prev && 'index' in prev ? view.maxHp[prev.side][prev.index] : undefined;
+    const delay = prev ? eventDelay(prev, view.message, speed, maxHp) : 0;
     const t = setTimeout(() => {
       if (index === events.length) {
         setIndex(i => i + 1);
@@ -60,7 +62,7 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
       setIndex(i => i + 1);
     }, delay);
     return () => clearTimeout(t);
-  }, [playing, index, speed, events, names, view.message]);
+  }, [playing, index, speed, events, names, view.message, view.maxHp]);
 
   useEffect(() => {
     if (!playing) busy.current = false;

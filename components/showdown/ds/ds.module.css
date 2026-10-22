@@ -77,3 +77,31 @@
 .extras { display: flex; gap: 8px; margin-top: 8px; }
 .extras button { flex: 1; min-height: 36px; border-radius: 8px; border: 1px solid #fff6; background: #222a32; color: #e8e8e8; font-family: inherit; font-size: 11px; cursor: pointer; }
 .result { width: 100%; min-height: 48px; margin-top: 8px; border-radius: 10px; border: 2px solid #fff8; background: linear-gradient(#e8c030, #b08a10); color: #222; font-family: inherit; font-weight: 900; cursor: pointer; }
+
+/* Builder preview (bottom screen) */
+.builderMenu { display: flex; flex-direction: column; gap: 8px; min-height: 230px; color: #f8f8f8; }
+.builderMenu button { font-family: inherit; cursor: pointer; }
+.builderMenu button:disabled { cursor: not-allowed; opacity: .55; }
+.builderMenu .fightBtn { flex: 1; }
+
+/* Result */
+.resultWrap { width: min(420px, 100%); margin-inline: auto; }
+.resultMenu { display: flex; flex-direction: column; gap: 8px; color: #f8f8f8; }
+.resultSides { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.resultSide { min-width: 0; background: #222a32; border: 1px solid #fff4; border-radius: 8px; padding: 6px 8px; }
+.resultSide h3 { margin: 0; font-size: 10px; letter-spacing: 1px; color: #cfe0ff; }
+.mvp { margin: 3px 0 5px; font-size: 10px; color: #ffe27a; }
+.mvp strong { display: block; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.resultSide ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.resultSide li { font-size: 9px; }
+.resultSide li > div:first-child { display: flex; justify-content: space-between; gap: 4px; }
+.resultSide li > div:first-child > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.resultSide li > div:first-child > span:last-child { flex-shrink: 0; color: #b8c4d0; }
+.dmgTrack { height: 4px; margin-top: 2px; background: #111; border-radius: 2px; overflow: hidden; }
+.dmgTrack i { display: block; height: 100%; background: #5b8def; }
+.dmgTrack i[data-mvp="true"] { background: #ffd84a; }
+.resultActions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.resultActions button { min-height: 48px; border-radius: 10px; border: 2px solid #fff8; font-family: inherit; font-weight: 900; font-size: 13px; cursor: pointer; }
+.resultGold { background: linear-gradient(#e8c030, #b08a10); color: #222; }
+.resultGrey { background: #5a6470; color: #fff; }
+.capNote { font-size: .8em; color: #606870; margin-top: 2px; }

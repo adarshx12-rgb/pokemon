@@ -1,46 +1,56 @@
 import type { EndEvent, Side, TeamMember } from '@/lib/battle/types';
 import { displayName } from '@/lib/pokeapi/names';
+import { DsConsole } from './ds/DsConsole';
+import { TopScreen } from './ds/TopScreen';
+import fxStyles from './ds/fx.module.css';
+import dsStyles from './ds/ds.module.css';
+import { PokemonSprite } from './PokemonSprite';
 
-interface Props { result: EndEvent; teamA: TeamMember[]; teamB: TeamMember[]; onRematch: () => void; onEdit: () => void }
+interface Props { result: EndEvent; teamA: TeamMember[]; teamB: TeamMember[]; lead: number; classic: boolean; onRematch: () => void; onEdit: () => void }
 
-export function ResultScreen({ result, teamA, teamB, onRematch, onEdit }: Props) {
+export function ResultScreen({ result, teamA, teamB, lead, classic, onRematch, onEdit }: Props) {
   const won = result.winner === 'A';
+  const winner = (won ? teamA : teamB)[lead] ?? (won ? teamA : teamB)[0];
   const column = (side: Side, team: TeamMember[], title: string) => {
     const dealt = result.damageDealt[side];
     const mvp = dealt.indexOf(Math.max(...dealt));
     const max = Math.max(1, ...dealt);
     return (
-      <div className="border-gold-frame rounded-3xl bg-surface/60 p-6">
-        <p className="text-sm text-muted">{title}</p>
-        <p className="mt-2 font-display text-3xl">MVP: <span className="text-gold-gradient italic">{displayName(team[mvp].pokemon.name)}</span></p>
-        <ul className="mt-6 space-y-3">
+      <section className={dsStyles.resultSide} data-testid={`result-${side}`} aria-label={title}>
+        <h3>{title}</h3>
+        <p className={dsStyles.mvp}>MVP: <strong>{displayName(team[mvp].pokemon.name).toUpperCase()}</strong></p>
+        <ul>
           {team.map((m, i) => (
-            <li key={i} className="text-sm">
-              <div className="flex justify-between"><span>{displayName(m.pokemon.name)}</span><span className="text-muted">{dealt[i]} dmg</span></div>
-              <div className="mt-1 h-1.5 rounded-full bg-line">
-                <div className={`h-full rounded-full ${i === mvp ? 'bg-gold-light' : 'bg-gold-dark'}`} style={{ width: `${(dealt[i] / max) * 100}%` }} />
-              </div>
+            <li key={i}>
+              <div><span>{displayName(m.pokemon.name).toUpperCase()}</span><span>{dealt[i]} dmg</span></div>
+              <div className={dsStyles.dmgTrack}><i data-mvp={i === mvp} style={{ width: `${(dealt[i] / max) * 100}%` }} /></div>
             </li>
           ))}
         </ul>
-      </div>
+      </section>
     );
   };
 
   return (
-    <div className="mx-auto max-w-4xl text-center">
-      <h2 data-testid="result-banner" className={`font-display text-5xl italic sm:text-8xl md:text-[10rem] ${won ? 'text-gold-gradient' : 'text-muted'}`}>
-        {won ? 'VICTORY' : 'DEFEAT'}
-      </h2>
-      {result.reason === 'turnCap' && <p className="text-sm text-muted">Decided on remaining HP after the 500-turn limit.</p>}
-      <div className="mt-12 grid gap-6 text-left md:grid-cols-2">
-        {column('A', teamA, 'Your team')}
-        {column('B', teamB, 'Opponent')}
-      </div>
-      <div className="mt-12 flex justify-center gap-4">
-        <button type="button" className="btn-gold" onClick={onRematch}>Rematch</button>
-        <button type="button" className="btn-ghost" onClick={onEdit}>Edit teams</button>
-      </div>
+    <div className={dsStyles.resultWrap}>
+      <DsConsole layout="ds" testId="result"
+        top={<TopScreen
+          player={won ? <div className={fxStyles.sprite}><PokemonSprite pokemon={winner.pokemon} side="A" classic={classic} /></div> : undefined}
+          opponent={won ? undefined : <div className={fxStyles.sprite}><PokemonSprite pokemon={winner.pokemon} side="B" classic={classic} /></div>}
+          message={<div>
+            <p data-testid="result-banner">{won ? 'RIVAL was defeated!' : 'You were defeated!'}</p>
+            {result.reason === 'turnCap' && <p className={dsStyles.capNote}>Decided on remaining HP after the 500-turn limit.</p>}
+          </div>} />}
+        bottom={<div className={dsStyles.resultMenu}>
+          <div className={dsStyles.resultSides}>
+            {column('A', teamA, 'Your team')}
+            {column('B', teamB, 'Opponent')}
+          </div>
+          <div className={dsStyles.resultActions}>
+            <button type="button" className={dsStyles.resultGold} onClick={onRematch}>REMATCH</button>
+            <button type="button" className={dsStyles.resultGrey} onClick={onEdit}>EDIT TEAMS</button>
+          </div>
+        </div>} />
     </div>
   );
 }

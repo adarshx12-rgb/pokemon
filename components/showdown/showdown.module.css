@@ -19,45 +19,9 @@
 .builder { display: grid; grid-template-columns: minmax(0, 1fr) 410px; gap: 24px; align-items: start; }
 .arenaColumn { min-width: 0; position: sticky; top: 90px; }
 .teamsColumn { display: grid; gap: 12px; min-width: 0; }
-.screenFrame { border: 1px solid #a1abaa; border-radius: 12px 12px 28px 12px; padding: 12px; background: linear-gradient(135deg, #d5dada 0%, #aeb9b8 52%, #7e8e8c 100%); box-shadow: inset 0 1px #f4f8f7, 0 16px 40px #0006, 0 5px #53605c; color: #263f35; }
-.screenLabel { display: flex; justify-content: space-between; gap: 8px; padding: 1px 5px 11px; font-size: 9px; font-weight: 500; letter-spacing: .02em; }
-.screen { border: 5px solid #35493f; border-radius: 5px; overflow: hidden; background: #35493f; box-shadow: 0 1px #e3ebe7; }
-.field { position: relative; aspect-ratio: 1.8; overflow: hidden; background: linear-gradient(180deg, #b4d6de 0%, #ddeddc 24%, #d4ebcc 65%, #bdddb2 100%); isolation: isolate; }
-.field::before { content: ''; position: absolute; inset: 0 0 auto; height: 28%; background: repeating-linear-gradient(0deg, transparent 0 7px, #fffffc45 8px 9px, transparent 10px 14px); opacity: .8; pointer-events: none; }
-.farPlatform, .nearPlatform { position: absolute; border-radius: 50%; background: radial-gradient(ellipse, #b0db7e 0% 35%, #bddf8b 36% 53%, #d4e9a1 54% 63%, #abcc8155 64% 70%, transparent 72%); z-index: -1; }
-.farPlatform { right: 1%; top: 39%; width: 48%; height: 24%; transform: rotate(-3deg); }
-.nearPlatform { left: -11%; bottom: -12%; width: 64%; height: 35%; transform: rotate(-3deg); }
-.emptyField { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; color: #355540; font-family: var(--font-press-start); font-size: clamp(9px, 1vw, 13px); line-height: 2.2; }
-.opponentPanel { position: absolute; top: 10%; left: 4%; width: 43%; z-index: 2; }
-.playerPanel { position: absolute; bottom: 5%; right: 3%; width: 45%; z-index: 2; }
-.opponentSprite { position: absolute; right: 8%; top: 6%; width: 33%; height: 50%; }
-.playerSprite { position: absolute; bottom: -3%; left: 5%; width: 38%; height: 58%; }
 .pokemonSprite { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 9px 2px #375b3828); }
-.screenFrame[data-testid="arena-preview"] .pokemonSprite { animation: arrival .45s ease-out both; }
 .playerArtwork { transform: scaleX(-1); }
 .classicSprite { image-rendering: pixelated; }
-.hpPanel { border: 3px solid #465945; background: #f7f8da; border-radius: 10px 3px 10px 3px; padding: 10px 12px 7px; color: #2b3930; box-shadow: 5px 5px 0 #6c826080, inset 0 0 0 2px #d8dec2; }
-.hpHeading { display: flex; justify-content: space-between; gap: 5px; font-weight: 700; font-size: clamp(11px, 1.3vw, 19px); line-height: 1.2; }
-.hpHeading > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.hpHeading > span:last-child { font-size: .72em; flex-shrink: 0; padding-top: 3px; }
-.hpRow { display: flex; gap: 5px; align-items: center; background: #5d6955; border-radius: 12px; padding: 2px 3px 2px 6px; margin: 6px 0 5px 15%; }
-.hpRow > span { color: #f8d45a; font-size: 10px; font-weight: 700; line-height: 1; }
-.hpTrack { flex: 1; background: #34433b; height: 9px; border: 2px solid #f2f2d9; border-radius: 6px; overflow: hidden; }
-.hpFill { height: 100%; box-shadow: inset 0 2px #ffffff66; transition: width .6s ease, background-color .6s ease; }
-.hpFooter { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: clamp(9px, 1vw, 13px); }
-.remaining { display: flex; gap: 3px; }
-.remaining .ball { width: 10px; height: 10px; border-width: 1px; box-shadow: none; }
-.remaining .ball::after { width: 4px; height: 4px; border-width: 1px; }
-.console { display: grid; grid-template-columns: 1.1fr 1fr; min-height: 135px; border-top: 5px solid #35493f; gap: 5px; background: #35493f; }
-.dialogue { display: flex; align-items: center; background: #285c68; color: #fbf9e5; padding: 20px; border: 4px solid #d6c383; box-shadow: inset 0 0 0 3px #497a80; border-radius: 3px; font-family: var(--font-press-start); font-size: clamp(8px, .86vw, 12px); line-height: 2.2; }
-.commands { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; background: #f1f0e8; color: #35423c; border: 4px solid #8b909c; box-shadow: inset 0 0 0 2px #d1d4d3; padding: 10px; border-radius: 3px; }
-.commands > button { text-align: left; font-family: var(--font-press-start); font-size: clamp(8px, .8vw, 11px); line-height: 1.65; padding: 10px 7px; border-radius: 2px; transition: background-color .15s; }
-.commands > button:hover:not(:disabled) { background: #dce3d4; }
-.commands .fight { color: #a63438; }
-.commands .fight > span { display: inline-block; font-size: .8em; }
-.screenFoot { padding: 13px 8px 2px; display: flex; align-items: center; gap: 7px; font-size: 9px; }
-.powerLight { width: 5px; height: 5px; border-radius: 50%; background: #478154; box-shadow: 0 0 0 2px #ffffff35; }
-.speaker { margin-left: auto; color: #546862; font-size: 13px; letter-spacing: 3px; }
 .arenaHint { display: flex; justify-content: space-between; gap: 16px; color: #a8b4ab; margin: 19px 0 23px; font-size: 10px; line-height: 1.8; }
 .rules { margin-top: 22px; padding-top: 20px; border-top: 1px solid #303b35; color: #b0b9b2; font-size: 11px; line-height: 1.9; }
 .rules summary { cursor: pointer; color: #e2e8de; }
@@ -125,52 +89,11 @@
 .moves label { min-width: 0; }
 .moves select { width: 100%; height: 27px; padding: 3px 5px; background: #0b120f; border: 1px solid #41584b; border-radius: 3px; color: #d7e3d5; font-size: 10px; text-overflow: ellipsis; }
 .battle { width: min(900px, 100%); margin-inline: auto; }
-.battle .dialogue { font-size: clamp(8px, .92vw, 12px); }
 .battleHelp { text-align: center; font-size: 11px; color: #a5b2a8; margin-top: 24px; }
-.battle .console { grid-template-columns: 1fr; }
-.battle .dialogue { min-height: 110px; }
-.battle .commands { gap: 12px; padding: 14px; }
-/* Interim bottom screen (replaced by the DS menus): one column; only the side about to move keeps its buttons. */
-.battle .commands { grid-template-columns: 1fr; }
-.moveMenu[data-next="true"] { order: -1; }
-.moveMenu[data-next="false"] h2 { flex-direction: row; justify-content: space-between; align-items: baseline; margin-bottom: 0; }
-.moveMenu[data-next="false"] .moveButtons { display: none; }
-.turnPrompt { margin-top: 12px; font-family: var(--font-jetbrains); font-size: 11px; line-height: 1.6; color: #f5e49e; }
-.moveMenu { min-width: 0; padding: 10px; border: 2px solid #b8beb1; border-radius: 3px; }
-.moveMenu[data-active="true"] { border-color: #466c52; background: #e0ead8; box-shadow: inset 0 0 0 1px #f7f8da; }
-.moveMenu h2 { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; font-size: 14px; font-weight: 700; }
-.moveMenu h2 small { font-size: 10px; font-weight: 400; }
-.moveButtons { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
-.moveButtons button { min-width: 0; min-height: 80px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; text-align: left; padding: 10px 8px; border: 1px solid #89947e; border-left-width: 5px; background: #fffef0; box-shadow: 0 2px #87917d; border-radius: 2px; }
-.moveButtons button:hover:not(:disabled) { background: #f7edb7; transform: translateY(-1px); }
-.moveButtons button { touch-action: manipulation; }
-.moveButtons button:active:not(:disabled) { transform: translateY(1px); box-shadow: none; }
-.moveButtons strong { font-family: var(--font-press-start); font-size: 9px; line-height: 1.8; overflow-wrap: anywhere; }
-.moveButtons span, .moveButtons small { font-size: 10px; line-height: 1.5; }
-.battleActions { grid-column: 1 / -1; display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; border-top: 1px solid #b8beb1; padding-top: 10px; }
-.battleActions button { padding: 8px 10px; min-height: 40px; font-size: 11px; border: 1px solid #89947e; border-radius: 2px; }
-.battleActions button:hover { background: #dce3d4; }
-@media (min-width: 641px) {
-  .battle .field { height: clamp(190px, calc(100svh - 520px), 420px); aspect-ratio: auto; }
-  .battle .console { grid-template-columns: .7fr 2fr; }
-  .battle .commands { padding: 8px; gap: 8px; }
-  .battle .dialogue { padding: 12px; }
-  .battle .hpPanel { padding: 7px 10px; }
-  .battle .hpHeading { font-size: 15px; }
-  .moveMenu { padding: 7px; }
-  .moveButtons button { padding: 7px 6px; gap: 4px; }
-  .moveButtons strong { font-size: 8px; }
-}
 .textBox { width: 100%; }
-.battle .commands > button { font-size: clamp(8px, .8vw, 11px); }
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 32px); z-index: 50; display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: #213c2f; border: 1px solid #9bbea4; border-radius: 6px; box-shadow: 0 10px 30px #0006; font-size: 12px; }
 .toast button { text-decoration: underline; text-underline-offset: 3px; }
-@keyframes arrival { from { opacity: 0; translate: 0 8px; } to { opacity: 1; translate: 0 0; } }
 @media (min-width: 1500px) { .builder { grid-template-columns: minmax(0, 1fr) 420px; } }
-@media (min-width: 1151px) {
-  .builder .field { height: clamp(260px, calc(100svh - 430px), 500px); aspect-ratio: auto; }
-  .builder .console { min-height: 108px; }
-}
 @media (min-width: 1151px) and (max-height: 800px) {
   .page { padding-top: 78px; }
   .header { margin-bottom: 16px; }
@@ -182,11 +105,6 @@
   .builder { grid-template-columns: minmax(0, 1fr); }
   .arenaColumn { position: static; }
   .teamsColumn { grid-template-columns: 1fr 1fr; align-items: start; }
-  .field { aspect-ratio: 1.95; }
-  .dialogue { font-size: 12px; }
-  .commands > button { font-size: 11px; }
-  .hpHeading { font-size: 20px; }
-  .hpFooter { font-size: 12px; }
 }
 @media (max-width: 640px) {
   .page { padding: 100px 14px 70px; }
@@ -196,29 +114,6 @@
   .visualMode button { font-size: 9px; padding: 7px 11px; }
   .teamsColumn { grid-template-columns: 1fr; }
   .builder { gap: 22px; }
-  .screenFrame { padding: 7px; border-radius: 8px 8px 20px 8px; }
-  .screenLabel { font-size: 7px; padding: 3px 3px 9px; }
-  .screen { border-width: 3px; }
-  .field { aspect-ratio: 1.5; }
-  .console { min-height: 112px; gap: 3px; border-top-width: 3px; grid-template-columns: 1fr 1fr; }
-  .dialogue { border-width: 3px; padding: 12px; font-size: 8px; line-height: 2.1; }
-  .commands { border-width: 3px; padding: 5px; gap: 2px; }
-  .battle .commands { grid-template-columns: 1fr; padding: 8px; gap: 8px; }
-  .battle .dialogue { min-height: 110px; font-size: 9px; }
-  .moveMenu { padding: 8px; }
-  .commands > button, .battle .commands > button { font-size: 8px; padding: 7px 3px; }
-  .hpPanel { padding: 6px 7px 5px; border-width: 2px; border-radius: 6px 2px; box-shadow: 3px 3px #6c826080; }
-  .hpHeading { font-size: 11px; }
-  .hpHeading > span:last-child { font-size: 8px; padding-top: 1px; }
-  .hpFooter { font-size: 8px; gap: 4px; flex-wrap: wrap; }
-  .hpFooter > span { margin-left: auto; }
-  .hpRow { margin: 5px 0; gap: 3px; }
-  .hpRow > span { font-size: 8px; }
-  .hpTrack { height: 7px; border-width: 1px; }
-  .remaining { gap: 2px; }
-  .remaining .ball { width: 8px; height: 8px; }
-  .remaining .ball::after { width: 3px; height: 3px; }
-  .screenFoot { font-size: 7px; padding: 10px 4px 2px; }
   .arenaHint { font-size: 8px; gap: 10px; margin-block: 16px; }
   .teamPanel { padding: 12px; }
   .teamHeading { gap: 5px; }
@@ -232,14 +127,7 @@
   .stats dt { font-size: 7px; }
   .rules { margin-top: 15px; padding-top: 15px; font-size: 10px; }
   .toast { font-size: 10px; gap: 12px; padding: 12px; }
-  .battle .screenFrame { scroll-margin-top: 72px; }
   /* Only the side about to move keeps its buttons, directly under the arena, so a phone never scrolls between turns. */
-  .moveMenu[data-next="true"] { order: -1; }
-  .moveMenu[data-next="false"] h2 { flex-direction: row; justify-content: space-between; align-items: baseline; margin-bottom: 0; font-size: 12px; }
-  .moveMenu[data-next="false"] .moveButtons { display: none; }
-  .moveButtons { gap: 6px; }
-  .moveButtons button { min-height: 64px; padding: 8px 7px; gap: 4px; }
-  .moveButtons span, .moveButtons small { font-size: 9px; line-height: 1.4; }
   .battleHelp { margin-top: 16px; padding-inline: 8px; }
 }
 /* Touch screens: 16px text stops iOS from zooming into focused fields, and taller controls are easier to hit. */

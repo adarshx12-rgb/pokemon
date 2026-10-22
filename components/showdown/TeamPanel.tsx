@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { TypeBadge } from '@/components/TypeBadge';
 import { moveLabel } from '@/lib/battle/view';
 import { statsAtLevel50 } from '@/lib/battle/stats';
-import type { Side, StatBlock, TeamMember } from '@/lib/battle/types';
+import { isStatMove, type Side, type StatBlock, type TeamMember } from '@/lib/battle/types';
 import { displayName } from '@/lib/pokeapi/names';
 import { MAX_TEAM, type TeamsAction } from '@/lib/showdown/teams';
 import { PokemonSearch } from './PokemonSearch';
@@ -78,7 +78,7 @@ export function TeamPanel({ side, title, team, names, loading, dispatch, onAdd, 
                   {moveGroups.filter(group => group.moves.length).map(group => <optgroup key={group.label} label={group.label}>
                     {group.moves.map(move => <option key={move.name} value={move.name}
                       disabled={member.moves.some((selectedMove, index) => index !== slot && selectedMove.name === move.name)}>
-                      {moveLabel(move.name)} ({move.power})
+                      {moveLabel(move.name)} ({isStatMove(move) ? '—' : move.power}) PP {move.pp}
                     </option>)}
                   </optgroup>)}
                 </select></label>

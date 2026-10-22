@@ -24,7 +24,7 @@ interface Step { id: number; event: BattleEvent; fx: FxPlay | null; out: boolean
 
 const sideOrder = (e: BattleEvent) => ('side' in e && e.side === 'A' ? 1 : 0);
 
-interface Props { teamA: TeamMember[]; teamB: TeamMember[]; seed: number; classic: boolean; onFinish: (end: EndEvent) => void; onEdit: () => void; onReset: () => void }
+interface Props { teamA: TeamMember[]; teamB: TeamMember[]; seed: number; classic: boolean; onFinish: (end: EndEvent, lead: number) => void; onEdit: () => void; onReset: () => void }
 
 export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, onReset }: Props) {
   const [battle] = useState(() => createBattle(teamA, teamB, seed));
@@ -202,7 +202,7 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
             onSwitch={i => play(battle.switchTo(turnSide, i))}
             onReplace={i => play(battle.replace(turnSide, i))}
             onRun={onEdit} />
-          {end && !playing && <button type="button" className={dsStyles.result} onClick={() => onFinish(end)}>View result</button>}
+          {end && !playing && <button type="button" className={dsStyles.result} onClick={() => onFinish(end, view.active[end.winner] ?? 0)}>View result</button>}
           <div className={dsStyles.extras}>
             <button type="button" onClick={onReset}>Reset battle</button>
             <button type="button" onClick={onEdit}>Edit teams</button>

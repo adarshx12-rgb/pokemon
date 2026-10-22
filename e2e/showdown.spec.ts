@@ -48,7 +48,7 @@ async function finishBattle(page: Page) {
     await finishAttack(page);
   }
   await page.getByRole('button', { name: 'View result', exact: true }).click();
-  await expect(page.getByTestId('result-banner')).toHaveText(/VICTORY|DEFEAT/);
+  await expect(page.getByTestId('result-banner')).toHaveText(/was defeated/);
 }
 
 // Logs, in order, each new text-box message and the first appearance of the watched elements in the battle stage.
@@ -107,6 +107,9 @@ test('empty opening, artwork, pointer/keyboard order, battle, rematch and reset'
   await expect(page.getByTestId('arena-pokemon-A')).toHaveAttribute('alt', 'Charizard');
   await page.getByTestId('slot-A-0').press('Alt+ArrowRight');
   await expect(page.getByTestId('arena-pokemon-A')).toHaveAttribute('alt', 'Pikachu');
+  await expect(page.getByTestId('arena-pokemon-A')).toHaveAttribute('src', /back\/25.png/); // pixel sprites are the default
+  await page.getByRole('button', { name: 'HD artwork' }).click();
+  await expect(page.getByTestId('arena-pokemon-A')).toHaveAttribute('src', /official-artwork\/25.png/);
   await page.getByRole('button', { name: 'Classic sprites' }).click();
   await expect(page.getByTestId('arena-pokemon-A')).toHaveAttribute('src', /back\/25.png/);
   await page.getByRole('button', { name: 'HD artwork' }).click();
@@ -153,14 +156,30 @@ test('empty opening, artwork, pointer/keyboard order, battle, rematch and reset'
   await expect(page.getByTestId('menu-fight')).toBeEnabled(); // the opening replays first
   expect(await hpValues()).toEqual(before);
   await finishBattle(page);
-  await page.getByRole('button', { name: 'Rematch', exact: true }).click();
+  await expect(page.getByTestId('result')).toBeVisible();
+  await expect(page.getByTestId('result').locator('img')).toHaveCount(1); // the winner's sprite
+  await page.getByRole('button', { name: 'REMATCH', exact: true }).click();
   await expect(page.getByTestId('battle-stage')).toBeVisible();
   await finishBattle(page);
-  await page.getByRole('button', { name: 'Edit teams', exact: true }).click();
-  await page.getByRole('button', { name: 'Reset', exact: true }).click();
+  await page.getByRole('button', { name: 'EDIT TEAMS', exact: true }).click();
+  await page.getByRole('button', { name: 'RESET', exact: true }).click();
   await expect(page.locator('[data-testid^="slot-"]')).toHaveCount(0);
   await expect(page.getByTestId('arena-preview').locator('img')).toHaveCount(0);
   expect(errors).toEqual([]);
+});
+
+test('move menus show PP and mark stat moves instead of a power', async ({ page }) => {
+  await page.route('**/api/pokemon/*', async route => {
+    const name = decodeURIComponent(new URL(route.request().url()).pathname.split('/').at(-1)!);
+    const base = pokemon(name);
+    await route.fulfill({ json: { ...base, movePool: [...base.movePool,
+      { name: 'swords-dance', power: 0, accuracy: null, type: 'normal', damageClass: 'status', pp: 20, target: 'self', statChanges: [{ stat: 'atk', change: 2 }], learnMethods: ['level-up'] }] } });
+  });
+  await page.goto('/showdown');
+  await add(page, 'A', 'pikachu');
+  const panel = page.getByRole('region', { name: /My team/ });
+  await expect(panel.locator('option[value="swords-dance"]').first()).toHaveText('SWORDS DANCE (—) PP 20');
+  await expect(panel.locator('option[value="tackle"]').first()).toHaveText('TACKLE (40) PP 10');
 });
 
 test('hp number counts down instead of jumping', async ({ page }) => {

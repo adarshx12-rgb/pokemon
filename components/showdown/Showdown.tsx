@@ -5,9 +5,12 @@ import { statsAtLevel50 } from '@/lib/battle/stats';
 import { displayName } from '@/lib/pokeapi/names';
 import { loadMember } from '@/lib/showdown/loadMember';
 import { EMPTY_TEAMS, MAX_TEAM, randomFillCount, teamsReducer } from '@/lib/showdown/teams';
-import { Arena } from './Arena';
 import { BattleScreen } from './BattleScreen';
-import { HpPanel } from './HpPanel';
+import { DsConsole } from './ds/DsConsole';
+import { HpBox } from './ds/HpBox';
+import { TopScreen } from './ds/TopScreen';
+import dsStyles from './ds/ds.module.css';
+import fxStyles from './ds/fx.module.css';
 import { MatchupPreview } from './MatchupPreview';
 import { PokemonSprite } from './PokemonSprite';
 import { ResultScreen } from './ResultScreen';
@@ -29,8 +32,8 @@ export function Showdown({ names }: { names: string[] }) {
   const [teams, dispatch] = useReducer(teamsReducer, EMPTY_TEAMS);
   const [phase, setPhase] = useState<Phase>('build');
   const [seed, setSeed] = useState(0);
-  const [classic, setClassic] = useState(false);
-  const [result, setResult] = useState<EndEvent | null>(null);
+  const [classic, setClassic] = useState(true); // pixel sprites by default
+  const [result, setResult] = useState<{ end: EndEvent; lead: number } | null>(null);
   const [loading, setLoading] = useState<Record<Side, boolean>>({ A: false, B: false });
   const busy = useRef<Record<Side, boolean>>({ A: false, B: false });
   const [toast, setToast] = useState<{ message: string; retry: () => void } | null>(null);
@@ -68,20 +71,15 @@ export function Showdown({ names }: { names: string[] }) {
     if (loading.A || loading.B) return;
     dispatch({ type: 'clear', side: 'A' }); dispatch({ type: 'clear', side: 'B' }); setToast(null);
   };
-  const focusTeam = (side: Side) => {
-    const input = document.getElementById(`pokemon-search-${side}`) as HTMLInputElement | null;
-    if (input && !input.disabled) input.focus();
-    else document.querySelector<HTMLButtonElement>(`[data-testid="slot-${side}-0"]`)?.focus();
-  };
   const previewPanel = (side: Side) => {
     const pokemon = teams[side][0]?.pokemon;
     if (!pokemon) return null;
     const hp = statsAtLevel50(pokemon.baseStats).hp;
-    return <HpPanel name={displayName(pokemon.name)} hp={hp} maxHp={hp} showNumbers={side === 'A'} fainted={teams[side].map(() => false)} />;
+    return <HpBox key={pokemon.name} name={displayName(pokemon.name).toUpperCase()} hp={hp} maxHp={hp} showNumbers={side === 'A'} fainted={teams[side].map(() => false)} side={side} />;
   };
   const previewSprite = (side: Side) => {
     const pokemon = teams[side][0]?.pokemon;
-    return pokemon ? <PokemonSprite key={pokemon.name} pokemon={pokemon} side={side} classic={classic} /> : null;
+    return pokemon ? <div className={fxStyles.sprite}><PokemonSprite key={pokemon.name} pokemon={pokemon} side={side} classic={classic} /></div> : null;
   };
   const prompt = loading.A || loading.B ? 'Getting your Pokémon ready…'
     : canBattle ? `${displayName(teams.A[0].pokemon.name)} is ready. Select Fight to choose your moves!`
@@ -102,14 +100,14 @@ export function Showdown({ names }: { names: string[] }) {
       {phase === 'build' && (
         <div className={styles.builder}>
           <div className={styles.arenaColumn}>
-            <Arena preview player={previewSprite('A')} opponent={previewSprite('B')} playerPanel={previewPanel('A')} opponentPanel={previewPanel('B')}
-              dialogue={<p aria-live="polite">{prompt}</p>}
-              commands={<>
-                <button type="button" data-testid="battle-start" className={styles.fight} disabled={!canBattle} onClick={startBattle}><span aria-hidden>▶</span> Fight</button>
-                <button type="button" onClick={() => focusTeam('A')}>Your team</button>
-                <button type="button" onClick={() => focusTeam('B')}>Opponent</button>
-                <button type="button" disabled={loading.A || loading.B || (!teams.A.length && !teams.B.length)} onClick={reset}>Reset</button>
-              </>} />
+            <DsConsole layout="ds" testId="arena-preview"
+              top={<TopScreen player={previewSprite('A')} opponent={previewSprite('B')} playerBox={previewPanel('A')} opponentBox={previewPanel('B')}
+                message={<p aria-live="polite">{prompt}</p>} />}
+              bottom={<div className={dsStyles.builderMenu}>
+                <h3 className={dsStyles.turnLabel}>TEAM SELECTION</h3>
+                <button type="button" data-testid="battle-start" className={dsStyles.fightBtn} disabled={!canBattle} onClick={startBattle}>FIGHT</button>
+                <button type="button" className={`${dsStyles.smallBtn} ${dsStyles.runBtn}`} disabled={loading.A || loading.B || (!teams.A.length && !teams.B.length)} onClick={reset}>RESET</button>
+              </div>} />
             <div className={styles.arenaHint}><span>1–6 Pokémon on each team</span><span>Drag Poké Balls to reorder · First ball leads</span></div>
             <MatchupPreview a={teams.A} b={teams.B} />
             <details className={styles.rules}>
@@ -127,8 +125,8 @@ export function Showdown({ names }: { names: string[] }) {
           </div>
         </div>
       )}
-      {phase === 'battle' && <BattleScreen key={seed} teamA={teams.A} teamB={teams.B} seed={seed} classic={classic} onReset={startBattle} onEdit={() => setPhase('build')} onFinish={end => { setResult(end); setPhase('result'); }} />}
-      {phase === 'result' && result && <ResultScreen result={result} teamA={teams.A} teamB={teams.B} onRematch={startBattle} onEdit={() => setPhase('build')} />}
+      {phase === 'battle' && <BattleScreen key={seed} teamA={teams.A} teamB={teams.B} seed={seed} classic={classic} onReset={startBattle} onEdit={() => setPhase('build')} onFinish={(end, lead) => { setResult({ end, lead }); setPhase('result'); }} />}
+      {phase === 'result' && result && <ResultScreen result={result.end} lead={result.lead} classic={classic} teamA={teams.A} teamB={teams.B} onRematch={startBattle} onEdit={() => setPhase('build')} />}
       {toast && (
         <div role="alert" className={styles.toast}>
           <span>{toast.message}</span><button type="button" onClick={toast.retry}>Retry</button>

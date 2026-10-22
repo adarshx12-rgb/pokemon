@@ -114,7 +114,7 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
     const idx = view.active[side];
     if (idx === null) return null;
     return (
-      <HpBox name={names[side][idx]} hp={view.hp[side][idx]} maxHp={view.maxHp[side][idx]} showNumbers
+      <HpBox key={`${side}-${idx}`} name={names[side][idx]} hp={view.hp[side][idx]} maxHp={view.maxHp[side][idx]} showNumbers
         fainted={view.fainted[side]} side={side} />
     );
   };

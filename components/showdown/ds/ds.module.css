@@ -15,7 +15,6 @@
 .foeSprite, .meSprite { position: absolute; aspect-ratio: 1; }
 .foeSprite { right: 13%; top: 8%; width: 26%; }
 .meSprite { left: 8%; bottom: 22%; width: 28%; }
-.foeSprite img, .meSprite img { image-rendering: pixelated; }
 .opponentBox { position: absolute; left: 4%; top: 7%; width: 44%; }
 .playerBox { position: absolute; right: 3%; bottom: 27%; width: 46%; }
 

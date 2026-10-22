@@ -146,6 +146,50 @@ test('hp number counts down instead of jumping', async ({ page }) => {
   expect(await number()).toBe(final);
 });
 
+test('a switch-in shows its HP bar at full value immediately', async ({ page }) => {
+  await page.goto('/showdown');
+  for (const [side, name] of [['A', 'pikachu'], ['A', 'charizard'], ['B', 'blastoise'], ['B', 'gengar']] as const) await add(page, side, name);
+  await page.clock.install();
+  await page.getByTestId('battle-start').click();
+  await expect(page.getByTestId('battle-stage')).toBeVisible();
+  const read = (side: 'A' | 'B') => page.getByTestId(`hp-box-${side}`).evaluate(box => {
+    const bar = box.querySelector('[role="progressbar"]')!;
+    return { label: bar.getAttribute('aria-label'), now: Number(bar.getAttribute('aria-valuenow')), shown: Number(box.querySelector('[data-testid^="hp-number"]')!.textContent!.split('/')[0]) };
+  });
+  const first = { A: (await read('A')).label, B: (await read('B')).label };
+  for (let turn = 0; turn < 60; turn++) {
+    await page.locator('[data-testid^="move-"]:enabled').first().click();
+    for (let i = 0; i < 800; i++) {
+      await page.clock.runFor(16);
+      for (const side of ['A', 'B'] as const) {
+        const hp = await read(side);
+        if (hp.label !== first[side]) { expect(hp.shown).toBe(hp.now); return; }
+      }
+      if (i > 0 && (await page.locator('[data-testid^="move-"]:enabled').count()) > 0) break;
+    }
+  }
+  throw new Error('no Pokémon fainted');
+});
+
+test('reduced motion jumps the HP number to its target', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/showdown');
+  await add(page, 'A', 'pikachu');
+  await add(page, 'B', 'blastoise');
+  await page.clock.install();
+  await page.getByTestId('battle-start').click();
+  await expect(page.getByTestId('battle-stage')).toBeVisible();
+  const number = async () => Number(await page.getByTestId('hp-number-B').textContent());
+  const target = async () => Number(await page.getByRole('progressbar', { name: /BLASTOISE HP/ }).getAttribute('aria-valuenow'));
+  const start = await number();
+  await page.locator('[data-testid^="move-A-"]:enabled').last().click();
+  for (let i = 0; i < 600 && (await target()) === start; i++) await page.clock.runFor(16);
+  const final = await target();
+  expect(final).toBeLessThan(start);
+  await page.clock.runFor(350);
+  expect(await number()).toBe(final);
+});
+
 test('six-slot cap, removal, and recoverable data failure', async ({ page }) => {
   await page.goto('/showdown');
   await page.route('**/api/pokemon/pikachu*', route => route.fulfill({ status: 503, json: { error: 'upstream' } }), { times: 1 });

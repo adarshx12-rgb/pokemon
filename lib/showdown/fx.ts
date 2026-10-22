@@ -24,6 +24,7 @@ export const TYPE_FX = Object.fromEntries(
 ) as Record<TypeName, { color: string; shape: FxShape }>;
 
 // Real-time animation lengths (ms) at normal motion; the playback speed does not shorten them.
+export const SKIP_PAUSE_MS = 250; // after a text-box skip, the next event follows this quickly
 export const INTRO_MS = 800; // screen flash, then the scene slides in
 export const THROW_MS = 600; // ball arc
 export const POP_MS = 400; // white silhouette grows into the Pokémon

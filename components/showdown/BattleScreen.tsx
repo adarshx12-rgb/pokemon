@@ -7,7 +7,7 @@ import { eventDelay } from '@/lib/battle/pacing';
 import type { BattleEvent, EndEvent, Side, TeamMember } from '@/lib/battle/types';
 import { applyEvent, initView, teamNames, type BattleView } from '@/lib/battle/view';
 import { battleCue, eventCues } from '@/lib/showdown/cues';
-import { fxAt, INTRO_MS, POP_MS, stepMs, THROW_MS, type FxPlay } from '@/lib/showdown/fx';
+import { fxAt, INTRO_MS, POP_MS, SKIP_PAUSE_MS, stepMs, THROW_MS, type FxPlay } from '@/lib/showdown/fx';
 import { BallThrow, BattleFx, IntroFlash, OpenFlash } from './ds/BattleFx';
 import { BottomScreen } from './ds/BottomScreen';
 import { HpBox } from './ds/HpBox';
@@ -56,10 +56,12 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
     if (!playing) return;
     const prev = index === 0 ? null : events[index - 1];
     const maxHp = prev && 'side' in prev && 'index' in prev ? view.maxHp[prev.side][prev.index] : undefined;
-    // Each step lasts its normal reading time, or longer when its animation needs it; skipping never shortens it.
-    const delay = prev
+    // Each step lasts its normal reading time, or longer when its animation needs it.
+    const normal = prev
       ? Math.max(eventDelay(prev, view.message, speed, maxHp, reduced), stepMs(prev, reduced ? null : fxAt(events, index - 1), reduced))
       : !played && !reduced ? INTRO_MS : 0;
+    // A skipped step only holds for a short beat, so tapping through never waits on an animation.
+    const delay = skipNow ? Math.min(SKIP_PAUSE_MS, normal) : normal;
     const later = (ms: number, fn: () => void) => {
       const entry = { fn, timer: setTimeout(() => { pending.current = pending.current.filter(p => p !== entry); fn(); }, ms) };
       pending.current.push(entry);
@@ -94,7 +96,7 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
       setIndex(i => i + 1);
     }, delay);
     return () => clearTimeout(t);
-  }, [playing, index, speed, reduced, events, names, species, battle, played, view.message, view.maxHp]);
+  }, [playing, index, speed, reduced, events, names, species, battle, played, skipNow, view.message, view.maxHp]);
 
   useEffect(() => {
     if (!playing) busy.current = false;
@@ -116,7 +118,7 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
   };
 
   // Tapping the text box finishes the current step: typing, HP drain, animation and its remaining cues.
-  // The next event still waits for its normal timing, so nothing is ever skipped.
+  // The next event then follows after SKIP_PAUSE_MS; events still play in order, each exactly once.
   const skip = () => {
     if (!playing) return;
     setSkipped(index);
@@ -150,7 +152,8 @@ export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, on
     const silhouette = anim === fxStyles.pop ? fxStyles.silhouette : anim === fxStyles.withdraw ? fxStyles.redSilhouette : null;
     return (
       <div className={fainted ? fxStyles.clip : fxStyles.sprite}>
-        <div className={`${fxStyles.sprite} ${anim ?? ''} ${gone ? fxStyles.gone : ''}`}>
+        {/* Keyed per animated step so back-to-back steps with the same animation still replay. */}
+        <div key={anim ? `fx-${live!.id}` : 'still'} className={`${fxStyles.sprite} ${anim ?? ''} ${gone ? fxStyles.gone : ''}`}>
           <PokemonSprite pokemon={p} side={side} classic={classic} />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {silhouette && src && <img src={src} alt="" aria-hidden draggable={false} className={`${spriteClass(side, classic)} ${silhouette}`} />}

@@ -500,7 +500,8 @@ test('skip finishes the step without losing events', async ({ page }) => {
     shown: Number(await page.getByTestId('hp-number-B').textContent()),
     now: Number(await page.getByTestId('hp-box-B').getByRole('progressbar').getAttribute('aria-valuenow')),
   });
-  const tapAt = [100, 700, 1_200, 1_700, 2_200];
+  // The menu is back for the next command (while moves are shown, menu-fight is not rendered at all).
+  const ready = async () => (await page.getByTestId('menu-fight').count()) > 0 && page.getByTestId('menu-fight').isEnabled();
   const run = async (taps: boolean) => {
     // Date.now is frozen at the same instant for both runs, so both battles get the same seed.
     await page.clock.setSystemTime(start + 10_000);
@@ -510,22 +511,31 @@ test('skip finishes the step without losing events', async ({ page }) => {
     await clearBattleLog(page);
     await page.locator('[data-testid^="move-A-"]').last().click();
     let drainSkipped = false;
+    let tapped = 0;
     for (let t = 50; t <= 12_000; t += 50) {
       await page.clock.runFor(50);
-      if (taps && tapAt.includes(t)) {
+      // Five taps, one every 100 ms of clock, while the attack is still playing.
+      if (taps && tapped < 5 && t % 100 === 0 && !(await ready())) {
+        tapped++;
         const before = await foe();
         await page.getByTestId('text-box').tap();
         // The clock is paused, so only the skip can have finished the typing.
         expect(await typed()).toBe(await full());
         await page.clock.runFor(20); // one frame for the HP bar to jump
         const after = await foe();
-        expect(after.shown).toBe(after.now);
-        if (before.shown !== before.now) drainSkipped = true;
+        // Unless the next hit landed during that frame, the bar now shows its target.
+        if (after.now === before.now) {
+          expect(after.shown).toBe(after.now);
+          if (before.shown !== before.now) drainSkipped = true;
+        }
       }
-      if (t > 2_200 && (await page.getByTestId('menu-fight').isEnabled())) break;
+      if (await ready()) break;
     }
     await expect(page.getByTestId('menu-fight')).toBeEnabled();
-    if (taps) expect(drainSkipped).toBe(true);
+    if (taps) {
+      expect(tapped).toBe(5);
+      expect(drainSkipped).toBe(true);
+    }
     return { log: await battleLog(page), hp: await hp() };
   };
   const plain = await run(false);
@@ -534,6 +544,33 @@ test('skip finishes the step without losing events', async ({ page }) => {
   const tapped = await run(true);
   expect(tapped.log).toEqual(plain.log);
   expect(tapped.hp).toEqual(plain.hp);
+});
+
+test('tapping through the opening is fast', async ({ page }) => {
+  await page.goto('/showdown');
+  await add(page, 'A', 'pikachu');
+  await add(page, 'B', 'blastoise');
+  const start = new Date('2026-10-23T10:00:00Z').getTime();
+  await page.clock.install({ time: start });
+  await page.clock.pauseAt(start + 10_000);
+  await watchBattle(page);
+  await page.getByTestId('battle-start').click();
+  await expect(page.getByTestId('battle-stage')).toBeVisible();
+  // Untapped, the opening takes about 3.6 s of clock (see the test above); tapping every 100 ms skips each step.
+  let elapsed = 0;
+  while (elapsed < 5_000 && !(await page.getByTestId('menu-fight').isEnabled())) {
+    await page.clock.runFor(50);
+    elapsed += 50;
+    if (elapsed % 100 === 0) await page.getByTestId('text-box').tap();
+  }
+  await expect(page.getByTestId('menu-fight')).toBeEnabled();
+  expect(elapsed).toBeLessThan(2_000);
+  // Both send-outs still played, in order.
+  const log = await battleLog(page);
+  expect(log.indexOf('text:RIVAL sent out BLASTOISE!')).toBeGreaterThan(-1);
+  expect(log.indexOf('text:RIVAL sent out BLASTOISE!')).toBeLessThan(log.indexOf('text:Go! PIKACHU!'));
+  await expect(page.getByTestId('arena-pokemon-A')).toBeVisible();
+  await expect(page.getByTestId('arena-pokemon-B')).toBeVisible();
 });
 
 test('reduced motion shows no throw', async ({ page }) => {

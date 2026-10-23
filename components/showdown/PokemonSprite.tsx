@@ -7,7 +7,9 @@ import styles from './showdown.module.css';
 export function PokemonSprite({ pokemon, side, classic }: { pokemon: BattlePokemon; side: Side; classic: boolean }) {
   const reduce = useReducedMotion();
   const battleSprite = side === 'A' ? pokemon.sprites.back : pokemon.sprites.front;
-  const staticSprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${side === 'A' ? 'back/' : ''}${pokemon.id}.png`;
+  // A still sprite is used as is (Mega forms share the species id, so rebuilding the URL from it shows the base form).
+  const staticSprite = battleSprite?.endsWith('.png') ? battleSprite
+    : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${side === 'A' ? 'back/' : ''}${pokemon.id}.png`;
   const src = classic ? (reduce ? staticSprite : battleSprite) ?? pokemon.sprites.artwork : pokemon.sprites.artwork ?? battleSprite;
   return (
     // eslint-disable-next-line @next/next/no-img-element

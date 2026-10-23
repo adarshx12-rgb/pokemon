@@ -272,3 +272,16 @@ test('an eligible Pokémon Mega Evolves mid-battle with higher stats and a new l
   await expect(page.locator('[data-testid^="mega-A-"]')).toHaveCount(0); // once per Pokémon
   await expect(page.getByText('MEGA CHARIZARD X', { exact: true })).toBeVisible(); // HP panel name
 });
+
+test('a Mega Evolved Pokémon shows its Mega sprite in classic mode with reduced motion', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/showdown');
+  await page.getByRole('button', { name: 'Classic sprites' }).click();
+  await add(page, 'A', 'charizard');
+  await add(page, 'B', 'blastoise');
+  await page.getByTestId('battle-start').click();
+  await expect(page.getByTestId('arena-pokemon-A')).toHaveAttribute('src', /back\/6\.png$/);
+  await page.getByTestId('mega-A-charizard-mega-y').click();
+  await page.getByTestId('move-A-tackle').click();
+  await expect(page.getByTestId('arena-pokemon-A')).toHaveAttribute('src', /back\/10035\.png$/);
+});

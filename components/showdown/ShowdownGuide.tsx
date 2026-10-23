@@ -33,7 +33,7 @@ export function ShowdownGuide() {
             <h3>How stats and speed decide each round</h3>
             <p>Every Pokémon fights at level 50 with the same individual values and no training, so a battle compares the species themselves. You make the opening move, then Speed, including any stat changes, sets the order of attacks in each later round. Attack and Special Attack raise the damage a move deals, while Defense and Special Defense reduce what a Pokémon takes. HP is how much damage it can absorb before it faints.</p>
             <p>That is why a fast, fragile attacker can win one matchup and lose the next: striking first only helps if the hit lands hard enough before the opponent replies. Moves that raise or lower stats can swing that order.</p>
-            <p>Pokémon with a Mega Evolution (or a Primal form) can change once per battle: select the Mega Stone, then a move. The new form's types and higher stats take over straight away, with its Speed counting from the next turn; HP stays the same and no Mega Stone item is needed.</p>
+            <p>Pokémon with a Mega Evolution (or a Primal form) can change once per battle: select the Mega Stone, then a move. The new form’s types and higher stats take over straight away, with its Speed counting from the next turn; HP stays the same and no Mega Stone item is needed.</p>
           </section>
           <section id="type-matchups">
             <h3>Learn type matchups by playing them</h3>

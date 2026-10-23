@@ -1,9 +1,10 @@
 'use client';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { TYPE_COLORS } from '@/data/typeColors';
 import type { Side, TeamMember } from '@/lib/battle/types';
 import { hpColor } from '@/lib/battle/view';
 import { displayName } from '@/lib/pokeapi/names';
+import { moveButtonColors } from '@/lib/showdown/contrast';
 import { battleCue, type Cue } from '@/lib/showdown/cues';
 import { fightOptions, type MenuState } from '@/lib/showdown/menu';
 import styles from './ds.module.css';
@@ -31,8 +32,24 @@ export function BottomScreen({ side, layout, state, onState, member, team, hp, m
       },
     };
   };
+  // Keep keyboard focus in the menu: a menu change unmounts the focused button and a played turn disables
+  // them all, so focus moves to the first enabled button (the preselected slot when replacing) once they are usable.
+  // Only when focus was lost or already inside the menu, and never on mount.
+  const root = useRef<HTMLDivElement>(null);
+  const prev = useRef({ state, disabled });
+  useEffect(() => {
+    const before = prev.current;
+    prev.current = { state, disabled };
+    if (disabled || (before.state === state && !before.disabled)) return;
+    const el = root.current;
+    const active = document.activeElement;
+    if (!el || (active && active !== document.body && !el.contains(active))) return;
+    const target = el.querySelector<HTMLButtonElement>('[data-selected="true"]:enabled') ?? el.querySelector<HTMLButtonElement>('button:enabled:not([data-testid="menu-back"])') ?? el.querySelector<HTMLButtonElement>('button:enabled');
+    target?.focus();
+  }, [state, disabled]);
   // Side layout has no main menu: the Fight menu is always open.
   const shown = layout === 'side' && state === 'main' ? 'fight' : state;
+  const colors = (type: keyof typeof TYPE_COLORS) => moveButtonColors(TYPE_COLORS[type]);
   const options = fightOptions(member.moves, ppLeft);
   const firstHealthy = team.findIndex((_, i) => !fainted[i] && i !== active);
 
@@ -58,7 +75,7 @@ export function BottomScreen({ side, layout, state, onState, member, team, hp, m
   );
 
   return (
-    <div className={styles.menu} data-side={side} data-state={shown} onPointerDown={() => { touched.current = false; }} onKeyDown={() => { touched.current = false; }}>
+    <div ref={root} className={styles.menu} data-side={side} data-state={shown} onPointerDown={() => { touched.current = false; }} onKeyDown={() => { touched.current = false; }}>
       <h3 className={styles.turnLabel} data-testid="turn-label">{side === 'A' ? 'YOUR TURN' : "RIVAL'S TURN"}</h3>
       {shown === 'main' && <div className={styles.mainMenu}>
         <button type="button" className={styles.fightBtn} data-testid="menu-fight" disabled={disabled} {...tap(() => onState('fight'))}>FIGHT</button>
@@ -69,10 +86,10 @@ export function BottomScreen({ side, layout, state, onState, member, team, hp, m
         <div className={styles.moveGrid}>
           {options.map(({ move, pp, disabled: empty }) => (
             <button key={move.name} type="button" className={styles.moveBtn} data-testid={`move-${side}-${move.name}`}
-              style={{ background: TYPE_COLORS[move.type] }} disabled={disabled || empty} {...tap(() => onMove(move.name))}>
+              style={{ background: colors(move.type).background, color: colors(move.type).text, textShadow: 'none' }} disabled={disabled || empty} {...tap(() => onMove(move.name))}>
               <strong>{displayName(move.name).toUpperCase()}</strong>
               <span>{move.type.toUpperCase()}</span>
-              <small>PP {pp}/{move.pp}</small>
+              <small>PP {pp}/{move.pp ?? 5}</small>
             </button>
           ))}
         </div>

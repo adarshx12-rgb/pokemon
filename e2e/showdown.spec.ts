@@ -435,6 +435,23 @@ test('switching from the POKéMON menu uses the turn', async ({ page }) => {
   await expect(page.getByTestId('arena-pokemon-A')).toHaveAttribute('alt', 'Charizard');
 });
 
+test('a turn played with the keyboard keeps focus on an enabled menu button', async ({ page }) => {
+  await page.goto('/showdown');
+  await add(page, 'A', 'pikachu');
+  await add(page, 'B', 'blastoise');
+  await page.getByTestId('battle-start').click();
+  const fight = page.getByTestId('menu-fight');
+  await expect(fight).toBeEnabled({ timeout: 30_000 });
+  await fight.focus();
+  await page.keyboard.press('Enter');
+  const move = page.locator('[data-testid^="move-A-"]:enabled').first();
+  await expect(move).toBeFocused(); // FIGHT unmounted; focus moved into the move list
+  await page.keyboard.press('Enter');
+  await expect(page.locator('[data-testid^="move-"]:enabled')).toHaveCount(0);
+  await expect(fight).toBeEnabled({ timeout: 60_000 }); // playback done
+  await expect(fight).toBeFocused();
+});
+
 test('run returns to the builder', async ({ page }) => {
   await page.goto('/showdown');
   await add(page, 'A', 'pikachu');

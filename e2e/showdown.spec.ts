@@ -285,3 +285,27 @@ test('a Mega Evolved Pokémon shows its Mega sprite in classic mode with reduced
   await page.getByTestId('move-A-tackle').click();
   await expect(page.getByTestId('arena-pokemon-A')).toHaveAttribute('src', /back\/10035\.png$/);
 });
+
+test('the HP bar drains in step with the HP number', async ({ page }) => {
+  await page.goto('/showdown');
+  await add(page, 'A', 'pikachu');
+  await add(page, 'B', 'blastoise');
+  await page.getByTestId('battle-start').click();
+  const bar = page.getByRole('progressbar', { name: /Blastoise HP/i });
+  const panel = page.locator('[class*="hpPanel"]').filter({ has: bar });
+  const start = Number(await bar.getAttribute('aria-valuenow'));
+  await page.locator('[data-testid^="move-A-"]:enabled').last().click();
+  await expect(bar).not.toHaveAttribute('aria-valuenow', String(start), { timeout: 15_000 });
+  // While the number drains, the drawn bar must show the same fraction (a CSS width transition makes it lag behind).
+  let worst = 0;
+  for (let i = 0; i < 20; i++) {
+    const { number, max, width } = await panel.evaluate(el => {
+      const [n, m] = el.textContent!.match(/(\d+) \/ (\d+)/)!.slice(1).map(Number);
+      const fill = el.querySelector('[role="progressbar"]')!.getBoundingClientRect().width;
+      return { number: n, max: m, width: fill / el.querySelector('[role="progressbar"]')!.parentElement!.getBoundingClientRect().width };
+    });
+    worst = Math.max(worst, Math.abs(width - number / max));
+    await page.waitForTimeout(40);
+  }
+  expect(worst).toBeLessThan(0.03);
+});

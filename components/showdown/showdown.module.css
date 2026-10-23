@@ -88,7 +88,7 @@
 .moves { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 6px; margin-top: 4px; }
 .moves label { min-width: 0; }
 .moves select { width: 100%; height: 27px; padding: 3px 5px; background: #0b120f; border: 1px solid #41584b; border-radius: 3px; color: #d7e3d5; font-size: 10px; text-overflow: ellipsis; }
-.battle { width: min(900px, 100%); margin-inline: auto; }
+.battle { width: min(1000px, 100%); margin-inline: auto; }
 .battleHelp { text-align: center; font-size: 11px; color: #a5b2a8; margin-top: 24px; }
 .textBox { width: 100%; }
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 32px); z-index: 50; display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: #213c2f; border: 1px solid #9bbea4; border-radius: 6px; box-shadow: 0 10px 30px #0006; font-size: 12px; }

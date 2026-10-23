@@ -15,13 +15,13 @@
 .opponentBox { position: absolute; left: 4%; top: 7%; width: 44%; }
 .playerBox { position: absolute; right: 3%; bottom: 29%; width: 46%; }
 
-.textBox { position: absolute; left: 2%; right: 2%; bottom: 2%; min-height: 25%; background: #f8f8f8; border: 3px solid #c84040; outline: 2px solid #f8f8f8; border-radius: 6px; padding: 5px 8px; font-size: clamp(11px, 3.4cqw, 15px); line-height: 1.4; color: #303030; display: flex; align-items: center; }
+.textBox { position: absolute; left: 2%; right: 2%; bottom: 2%; min-height: 25%; background: #f8f8f8; border: 3px solid #c84040; outline: 2px solid #f8f8f8; border-radius: 6px; padding: 5px 8px; font-size: clamp(11px, 3.4cqw, 22px); line-height: 1.4; color: #303030; display: flex; align-items: center; }
 .textBox[role="button"] { cursor: pointer; }
 .textBox:focus-visible { outline: 3px solid #ffd84a; }
 .textBox > * { width: 100%; }
 .textBox[data-expanded] { top: 2%; align-items: stretch; }
 
-.hpBox { background: #f8f8f0; border: 2px solid #404848; border-radius: 6px 2px 6px 2px; padding: 3px 8px 4px; font-size: clamp(9px, 2.8cqw, 12px); color: #303030; box-shadow: 2px 2px 0 #70787880; }
+.hpBox { background: #f8f8f0; border: 2px solid #404848; border-radius: 6px 2px 6px 2px; padding: 3px 8px 4px; font-size: clamp(9px, 2.8cqw, 17px); color: #303030; box-shadow: 2px 2px 0 #70787880; }
 .hpHeading { display: flex; justify-content: space-between; gap: 4px; font-weight: 700; font-size: 1.1em; }
 .hpHeading > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hpHeading > span:last-child { flex-shrink: 0; }
@@ -101,9 +101,14 @@
 .capNote { font-size: .8em; color: #606870; margin-top: 2px; }
 
 /* Size overrides: last so they beat the base rules above */
-@media (min-width: 900px) {
+@media (min-width: 640px) {
   .shell, .resultWrap, .extras { max-width: 600px; }
   .resultWrap { width: min(600px, 100%); }
+}
+/* Desktop: as large as the window allows while the whole 4:3 screen stays in view. */
+@media (min-width: 900px) {
+  .shell, .resultWrap, .extras { max-width: clamp(600px, calc((100svh - 150px) * 4 / 3 + 20px), 880px); }
+  .resultWrap { width: 100%; }
 }
 @media (max-width: 480px) {
   .shell { padding: 6px; border-radius: 10px; }

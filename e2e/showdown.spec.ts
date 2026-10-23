@@ -379,7 +379,7 @@ test.describe('phone battle layout', () => {
   });
 });
 
-test('desktop DS shell and result grow past 420px', async ({ page }) => {
+test('desktop battle screen and result grow to fill a large window', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto('/showdown');
   await add(page, 'A', 'pikachu');
@@ -387,13 +387,13 @@ test('desktop DS shell and result grow past 420px', async ({ page }) => {
   await page.clock.install();
   await page.getByTestId('battle-start').click();
   const stage = await page.getByTestId('battle-stage').boundingBox();
-  expect(stage!.width).toBeGreaterThan(500);
-  expect(stage!.width).toBeLessThanOrEqual(601);
+  expect(stage!.width).toBeGreaterThan(860);
+  expect(stage!.width).toBeLessThanOrEqual(881);
   await finishBattle(page);
   await page.clock.fastForward(5_000);
   const result = await page.getByTestId('result').boundingBox();
-  expect(result!.width).toBeGreaterThan(500);
-  expect(result!.width).toBeLessThanOrEqual(601);
+  expect(result!.width).toBeGreaterThan(860);
+  expect(result!.width).toBeLessThanOrEqual(881);
 });
 
 test('fight menu opens moves and back returns', async ({ page }) => {

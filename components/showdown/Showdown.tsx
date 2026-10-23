@@ -5,13 +5,9 @@ import { statsAtLevel50 } from '@/lib/battle/stats';
 import { displayName } from '@/lib/pokeapi/names';
 import { loadMember } from '@/lib/showdown/loadMember';
 import { EMPTY_TEAMS, MAX_TEAM, randomFillCount, teamsReducer } from '@/lib/showdown/teams';
+import { Arena } from './Arena';
 import { BattleScreen } from './BattleScreen';
-import { OptionBox } from './ds/CommandMenu';
-import { DsConsole } from './ds/DsConsole';
-import { HpBox } from './ds/HpBox';
-import { TopScreen } from './ds/TopScreen';
-import dsStyles from './ds/ds.module.css';
-import fxStyles from './ds/fx.module.css';
+import { HpPanel } from './HpPanel';
 import { MatchupPreview } from './MatchupPreview';
 import { PokemonSprite } from './PokemonSprite';
 import { ResultScreen } from './ResultScreen';
@@ -33,8 +29,8 @@ export function Showdown({ names }: { names: string[] }) {
   const [teams, dispatch] = useReducer(teamsReducer, EMPTY_TEAMS);
   const [phase, setPhase] = useState<Phase>('build');
   const [seed, setSeed] = useState(0);
-  const [classic, setClassic] = useState(true); // pixel sprites by default
-  const [result, setResult] = useState<{ end: EndEvent; lead: number } | null>(null);
+  const [classic, setClassic] = useState(false);
+  const [result, setResult] = useState<EndEvent | null>(null);
   const [loading, setLoading] = useState<Record<Side, boolean>>({ A: false, B: false });
   const busy = useRef<Record<Side, boolean>>({ A: false, B: false });
   const [toast, setToast] = useState<{ message: string; retry: () => void } | null>(null);
@@ -72,15 +68,20 @@ export function Showdown({ names }: { names: string[] }) {
     if (loading.A || loading.B) return;
     dispatch({ type: 'clear', side: 'A' }); dispatch({ type: 'clear', side: 'B' }); setToast(null);
   };
+  const focusTeam = (side: Side) => {
+    const input = document.getElementById(`pokemon-search-${side}`) as HTMLInputElement | null;
+    if (input && !input.disabled) input.focus();
+    else document.querySelector<HTMLButtonElement>(`[data-testid="slot-${side}-0"]`)?.focus();
+  };
   const previewPanel = (side: Side) => {
     const pokemon = teams[side][0]?.pokemon;
     if (!pokemon) return null;
     const hp = statsAtLevel50(pokemon.baseStats).hp;
-    return <HpBox key={pokemon.name} name={displayName(pokemon.name).toUpperCase()} hp={hp} maxHp={hp} showNumbers={side === 'A'} fainted={teams[side].map(() => false)} side={side} />;
+    return <HpPanel name={displayName(pokemon.name)} hp={hp} maxHp={hp} showNumbers={side === 'A'} fainted={teams[side].map(() => false)} />;
   };
   const previewSprite = (side: Side) => {
     const pokemon = teams[side][0]?.pokemon;
-    return pokemon ? <div className={fxStyles.sprite}><PokemonSprite key={pokemon.name} pokemon={pokemon} side={side} classic={classic} /></div> : null;
+    return pokemon ? <PokemonSprite key={pokemon.name} pokemon={pokemon} side={side} classic={classic} /> : null;
   };
   const prompt = loading.A || loading.B ? 'Getting your Pokémon ready…'
     : canBattle ? `${displayName(teams.A[0].pokemon.name)} is ready. Select Fight to choose your moves!`
@@ -101,23 +102,22 @@ export function Showdown({ names }: { names: string[] }) {
       {phase === 'build' && (
         <div className={styles.builder}>
           <div className={styles.arenaColumn}>
-            <DsConsole testId="arena-preview"
-              top={<TopScreen player={previewSprite('A')} opponent={previewSprite('B')} playerBox={previewPanel('A')} opponentBox={previewPanel('B')}
-                message={<div className={dsStyles.command}>
-                  <div className={dsStyles.say}><p aria-live="polite">{prompt}</p></div>
-                  <OptionBox>
-                    <button type="button" data-testid="battle-start" className={dsStyles.opt} disabled={!canBattle} onClick={startBattle}>FIGHT</button>
-                    <button type="button" className={dsStyles.opt} disabled={loading.A || loading.B || (!teams.A.length && !teams.B.length)} onClick={reset}>RESET</button>
-                  </OptionBox>
-                </div>} />} />
+            <Arena preview player={previewSprite('A')} opponent={previewSprite('B')} playerPanel={previewPanel('A')} opponentPanel={previewPanel('B')}
+              dialogue={<p aria-live="polite">{prompt}</p>}
+              commands={<>
+                <button type="button" data-testid="battle-start" className={styles.fight} disabled={!canBattle} onClick={startBattle}><span aria-hidden>▶</span> Fight</button>
+                <button type="button" onClick={() => focusTeam('A')}>Your team</button>
+                <button type="button" onClick={() => focusTeam('B')}>Opponent</button>
+                <button type="button" disabled={loading.A || loading.B || (!teams.A.length && !teams.B.length)} onClick={reset}>Reset</button>
+              </>} />
             <div className={styles.arenaHint}><span>1–6 Pokémon on each team</span><span>Drag Poké Balls to reorder · First ball leads</span></div>
             <MatchupPreview a={teams.A} b={teams.B} />
             <details className={styles.rules}>
               <summary>How the battle works</summary>
-              <p>Everyone fights at level 50 with 31 IVs, no EVs, and a neutral nature. You make the opening move; after that, Speed (including stat changes) decides who moves first each round. Attack, Defense, special stats, and type matchups decide damage. HP keeps you in the fight.</p>
-              <p>You control both teams. Use the menu in the text box: select Fight and pick a move for whoever’s turn it is, or choose Pokémon to switch. Neither side acts automatically. When a Pokémon faints, you choose which Pokémon replaces it. The last team standing wins.</p>
-              <p>Each Pokémon starts with the moves it knows at level 50, and you can change them in the builder. Moves have PP; a Pokémon with no PP left uses Struggle, which hurts it with recoil. Moves that raise or lower stats work too, and critical hits happen as in the Gen 4 games.</p>
-              <p>This is still a simplified battle: no status conditions, abilities, items, weather, or move priority. Accuracy, critical hits, and damage rolls mean rematches can end differently.</p>
+              <p>Everyone fights at level 50 with 31 IVs, no EVs, and a neutral nature. You always make the first move; after that, Speed (including stat changes) decides who moves first. Attack, Defense, special stats, and type matchups decide damage. HP keeps you in the fight, and it drains away hit by hit, so a close fight can leave a Pokémon hanging on with a sliver of HP.</p>
+              <p>You control both teams. Select Fight, then click a move for the highlighted Pokémon to play its attack. Your Pokémon opens the battle, then Speed decides the order each round; neither side attacks automatically. When a Pokémon faints, the next Poké Ball in its lineup enters. The last team standing wins.</p>
+              <p>Each Pokémon starts with the moves it knows at level 50; the menus also include compatible TM, tutor, and inherited moves. Moves have PP, and a Pokémon with no PP left uses Struggle, which hurts it with recoil. Moves that raise or lower stats work too.</p>
+              <p>This is a simplified stat battle: no items, abilities, weather, status effects, or move priority. Accuracy, critical hits (as in the Gen 4 games), and damage rolls mean rematches can end differently.</p>
               <a href="https://pokeapi.co/" target="_blank" rel="noreferrer">Stats & artwork from PokéAPI</a>
             </details>
           </div>
@@ -127,8 +127,8 @@ export function Showdown({ names }: { names: string[] }) {
           </div>
         </div>
       )}
-      {phase === 'battle' && <BattleScreen key={seed} teamA={teams.A} teamB={teams.B} seed={seed} classic={classic} onReset={startBattle} onEdit={() => setPhase('build')} onFinish={(end, lead) => { setResult({ end, lead }); setPhase('result'); }} />}
-      {phase === 'result' && result && <ResultScreen result={result.end} lead={result.lead} classic={classic} teamA={teams.A} teamB={teams.B} onRematch={startBattle} onEdit={() => setPhase('build')} />}
+      {phase === 'battle' && <BattleScreen key={seed} teamA={teams.A} teamB={teams.B} seed={seed} classic={classic} onReset={startBattle} onEdit={() => setPhase('build')} onFinish={end => { setResult(end); setPhase('result'); }} />}
+      {phase === 'result' && result && <ResultScreen result={result} teamA={teams.A} teamB={teams.B} onRematch={startBattle} onEdit={() => setPhase('build')} />}
       {toast && (
         <div role="alert" className={styles.toast}>
           <span>{toast.message}</span><button type="button" onClick={toast.retry}>Retry</button>

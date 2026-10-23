@@ -1,18 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { STRUGGLE } from '@/lib/battle/moves';
 import type { Move } from '@/lib/battle/types';
-import { fightOptions, menuFor } from './menu';
+import { fightOptions } from './menu';
 
 const move = (name: string, pp = 10): Move => ({ name, type: 'normal', power: 40, accuracy: 100, damageClass: 'physical', pp });
-
-describe('menuFor', () => {
-  it('opens the replacement picker after a faint', () => {
-    expect(menuFor({ replacing: true })).toBe('replace');
-  });
-  it('otherwise starts at the main menu', () => {
-    expect(menuFor({ replacing: false })).toBe('main');
-  });
-});
 
 describe('fightOptions', () => {
   const moves = [move('tackle'), move('growl'), move('bite')];

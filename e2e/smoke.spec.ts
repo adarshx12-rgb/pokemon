@@ -31,8 +31,7 @@ test('showdown: build teams and choose an attack manually', async ({ page }) => 
   await page.getByTestId('randomize').click();
   await expect(page.getByTestId('slot-B-5')).toBeVisible();
   await page.getByTestId('battle-start').click();
-  await expect(page.getByTestId('turn-label')).toHaveText('YOUR TURN');
-  await page.getByTestId('menu-fight').click();
+  await expect(page.getByTestId('turn-prompt')).toBeVisible();
   await page.locator('[data-testid^="move-"]:enabled').first().click();
   await expect(page.getByTestId('battle-stage')).toContainText(/used /);
   await page.getByRole('button', { name: 'Edit teams', exact: true }).click();

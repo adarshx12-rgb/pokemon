@@ -27,12 +27,12 @@ export function ShowdownGuide() {
           <section id="build-a-team">
             <h3>Build a Pokémon team in your browser</h3>
             <p>Search for any Pokémon by name and add up to six to each side. Both teams are yours to control, so you can test a favorite lineup against a rival you design, recreate a matchup you remember, or simply see which of two Pokémon comes out ahead. Use the randomize button to fill the opponent’s team when you want a surprise.</p>
-            <p>Each Pokémon arrives with up to four moves, the ones it knows at level 50. You can swap any of them in the builder for other moves it can learn, including TM, tutor and inherited attacks. Drag the Poké Balls to change the order: the first ball leads, and when a Pokémon faints you choose which one replaces it.</p>
+            <p>Each Pokémon arrives with up to four moves, the ones it knows at level 50. You can swap any of them in the builder for other moves it can learn, including TM, tutor and inherited attacks. Drag the Poké Balls to change the order: the first ball leads, and the next one enters when a Pokémon faints.</p>
           </section>
           <section id="stats-and-speed">
             <h3>How stats and speed decide each round</h3>
             <p>Every Pokémon fights at level 50 with the same individual values and no training, so a battle compares the species themselves. You make the opening move, then Speed, including any stat changes, sets the order of attacks in each later round. Attack and Special Attack raise the damage a move deals, while Defense and Special Defense reduce what a Pokémon takes. HP is how much damage it can absorb before it faints.</p>
-            <p>That is why a fast, fragile attacker can win one matchup and lose the next: striking first only helps if the hit lands hard enough before the opponent replies. Moves that raise or lower stats can swing that order, and switching Pokémon uses your turn.</p>
+            <p>That is why a fast, fragile attacker can win one matchup and lose the next: striking first only helps if the hit lands hard enough before the opponent replies. Moves that raise or lower stats can swing that order.</p>
           </section>
           <section id="type-matchups">
             <h3>Learn type matchups by playing them</h3>

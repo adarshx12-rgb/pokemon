@@ -7,12 +7,10 @@ const move = (name: string, pp = 10): Move => ({ name, type: 'normal', power: 40
 
 describe('menuFor', () => {
   it('opens the replacement picker after a faint', () => {
-    expect(menuFor({ replacing: true, layout: 'ds' })).toBe('replace');
-    expect(menuFor({ replacing: true, layout: 'side' })).toBe('replace');
+    expect(menuFor({ replacing: true })).toBe('replace');
   });
-  it('keeps the Fight menu open in side layout and starts at main in ds layout', () => {
-    expect(menuFor({ replacing: false, layout: 'side' })).toBe('fight');
-    expect(menuFor({ replacing: false, layout: 'ds' })).toBe('main');
+  it('otherwise starts at the main menu', () => {
+    expect(menuFor({ replacing: false })).toBe('main');
   });
 });
 

@@ -1,5 +1,6 @@
 import type { EndEvent, Side, TeamMember } from '@/lib/battle/types';
 import { displayName } from '@/lib/pokeapi/names';
+import { OptionBox } from './ds/CommandMenu';
 import { DsConsole } from './ds/DsConsole';
 import { TopScreen } from './ds/TopScreen';
 import fxStyles from './ds/fx.module.css';
@@ -33,24 +34,24 @@ export function ResultScreen({ result, teamA, teamB, lead, classic, onRematch, o
 
   return (
     <div className={dsStyles.resultWrap}>
-      <DsConsole layout="ds" testId="result"
+      <DsConsole testId="result"
         top={<TopScreen
           player={won ? <div className={fxStyles.sprite}><PokemonSprite pokemon={winner.pokemon} side="A" classic={classic} /></div> : undefined}
           opponent={won ? undefined : <div className={fxStyles.sprite}><PokemonSprite pokemon={winner.pokemon} side="B" classic={classic} /></div>}
-          message={<div>
-            <p data-testid="result-banner">{won ? 'RIVAL was defeated!' : 'You were defeated!'}</p>
-            {result.reason === 'turnCap' && <p className={dsStyles.capNote}>Decided on remaining HP after the 500-turn limit.</p>}
-          </div>} />}
-        bottom={<div className={dsStyles.resultMenu}>
-          <div className={dsStyles.resultSides}>
-            {column('A', teamA, 'Your team')}
-            {column('B', teamB, 'Opponent')}
-          </div>
-          <div className={dsStyles.resultActions}>
-            <button type="button" className={dsStyles.resultGold} onClick={onRematch}>REMATCH</button>
-            <button type="button" className={dsStyles.resultGrey} onClick={onEdit}>EDIT TEAMS</button>
-          </div>
-        </div>} />
+          message={<div className={dsStyles.command}>
+            <div className={dsStyles.say}>
+              <p data-testid="result-banner">{won ? 'RIVAL was defeated!' : 'You were defeated!'}</p>
+              {result.reason === 'turnCap' && <p className={dsStyles.capNote}>Decided on remaining HP after the 500-turn limit.</p>}
+            </div>
+            <OptionBox>
+              <button type="button" className={dsStyles.opt} onClick={onRematch}>REMATCH</button>
+              <button type="button" className={dsStyles.opt} onClick={onEdit}>EDIT TEAMS</button>
+            </OptionBox>
+          </div>} />} />
+      <div className={dsStyles.resultSides}>
+        {column('A', teamA, 'Your team')}
+        {column('B', teamB, 'Opponent')}
+      </div>
     </div>
   );
 }

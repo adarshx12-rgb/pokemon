@@ -9,7 +9,7 @@ import { applyEvent, initView, teamNames, type BattleView } from '@/lib/battle/v
 import { battleCue, eventCues } from '@/lib/showdown/cues';
 import { fxAt, INTRO_MS, POP_MS, SKIP_PAUSE_MS, stepMs, THROW_MS, type FxPlay } from '@/lib/showdown/fx';
 import { BallThrow, BattleFx, IntroFlash, OpenFlash } from './ds/BattleFx';
-import { BottomScreen } from './ds/BottomScreen';
+import { CommandMenu, OptionBox } from './ds/CommandMenu';
 import { HpBox } from './ds/HpBox';
 import dsStyles from './ds/ds.module.css';
 import fxStyles from './ds/fx.module.css';
@@ -24,9 +24,9 @@ interface Step { id: number; event: BattleEvent; fx: FxPlay | null; out: boolean
 
 const sideOrder = (e: BattleEvent) => ('side' in e && e.side === 'A' ? 1 : 0);
 
-interface Props { teamA: TeamMember[]; teamB: TeamMember[]; seed: number; classic: boolean; layout?: 'ds' | 'side'; onFinish: (end: EndEvent, lead: number) => void; onEdit: () => void; onReset: () => void }
+interface Props { teamA: TeamMember[]; teamB: TeamMember[]; seed: number; classic: boolean; onFinish: (end: EndEvent, lead: number) => void; onEdit: () => void; onReset: () => void }
 
-export function BattleScreen({ teamA, teamB, seed, classic, layout = 'ds', onFinish, onEdit, onReset }: Props) {
+export function BattleScreen({ teamA, teamB, seed, classic, onFinish, onEdit, onReset }: Props) {
   const [battle] = useState(() => createBattle(teamA, teamB, seed));
   // The opening plays the engine's two initial send-outs like any other events: the rival's first, as in the games.
   const [events, setEvents] = useState<BattleEvent[]>(() => [...battle.initialEvents].sort((a, b) => sideOrder(a) - sideOrder(b)));
@@ -45,7 +45,7 @@ export function BattleScreen({ teamA, teamB, seed, classic, layout = 'ds', onFin
   const [typedId, setTypedId] = useState(-1); // the message a skip finished typing
   const [played, setPlayed] = useState(false); // false until the first command (the opening is still on)
   const [turn, setTurn] = useState<{ side: Side }>(() => ({ side: battle.nextSide ?? 'A' }));
-  const [menu, setMenu] = useState<MenuState>(() => menuFor({ replacing: !!battle.replacing, layout }));
+  const [menu, setMenu] = useState<MenuState>(() => menuFor({ replacing: !!battle.replacing }));
   const playing = events.length > 0 && index <= events.length;
   const end = events.find((event): event is EndEvent => event.kind === 'end');
   const skipNow = playing && skipped === index;
@@ -70,7 +70,7 @@ export function BattleScreen({ teamA, teamB, seed, classic, layout = 'ds', onFin
       if (index === events.length) {
         // Playback is over: the menu serves whoever acts next (or must replace a fainted Pokémon).
         setTurn(t => ({ side: battle.replacing ?? battle.nextSide ?? t.side }));
-        setMenu(menuFor({ replacing: !!battle.replacing, layout }));
+        setMenu(menuFor({ replacing: !!battle.replacing }));
         setIndex(i => i + 1);
         return;
       }
@@ -96,7 +96,7 @@ export function BattleScreen({ teamA, teamB, seed, classic, layout = 'ds', onFin
       setIndex(i => i + 1);
     }, delay);
     return () => clearTimeout(t);
-  }, [playing, index, speed, reduced, events, names, species, battle, played, skipNow, view.message, view.maxHp, layout]);
+  }, [playing, index, speed, reduced, events, names, species, battle, played, skipNow, view.message, view.maxHp]);
 
   useEffect(() => {
     if (!playing) busy.current = false;
@@ -183,32 +183,34 @@ export function BattleScreen({ teamA, teamB, seed, classic, layout = 'ds', onFin
 
   const turnSide = turn.side;
   const turnName = names[turnSide][view.active[turnSide] ?? 0];
-  const asking = !played && !playing;
-  const prompt = asking ? `What will ${turnName} do? Choose a move.` : view.message;
   const member = (turnSide === 'A' ? teamA : teamB)[view.active[turnSide] ?? 0];
   const sideTeam = turnSide === 'A' ? teamA : teamB;
+  const commanding = !playing && !end;
+  const finish = () => end && onFinish(end, view.active[end.winner] ?? 0);
+  const text = <TextBox key={view.messageId} message={view.message} speed={speed} complete={typedId === view.messageId} />;
 
   return (
     <div className={styles.battle}>
-      <DsConsole layout={layout} testId="battle-stage"
+      <DsConsole testId="battle-stage"
         top={<TopScreen player={sprite('A')} opponent={sprite('B')} playerBox={panel('A')} opponentBox={panel('B')} intro={opening}
-          message={<TextBox key={asking ? 'prompt' : view.messageId} message={prompt} speed={speed} complete={!asking && typedId === view.messageId} />}
-          overlay={<>{opening && <IntroFlash />}{overlay}</>} onAdvance={skip} />}
-        bottom={<>
-          <BottomScreen side={turnSide} layout={layout} state={menu} onState={setMenu} member={member} team={sideTeam}
-            hp={view.hp[turnSide]} maxHp={view.maxHp[turnSide]} fainted={view.fainted[turnSide]} active={view.active[turnSide]}
-            ppLeft={view.pp[turnSide][view.active[turnSide] ?? 0]} disabled={playing || !!end}
-            onMove={name => play(battle.playMove(turnSide, name))}
-            onSwitch={i => play(battle.switchTo(turnSide, i))}
-            onReplace={i => play(battle.replace(turnSide, i))}
-            onRun={onEdit} />
-          {end && !playing && <button type="button" className={dsStyles.result} onClick={() => onFinish(end, view.active[end.winner] ?? 0)}>View result</button>}
-          <div className={dsStyles.extras}>
-            <button type="button" onClick={onReset}>Reset battle</button>
-            <button type="button" onClick={onEdit}>Edit teams</button>
-          </div>
-        </>} />
-      <p className={styles.battleHelp}>You control both teams. Use the touch screen to fight, switch or give up for whoever&rsquo;s turn it is; nothing happens until you choose.</p>
+          expanded={commanding && (menu === 'party' || menu === 'replace')}
+          message={commanding
+            ? <CommandMenu side={turnSide} name={turnName} state={menu} onState={setMenu} member={member} team={sideTeam}
+              hp={view.hp[turnSide]} maxHp={view.maxHp[turnSide]} fainted={view.fainted[turnSide]} active={view.active[turnSide]}
+              ppLeft={view.pp[turnSide][view.active[turnSide] ?? 0]}
+              onMove={name => play(battle.playMove(turnSide, name))}
+              onSwitch={i => play(battle.switchTo(turnSide, i))}
+              onReplace={i => play(battle.replace(turnSide, i))}
+              onRun={onEdit} />
+            : end && !playing
+              ? <div className={dsStyles.command}>{text}<OptionBox><button type="button" className={dsStyles.opt} onClick={finish}>View result</button></OptionBox></div>
+              : text}
+          overlay={<>{opening && <IntroFlash />}{overlay}</>} onAdvance={playing ? skip : undefined} />} />
+      <div className={dsStyles.extras}>
+        <button type="button" onClick={onReset}>Reset battle</button>
+        <button type="button" onClick={onEdit}>Edit teams</button>
+      </div>
+      <p className={styles.battleHelp}>You control both teams. Pick FIGHT, POKéMON or RUN in the text box for whoever&rsquo;s turn it is; nothing happens until you choose. Tap the text box to speed up the messages.</p>
     </div>
   );
 }

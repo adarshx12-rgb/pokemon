@@ -3,8 +3,8 @@ import type { Move } from '@/lib/battle/types';
 
 export type MenuState = 'main' | 'fight' | 'party' | 'run' | 'replace';
 
-export function menuFor({ replacing, layout }: { replacing: boolean; layout: 'ds' | 'side' }): MenuState {
-  return replacing ? 'replace' : layout === 'side' ? 'fight' : 'main';
+export function menuFor({ replacing }: { replacing: boolean }): MenuState {
+  return replacing ? 'replace' : 'main';
 }
 
 /** The Fight menu entries; with no PP left anywhere (or no moves) Struggle is the only choice. */

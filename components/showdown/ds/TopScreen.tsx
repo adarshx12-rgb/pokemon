@@ -10,10 +10,11 @@ interface Props {
   overlay?: ReactNode;
   onAdvance?: () => void;
   intro?: boolean; // the platforms slide in
+  expanded?: boolean; // the text box fills the screen (the party list)
 }
 
-/** The DS top screen: HGSS-style battle scene with the red-framed text box along the bottom. */
-export function TopScreen({ player, opponent, playerBox, opponentBox, message, overlay, onAdvance, intro = false }: Props) {
+/** The HGSS battle screen with the red-framed text box along the bottom, which also holds the menus. */
+export function TopScreen({ player, opponent, playerBox, opponentBox, message, overlay, onAdvance, intro = false, expanded = false }: Props) {
   // Enter or Space advances the text like a click.
   const key = (e: React.KeyboardEvent) => {
     if (e.key !== 'Enter' && e.key !== ' ') return;
@@ -28,7 +29,7 @@ export function TopScreen({ player, opponent, playerBox, opponentBox, message, o
       <div className={styles.meSprite}>{player}</div>
       <div className={styles.playerBox}>{playerBox}</div>
       {overlay}
-      <div className={styles.textBox} data-testid="text-box" onClick={onAdvance} {...(onAdvance && { role: 'button', tabIndex: 0, onKeyDown: key })}>{message}</div>
+      <div className={styles.textBox} data-testid="text-box" data-expanded={expanded || undefined} onClick={onAdvance} {...(onAdvance && { role: 'button', tabIndex: 0, onKeyDown: key })}>{message}</div>
     </div>
   );
 }

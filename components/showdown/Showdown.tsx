@@ -1,11 +1,12 @@
 ﻿'use client';
-import { useReducer, useRef, useState, useSyncExternalStore } from 'react';
+import { useReducer, useRef, useState } from 'react';
 import type { EndEvent, Side } from '@/lib/battle/types';
 import { statsAtLevel50 } from '@/lib/battle/stats';
 import { displayName } from '@/lib/pokeapi/names';
 import { loadMember } from '@/lib/showdown/loadMember';
 import { EMPTY_TEAMS, MAX_TEAM, randomFillCount, teamsReducer } from '@/lib/showdown/teams';
 import { BattleScreen } from './BattleScreen';
+import { OptionBox } from './ds/CommandMenu';
 import { DsConsole } from './ds/DsConsole';
 import { HpBox } from './ds/HpBox';
 import { TopScreen } from './ds/TopScreen';
@@ -17,7 +18,6 @@ import { ResultScreen } from './ResultScreen';
 import { TeamPanel } from './TeamPanel';
 import styles from './showdown.module.css';
 
-const noSubscribe = () => () => {};
 type Phase = 'build' | 'battle' | 'result';
 
 function sample<T>(items: T[], n: number): T[] {
@@ -33,8 +33,6 @@ export function Showdown({ names }: { names: string[] }) {
   const [teams, dispatch] = useReducer(teamsReducer, EMPTY_TEAMS);
   const [phase, setPhase] = useState<Phase>('build');
   const [seed, setSeed] = useState(0);
-  // ?layout=side is a dev-only switch, read client-side ('ds' during server render).
-  const layout = useSyncExternalStore<'ds' | 'side'>(noSubscribe, () => (process.env.NODE_ENV !== 'production' && new URLSearchParams(window.location.search).get('layout') === 'side' ? 'side' : 'ds'), () => 'ds');
   const [classic, setClassic] = useState(true); // pixel sprites by default
   const [result, setResult] = useState<{ end: EndEvent; lead: number } | null>(null);
   const [loading, setLoading] = useState<Record<Side, boolean>>({ A: false, B: false });
@@ -103,20 +101,21 @@ export function Showdown({ names }: { names: string[] }) {
       {phase === 'build' && (
         <div className={styles.builder}>
           <div className={styles.arenaColumn}>
-            <DsConsole layout="ds" testId="arena-preview"
+            <DsConsole testId="arena-preview"
               top={<TopScreen player={previewSprite('A')} opponent={previewSprite('B')} playerBox={previewPanel('A')} opponentBox={previewPanel('B')}
-                message={<p aria-live="polite">{prompt}</p>} />}
-              bottom={<div className={dsStyles.builderMenu}>
-                <h3 className={dsStyles.turnLabel}>TEAM SELECTION</h3>
-                <button type="button" data-testid="battle-start" className={dsStyles.fightBtn} disabled={!canBattle} onClick={startBattle}>FIGHT</button>
-                <button type="button" className={`${dsStyles.smallBtn} ${dsStyles.runBtn}`} disabled={loading.A || loading.B || (!teams.A.length && !teams.B.length)} onClick={reset}>RESET</button>
-              </div>} />
+                message={<div className={dsStyles.command}>
+                  <div className={dsStyles.say}><p aria-live="polite">{prompt}</p></div>
+                  <OptionBox>
+                    <button type="button" data-testid="battle-start" className={dsStyles.opt} disabled={!canBattle} onClick={startBattle}>FIGHT</button>
+                    <button type="button" className={dsStyles.opt} disabled={loading.A || loading.B || (!teams.A.length && !teams.B.length)} onClick={reset}>RESET</button>
+                  </OptionBox>
+                </div>} />} />
             <div className={styles.arenaHint}><span>1–6 Pokémon on each team</span><span>Drag Poké Balls to reorder · First ball leads</span></div>
             <MatchupPreview a={teams.A} b={teams.B} />
             <details className={styles.rules}>
               <summary>How the battle works</summary>
               <p>Everyone fights at level 50 with 31 IVs, no EVs, and a neutral nature. You make the opening move; after that, Speed (including stat changes) decides who moves first each round. Attack, Defense, special stats, and type matchups decide damage. HP keeps you in the fight.</p>
-              <p>You control both teams. Use the touch screen: select Fight and pick a move for whoever’s turn it is, or choose Pokémon to switch. Neither side acts automatically. When a Pokémon faints, you choose which Pokémon replaces it. The last team standing wins.</p>
+              <p>You control both teams. Use the menu in the text box: select Fight and pick a move for whoever’s turn it is, or choose Pokémon to switch. Neither side acts automatically. When a Pokémon faints, you choose which Pokémon replaces it. The last team standing wins.</p>
               <p>Each Pokémon starts with the moves it knows at level 50, and you can change them in the builder. Moves have PP; a Pokémon with no PP left uses Struggle, which hurts it with recoil. Moves that raise or lower stats work too, and critical hits happen as in the Gen 4 games.</p>
               <p>This is still a simplified battle: no status conditions, abilities, items, weather, or move priority. Accuracy, critical hits, and damage rolls mean rematches can end differently.</p>
               <a href="https://pokeapi.co/" target="_blank" rel="noreferrer">Stats & artwork from PokéAPI</a>
@@ -128,7 +127,7 @@ export function Showdown({ names }: { names: string[] }) {
           </div>
         </div>
       )}
-      {phase === 'battle' && <BattleScreen key={seed} teamA={teams.A} teamB={teams.B} seed={seed} classic={classic} layout={layout} onReset={startBattle} onEdit={() => setPhase('build')} onFinish={(end, lead) => { setResult({ end, lead }); setPhase('result'); }} />}
+      {phase === 'battle' && <BattleScreen key={seed} teamA={teams.A} teamB={teams.B} seed={seed} classic={classic} onReset={startBattle} onEdit={() => setPhase('build')} onFinish={(end, lead) => { setResult({ end, lead }); setPhase('result'); }} />}
       {phase === 'result' && result && <ResultScreen result={result.end} lead={result.lead} classic={classic} teamA={teams.A} teamB={teams.B} onRematch={startBattle} onEdit={() => setPhase('build')} />}
       {toast && (
         <div role="alert" className={styles.toast}>

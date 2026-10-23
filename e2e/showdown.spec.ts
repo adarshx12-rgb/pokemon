@@ -31,8 +31,10 @@ const waiting = (page: Page) => page.locator('[data-testid="menu-fight"]:enabled
 /** Opens FIGHT from the main menu and waits for the move buttons. */
 async function openFight(page: Page) {
   const fight = page.getByTestId('menu-fight');
+  const moves = page.locator('[data-testid^="move-"]:enabled');
+  await expect(fight.or(moves).first()).toBeVisible(); // the menu only appears once the last turn has played out
   if (await fight.isVisible()) await fight.click();
-  await expect(page.locator('[data-testid^="move-"]:enabled').first()).toBeVisible();
+  await expect(moves.first()).toBeVisible();
 }
 
 async function finishBattle(page: Page) {
@@ -308,7 +310,7 @@ test('phone touch ordering, empty slots focus search, and no horizontal overflow
   await expect(page.locator('[data-testid^="move-"]')).toHaveCount(4);
   await page.locator('[data-testid^="move-"]:enabled').first().tap();
   await expect.poll(mobileHp).not.toEqual(beforeAttack);
-  await expect(page.getByTestId('turn-label')).toBeVisible();
+  await expect(page.getByTestId('turn-label')).toBeVisible({ timeout: 30_000 }); // the menu is back after the turn
   await page.screenshot({ path: 'test-results/showdown-manual-phone.png', fullPage: true, caret: 'initial' });
 });
 
@@ -365,7 +367,7 @@ test.describe('phone emulation', () => {
 test.describe('phone battle layout', () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 3 });
 
-  test('phone shows both screens without scrolling during battle', async ({ page }) => {
+  test('phone shows the screen and its text-box menu without scrolling during battle', async ({ page }) => {
     await page.goto('/showdown');
     await add(page, 'A', 'pikachu');
     await add(page, 'B', 'blastoise');
@@ -394,16 +396,6 @@ test('desktop DS shell and result grow past 420px', async ({ page }) => {
   expect(result!.width).toBeLessThanOrEqual(601);
 });
 
-test('side layout fallback renders moves beside the screen', async ({ page }) => {
-  await page.goto('/showdown?layout=side');
-  await add(page, 'A', 'pikachu');
-  await add(page, 'B', 'blastoise');
-  await page.getByTestId('battle-start').click();
-  await expect(page.getByTestId('battle-stage')).toHaveAttribute('data-layout', 'side');
-  await expect(page.locator('[data-testid^="move-A-"]').first()).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByTestId('menu-fight')).toHaveCount(0);
-});
-
 test('fight menu opens moves and back returns', async ({ page }) => {
   await page.goto('/showdown');
   await add(page, 'A', 'pikachu');
@@ -413,7 +405,10 @@ test('fight menu opens moves and back returns', async ({ page }) => {
   await expect(page.locator('[data-testid^="move-"]')).toHaveCount(0);
   await page.getByTestId('menu-fight').click();
   await expect(page.locator('[data-testid^="move-A-"]')).toHaveCount(4);
-  await expect(page.getByTestId('move-A-tackle')).toContainText('PP 10/10');
+  await page.getByTestId('move-A-tackle').hover();
+  await expect(page.getByTestId('fight-info')).toContainText('PP 10/10');
+  await expect(page.getByTestId('fight-info')).toContainText('TYPE/NORMAL');
+  await expect(page.getByTestId('text-box').getByTestId('move-A-tackle')).toBeVisible(); // the moves sit in the text box
   await page.getByTestId('menu-back').click();
   await expect(page.getByTestId('menu-fight')).toBeVisible();
   await expect(page.locator('[data-testid^="move-"]')).toHaveCount(0);
@@ -443,9 +438,18 @@ test('a turn played with the keyboard keeps focus on an enabled menu button', as
   const fight = page.getByTestId('menu-fight');
   await expect(fight).toBeEnabled({ timeout: 30_000 });
   await fight.focus();
+  // Arrow keys move the cursor like the D-pad; Escape backs out of a submenu.
+  await page.keyboard.press('ArrowRight');
+  await expect(page.getByTestId('menu-pokemon')).toBeFocused();
+  await page.keyboard.press('ArrowLeft');
+  await expect(fight).toBeFocused();
   await page.keyboard.press('Enter');
   const move = page.locator('[data-testid^="move-A-"]:enabled').first();
   await expect(move).toBeFocused(); // FIGHT unmounted; focus moved into the move list
+  await page.keyboard.press('Escape');
+  await expect(fight).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(move).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.locator('[data-testid^="move-"]:enabled')).toHaveCount(0);
   await expect(fight).toBeEnabled({ timeout: 60_000 }); // playback done
@@ -548,7 +552,7 @@ test('opening sends out both Pokémon with ball throws', async ({ page }) => {
   // Flash, slide-in, then both send-outs: about 3.6 s before the first command. (Small steps let React schedule each next timer.)
   const run = async (ms: number) => { for (let t = 0; t < ms; t += 50) await page.clock.runFor(50); };
   await run(3_300);
-  await expect(page.getByTestId('menu-fight')).toBeDisabled();
+  await expect(page.getByTestId('menu-fight')).toHaveCount(0); // the text box still shows the send-out messages
   await run(500);
   await expect(page.getByTestId('menu-fight')).toBeEnabled();
   const log = await battleLog(page);
@@ -578,13 +582,13 @@ test('skip finishes the step without losing events', async ({ page }) => {
     shown: Number(await page.getByTestId('hp-number-B').textContent()),
     now: Number(await page.getByTestId('hp-box-B').getByRole('progressbar').getAttribute('aria-valuenow')),
   });
-  // The menu is back for the next command (while moves are shown, menu-fight is not rendered at all).
+  // The menu is back for the next command (menu-fight is only rendered while the main menu is open).
   const ready = async () => (await page.getByTestId('menu-fight').count()) > 0 && page.getByTestId('menu-fight').isEnabled();
   const run = async (taps: boolean) => {
     // Date.now is frozen at the same instant for both runs, so both battles get the same seed.
     await page.clock.setSystemTime(start + 10_000);
     await page.getByTestId('battle-start').click();
-    for (let i = 0; i < 100 && !(await page.getByTestId('menu-fight').isEnabled()); i++) await page.clock.runFor(100);
+    for (let i = 0; i < 100 && !(await ready()); i++) await page.clock.runFor(100);
     await page.getByTestId('menu-fight').click();
     await clearBattleLog(page);
     await page.locator('[data-testid^="move-A-"]').last().click();
@@ -636,7 +640,7 @@ test('tapping through the opening is fast', async ({ page }) => {
   await expect(page.getByTestId('battle-stage')).toBeVisible();
   // Untapped, the opening takes about 3.6 s of clock (see the test above); tapping every 100 ms skips each step.
   let elapsed = 0;
-  while (elapsed < 5_000 && !(await page.getByTestId('menu-fight').isEnabled())) {
+  while (elapsed < 5_000 && !(await page.getByTestId('menu-fight').count())) {
     await page.clock.runFor(50);
     elapsed += 50;
     if (elapsed % 100 === 0) await page.getByTestId('text-box').tap();

@@ -1,18 +1,19 @@
 'use client';
+import { MegaStone } from './MegaStone';
 import { Pokeball } from './Pokeball';
 import { useHpDrain } from './useHpDrain';
 import styles from './showdown.module.css';
 
-interface Props { name: string; hp: number; maxHp: number; showNumbers: boolean; fainted: boolean[] }
+interface Props { name: string; hp: number; maxHp: number; showNumbers: boolean; fainted: boolean[]; mega?: boolean }
 
-export function HpPanel({ name, hp, maxHp, showNumbers, fainted }: Props) {
+export function HpPanel({ name, hp, maxHp, showNumbers, fainted, mega = false }: Props) {
   // The bar and number drain towards the new HP at a steady rate, as in the games; the progressbar reports the real value.
   const shown = useHpDrain(hp, maxHp);
   const pct = maxHp ? shown / maxHp : 0;
   const color = pct > 0.5 ? '#53c997' : pct > 0.2 ? '#dfb440' : '#d95959';
   return (
     <div className={styles.hpPanel}>
-      <div className={styles.hpHeading}><span>{name}</span><span>Lv.50</span></div>
+      <div className={styles.hpHeading}><span>{mega && <MegaStone size={14} />}{name}</span><span>Lv.50</span></div>
       <div className={styles.hpRow}>
         <span>HP</span>
         <div className={styles.hpTrack}>

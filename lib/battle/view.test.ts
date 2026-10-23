@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { applyEvent, initView, moveLabel, teamNames, hpColor, type BattleView } from './view';
+import { applyEvent, initView, megaLabel, moveLabel, teamNames, hpColor, type BattleView } from './view';
 import type { BattleEvent, TeamMember } from './types';
 
 const mon = (name: string): TeamMember => ({
@@ -96,6 +96,18 @@ describe('battle view', () => {
     const v2 = applyEvent(applyEvent(v1, { kind: 'withdraw', side: 'A', index: 0 }, teamNames(withPp, B)),
       { kind: 'switchIn', side: 'A', index: 1, hp: 153, maxHp: 153 }, teamNames(withPp, B));
     expect(v2.stages.A[0].atk).toBe(0);
+  });
+
+  it('announces a Mega Evolution or Primal Reversion and records the form', () => {
+    const v = run([{ kind: 'switchIn', side: 'A', index: 0, hp: 153, maxHp: 153 }, { kind: 'mega', side: 'A', index: 0, form: 'charizard-mega-x' }]);
+    expect(v.message).toBe('CHARIZARD has Mega Evolved into MEGA CHARIZARD X!');
+    expect(v.forms.A).toEqual(['charizard-mega-x', null]);
+    expect(v.forms.B).toEqual([null]);
+    const foe = run([{ kind: 'mega', side: 'B', index: 0, form: 'azumarill-mega' }]);
+    expect(foe.message).toBe("The foe's AZUMARILL has Mega Evolved into MEGA AZUMARILL!");
+    expect(run([{ kind: 'mega', side: 'B', index: 0, form: 'kyogre-primal' }]).message).toBe("The foe's AZUMARILL's Primal Reversion! It reverted to its primal form!");
+    expect(megaLabel('mewtwo-mega-y', 'MEWTWO')).toBe('MEGA MEWTWO Y');
+    expect(megaLabel('kyogre-primal', 'KYOGRE')).toBe('PRIMAL KYOGRE');
   });
 
   it('colours HP', () => {

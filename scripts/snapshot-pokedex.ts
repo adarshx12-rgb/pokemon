@@ -1,7 +1,7 @@
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { fetchWithRetry } from '../lib/http';
 import { idFromUrl } from '../lib/pokeapi/names';
-import type { RawMove } from '../lib/pokeapi/normalize';
+import { normalizeMega, type RawMove, type RawPokemon } from '../lib/pokeapi/normalize';
 
 const API = 'https://pokeapi.co/api/v2';
 const MAX_NATIONAL_DEX = 1025;
@@ -13,8 +13,38 @@ async function getJson<T>(url: string): Promise<T> {
   return (await res.json()) as T;
 }
 
+type Listing = { results: { name: string; url: string }[] };
+// Every Mega and Primal form is its own PokéAPI entry, named after its base species.
+const IS_MEGA = /-(mega|primal)(-|$)/;
+
+/** Mega and Primal forms keyed by the species' default Pokémon (the one the Showdown offers): [slug, types, [hp, atk, def, spa, spd, spe], front, back, artwork]. */
+async function snapshotMegas(pokemon: Listing) {
+  const megas: Record<string, unknown[][]> = {};
+  const forms = pokemon.results.filter(r => IS_MEGA.test(r.name));
+  for (let i = 0; i < forms.length; i += CONCURRENCY) {
+    const batch = await Promise.all(forms.slice(i, i + CONCURRENCY).map(async f => {
+      const raw = await getJson<RawPokemon & { species: { url: string } }>(f.url);
+      const species = await getJson<{ varieties: { is_default: boolean; pokemon: { name: string } }[] }>(raw.species.url);
+      const owner = species.varieties.find(v => v.is_default)!.pokemon.name;
+      const m = normalizeMega(raw);
+      const st = m.baseStats;
+      return [owner, [m.name, m.types, [st.hp, st.atk, st.def, st.spa, st.spd, st.spe], m.sprites.front, m.sprites.back, m.sprites.artwork]] as const;
+    }));
+    for (const [owner, form] of batch) (megas[owner] ??= []).push([...form]);
+  }
+  return megas;
+}
+
 async function main() {
-  const pokemon = await getJson<{ results: { name: string; url: string }[] }>(`${API}/pokemon?limit=2000`);
+  const pokemon = await getJson<Listing>(`${API}/pokemon?limit=2000`);
+  // `--megas` refreshes only the Mega forms and keeps the bundled move data.
+  if (process.argv.includes('--megas')) {
+    const snapshot = JSON.parse(readFileSync('data/pokedex-snapshot.json', 'utf8'));
+    snapshot.megas = await snapshotMegas(pokemon);
+    writeFileSync('data/pokedex-snapshot.json', JSON.stringify(snapshot) + '\n');
+    console.log(`Wrote Mega forms for ${Object.keys(snapshot.megas).length} Pokémon to data/pokedex-snapshot.json`);
+    return;
+  }
   const names = pokemon.results.filter(r => idFromUrl(r.url) <= MAX_NATIONAL_DEX).map(r => r.name);
 
   const list = await getJson<{ results: { name: string; url: string }[] }>(`${API}/move?limit=2000`);
@@ -28,7 +58,8 @@ async function main() {
     ];
   }
 
-  writeFileSync('data/pokedex-snapshot.json', JSON.stringify({ names, moves }) + '\n');
+  const megas = await snapshotMegas(pokemon);
+  writeFileSync('data/pokedex-snapshot.json', JSON.stringify({ names, moves, megas }) + '\n');
   console.log(`Wrote ${names.length} Pokémon and ${Object.keys(moves).length} moves to data/pokedex-snapshot.json`);
 }
 

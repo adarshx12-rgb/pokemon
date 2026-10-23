@@ -1,4 +1,4 @@
-import { TYPE_NAMES, type BattlePokemon, type Move, type StageStat, type StatBlock, type TypeName } from '@/lib/battle/types';
+import { TYPE_NAMES, type BattlePokemon, type MegaForm, type Move, type StageStat, type StatBlock, type TypeName } from '@/lib/battle/types';
 
 export interface RawMove {
   name: string;
@@ -115,13 +115,32 @@ export function pixelSprites(id: number): { front: string | null; back: string |
   return { front: `${SPRITE_BASE}/${dir}/${id}.png`, back: `${SPRITE_BASE}/${dir}/back/${id}.png` };
 }
 
-export function normalizePokemon(raw: RawPokemon, moves: RawMove[]): BattlePokemon {
+function statsOf(raw: RawPokemon): StatBlock {
   const baseStats = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
   for (const s of raw.stats) {
     const key = STAT_KEYS[s.stat.name];
     if (key) baseStats[key] = s.base_stat;
   }
-  const types = [...raw.types].sort((a, b) => a.slot - b.slot).map(t => t.type.name).filter(isType);
+  return baseStats;
+}
+
+const typesOf = (raw: RawPokemon) => [...raw.types].sort((a, b) => a.slot - b.slot).map(t => t.type.name).filter(isType);
+
+/** A Mega or Primal form from its PokéAPI entry. There are no HGSS/BW pixel sprites for these, so the newer ones are used. */
+export function normalizeMega(raw: RawPokemon): MegaForm {
+  const sd = raw.sprites.other?.showdown;
+  const art = raw.sprites.other?.['official-artwork']?.front_default ?? null;
+  return {
+    name: raw.name,
+    types: typesOf(raw),
+    baseStats: statsOf(raw),
+    sprites: { front: raw.sprites.front_default ?? sd?.front_default ?? art, back: raw.sprites.back_default ?? sd?.back_default ?? null, artwork: art },
+  };
+}
+
+export function normalizePokemon(raw: RawPokemon, moves: RawMove[]): BattlePokemon {
+  const baseStats = statsOf(raw);
+  const types = typesOf(raw);
   const seen = new Set<string>();
   const learnset = new Map(raw.moves.map(entry => [entry.move.name,
     [...new Set(entry.version_group_details.map(detail => detail.move_learn_method.name))],

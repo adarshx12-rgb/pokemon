@@ -6,6 +6,7 @@ import { statsAtLevel50 } from '@/lib/battle/stats';
 import { isStatMove, type Side, type StatBlock, type TeamMember } from '@/lib/battle/types';
 import { displayName } from '@/lib/pokeapi/names';
 import { MAX_TEAM, type TeamsAction } from '@/lib/showdown/teams';
+import { MegaStone } from './MegaStone';
 import { PokemonSearch } from './PokemonSearch';
 import { TeamOrder } from './TeamOrder';
 import styles from './showdown.module.css';
@@ -58,6 +59,7 @@ export function TeamPanel({ side, title, team, names, loading, dispatch, onAdd, 
               <div className={styles.memberName}>
                 <h3 title={displayName(member.pokemon.name)}>{displayName(member.pokemon.name)}</h3>
                 <div className={styles.types}>{member.pokemon.types.map(t => <TypeBadge key={t} type={t} />)}</div>
+                {!!member.pokemon.megas?.length && <span className={styles.canMega} data-testid={`can-mega-${side}`}><MegaStone size={16} />Can Mega Evolve</span>}
               </div>
               <dl className={styles.stats} aria-label="Stats at level 50">
                 {STATS.map(([key, label]) => <div key={key}><dt>{label}</dt><dd>{stats[key]}</dd><span aria-hidden style={{ width: `${Math.min(100, stats[key] / 3)}%` }} /></div>)}

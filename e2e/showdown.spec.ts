@@ -11,6 +11,15 @@ const pokemon = (name: string) => ({
     back: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${ids[name] ?? 25}.png`,
   },
   movePool: ['tackle', 'body-slam', 'quick-attack', 'hyper-fang'].map((name, index) => ({ name, power: 40 + index * 10, accuracy: 100, type: 'normal', damageClass: 'physical' })),
+  ...(name === 'charizard' && { megas: [10034, 10035].map((id, i) => ({
+    name: `charizard-mega-${'xy'[i]}`, types: i ? ['fire', 'flying'] : ['fire', 'dragon'],
+    baseStats: { hp: 80, atk: 130, def: 111, spa: 130, spd: 85, spe: 100 },
+    sprites: {
+      artwork: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`,
+      front: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`,
+      back: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${id}.png`,
+    },
+  })) }),
 });
 
 async function add(page: Page, side: 'A' | 'B', name: string) {
@@ -239,4 +248,27 @@ test('the HP number drains towards the new value instead of jumping', async ({ p
   expect(mid).toBeLessThanOrEqual(start);
   await page.clock.runFor(1_600);
   expect(await shown()).toBe(target);
+});
+
+test('an eligible Pokémon Mega Evolves mid-battle with higher stats and a new look', async ({ page }) => {
+  await page.goto('/showdown');
+  await add(page, 'A', 'charizard');
+  await expect(page.getByTestId('can-mega-A')).toBeVisible();
+  await add(page, 'B', 'blastoise');
+  await expect(page.getByTestId('can-mega-B')).toHaveCount(0);
+  await page.getByTestId('battle-start').click();
+  await expect(page.locator('[data-testid^="mega-B-"]')).toHaveCount(0); // Blastoise's mock has no Mega form
+  const megaX = page.getByTestId('mega-A-charizard-mega-x');
+  await expect(megaX).toHaveAccessibleName('Mega Evolve into Mega Charizard X');
+  await expect(page.getByTestId('mega-A-charizard-mega-y')).toBeVisible();
+  await megaX.click();
+  await expect(megaX).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByTestId('mega-stats-A')).toContainText('Fire / Dragon');
+  await expect(page.getByTestId('mega-stats-A')).toContainText('Atk 100→150'); // level-50 stats from base 80 → 130
+  await page.getByTestId('move-A-tackle').click();
+  await expect(page.getByTestId('battle-stage')).toContainText('CHARIZARD has Mega Evolved into MEGA CHARIZARD X!');
+  await expect(page.getByTestId('arena-pokemon-A')).toHaveAttribute('src', /back\/10034\.png$|official-artwork\/10034\.png$/);
+  await expect(page.getByRole('region', { name: 'Your Mega Charizard X moves' })).toBeVisible();
+  await expect(page.locator('[data-testid^="mega-A-"]')).toHaveCount(0); // once per Pokémon
+  await expect(page.getByText('MEGA CHARIZARD X', { exact: true })).toBeVisible(); // HP panel name
 });

@@ -240,3 +240,73 @@ describe('simulate', () => {
     expect(() => simulate([], [strongFast], 1)).toThrow();
   });
 });
+
+describe('mega evolution', () => {
+  const tackle = move('tackle', 'normal', 40);
+  const dragonClaw = move('dragon-claw', 'dragon', 80);
+  const megaMember = (name: string, stats: StatBlock, megaStats: StatBlock, moves: Move[] = [tackle]): TeamMember => {
+    const m = member(name, ['fire'], stats, moves);
+    return { ...m, pokemon: { ...m.pokemon, megas: [
+      { name: `${name}-mega-x`, types: ['fire', 'dragon'], baseStats: megaStats, sprites: { front: null, back: null, artwork: null } },
+      { name: `${name}-mega-y`, types: ['fire', 'flying'], baseStats: megaStats, sprites: { front: null, back: null, artwork: null } },
+    ] } };
+  };
+  const foe = () => member('foe', ['normal'], base({ hp: 255, def: 80, spe: 10 }), [tackle]);
+  const firstDamage = (events: BattleEvent[]) => events.find(e => e.kind === 'damage') as Extract<BattleEvent, { kind: 'damage' }>;
+
+  it('Mega Evolves before the move, keeps HP and hits harder with the Mega stats', () => {
+    const normal = megaMember('zard', base({ atk: 80 }), base({ atk: 200 }));
+    const plain = createBattle([normal], [foe()], 7).playMove('A', 'tackle');
+    const battle = createBattle([normal], [foe()], 7);
+    const events = battle.playMove('A', 'tackle', 'zard-mega-x');
+    expect(kinds(events).slice(0, 2)).toEqual(['mega', 'useMove']);
+    expect(events[0]).toEqual({ kind: 'mega', side: 'A', index: 0, form: 'zard-mega-x' });
+    expect(battle.form('A', 0)).toBe('zard-mega-x');
+    expect(firstDamage(events).amount).toBeGreaterThan(firstDamage(plain).amount);
+    // HP is untouched by the change.
+    expect(events.some(e => e.kind === 'damage' && e.side === 'A')).toBe(false);
+  });
+
+  it('takes the Mega types for same-type attack bonus', () => {
+    const stats = base();
+    const plain = createBattle([megaMember('zard', stats, stats, [dragonClaw])], [foe()], 3).playMove('A', 'dragon-claw');
+    const mega = createBattle([megaMember('zard', stats, stats, [dragonClaw])], [foe()], 3).playMove('A', 'dragon-claw', 'zard-mega-x');
+    expect(firstDamage(mega).amount).toBeGreaterThan(firstDamage(plain).amount); // Dragon STAB after becoming Fire/Dragon
+  });
+
+  it('uses the Mega Speed from the next round', () => {
+    const fast = member('fast', ['normal'], base({ hp: 255, spe: 100 }), [move('tap', 'normal', 1)]);
+    const slow = megaMember('slow', base({ hp: 255, spe: 50 }), base({ hp: 255, spe: 200 }), [move('tap', 'normal', 1)]);
+    const battle = createBattle([fast], [slow], 2);
+    battle.playMove('A', 'tap');
+    battle.playMove('B', 'tap', 'slow-mega-y');
+    expect(battle.turn).toBe(2);
+    expect(battle.nextSide).toBe('B');
+  });
+
+  it('rejects an unknown form, a Pokémon without Megas and a second Mega Evolution, without using PP', () => {
+    const battle = createBattle([megaMember('zard', base({ hp: 255 }), base({ hp: 255 }))], [member('plain', ['normal'], base({ hp: 255 }), [tackle])], 4);
+    expect(battle.playMove('A', 'tackle', 'nope-mega')).toEqual([]);
+    expect(battle.ppLeft('A', 0)).toEqual([10]);
+    battle.playMove('A', 'tackle', 'zard-mega-x');
+    expect(battle.playMove('B', 'tackle', 'plain-mega')).toEqual([]);
+    battle.playMove('B', 'tackle');
+    expect(battle.playMove('A', 'tackle', 'zard-mega-y')).toEqual([]);
+    expect(battle.playMove('A', 'tackle').length).toBeGreaterThan(0);
+    expect(battle.form('A', 0)).toBe('zard-mega-x');
+  });
+
+  it('lets every eligible Pokémon on a team Mega Evolve', () => {
+    const frail = megaMember('two', base({ hp: 20, def: 10, spe: 10 }), base({ hp: 20, def: 10, spe: 10 }));
+    const sturdy = megaMember('three', base({ hp: 255, def: 255, spe: 10 }), base({ hp: 255, def: 255, spe: 10 }));
+    const hitter = member('hitter', ['normal'], base({ atk: 120, spe: 200 }), [move('slam', 'normal', 60)]);
+    const battle = createBattle([frail, sturdy], [hitter], 9);
+    battle.playMove('A', 'tackle', 'two-mega-x');
+    battle.playMove('B', 'slam');
+    expect(battle.replacing).toBe('A'); // the first Mega fainted
+    battle.replace('A', 1);
+    battle.playMove('B', 'slam'); // faster, so it opens round two
+    expect(battle.playMove('A', 'tackle', 'three-mega-y')[0]).toMatchObject({ kind: 'mega', index: 1 });
+    expect([battle.form('A', 0), battle.form('A', 1)]).toEqual(['two-mega-x', 'three-mega-y']);
+  });
+});

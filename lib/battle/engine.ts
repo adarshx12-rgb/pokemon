@@ -8,7 +8,7 @@ import { isStatMove, type BattleEvent, type Side, type TeamMember } from './type
 export const TURN_CAP = 500;
 const DEFAULT_PP = 5; // old cached data has no pp field
 
-interface Fighter { member: TeamMember; combatant: Combatant; hp: number; maxHp: number; pp: number[]; stages: Stages }
+interface Fighter { member: TeamMember; combatant: Combatant; hp: number; maxHp: number; pp: number[]; stages: Stages; form: string | null }
 
 const other = (side: Side): Side => (side === 'A' ? 'B' : 'A');
 
@@ -16,7 +16,7 @@ function toFighter(member: TeamMember): Fighter {
   const stats = statsAtLevel50(member.pokemon.baseStats);
   return {
     member, combatant: { types: member.pokemon.types, stats }, hp: stats.hp, maxHp: stats.hp,
-    pp: member.moves.map(m => m.pp ?? DEFAULT_PP), stages: ZERO_STAGES,
+    pp: member.moves.map(m => m.pp ?? DEFAULT_PP), stages: ZERO_STAGES, form: null,
   };
 }
 
@@ -90,6 +90,8 @@ export function createBattle(teamA: TeamMember[], teamB: TeamMember[], seed: num
     get turn() { return turn; },
     ppLeft: (side: Side, index: number) => [...sides[side][index].pp],
     stages: (side: Side, index: number): Stages => sides[side][index].stages,
+    /** The Mega (or Primal) form a Pokémon has taken, or null. */
+    form: (side: Side, index: number) => sides[side][index].form,
     bestMove() {
       const { side, index } = actors[0];
       const attacker = sides[side][index];
@@ -99,13 +101,16 @@ export function createBattle(teamA: TeamMember[], teamB: TeamMember[], seed: num
       if (!damaging.length) return usable[0].name;
       return chooseMove(damaging, attacker.combatant, sides[other(side)][active[other(side)]].combatant).name;
     },
-    playMove(side: Side, moveName: string): BattleEvent[] {
+    /** Plays `side`'s move; with `mega` (one of its Mega forms) the Pokémon Mega Evolves first. Any number of Pokémon may Mega Evolve, each once. */
+    playMove(side: Side, moveName: string, mega?: string): BattleEvent[] {
       if (!turnOf(side)) return [];
       const { index } = actors[0];
       const attacker = sides[side][index];
       const foeSide = other(side);
       const foeIndex = active[foeSide];
       const defender = sides[foeSide][foeIndex];
+      const form = mega === undefined ? undefined : attacker.member.pokemon.megas?.find(f => f.name === mega);
+      if (mega !== undefined && (!form || attacker.form)) return [];
 
       let move = STRUGGLE;
       let ppLeft = STRUGGLE.pp;
@@ -120,6 +125,12 @@ export function createBattle(teamA: TeamMember[], teamB: TeamMember[], seed: num
 
       const start = events.length;
       actors.shift();
+      if (form) {
+        // The new types and stats count from this attack (Speed from the next round); HP stays, as in the games.
+        attacker.form = form.name;
+        attacker.combatant = { types: form.types, stats: { ...statsAtLevel50(form.baseStats), hp: attacker.maxHp } };
+        events.push({ kind: 'mega', side, index, form: form.name });
+      }
       events.push({ kind: 'useMove', side, index, move, ppLeft });
 
       const selfTarget = isStatMove(move) && move.target === 'self';

@@ -11,6 +11,7 @@ export interface BattleView {
   pp: Record<Side, number[][]>;
   stages: Record<Side, Stages[]>;
   moveNames: Record<Side, string[][]>;
+  forms: Record<Side, (string | null)[]>; // the Mega form each Pokémon has taken
   message: string;
   messageId: number;
   winner: Side | null;
@@ -23,6 +24,14 @@ export const moveLabel = (name: string) => name.replace(/-/g, ' ').toUpperCase()
 const STAT_NAMES: Record<StageStat, string> = {
   atk: 'ATTACK', def: 'DEFENSE', spa: 'SP. ATK', spd: 'SP. DEF', spe: 'SPEED', accuracy: 'ACCURACY', evasion: 'EVASIVENESS',
 };
+
+const isPrimal = (form: string) => /-primal(-|$)/.test(form);
+
+/** "MEGA CHARIZARD X" for charizard-mega-x, "PRIMAL KYOGRE" for kyogre-primal, from the Pokémon's battle name. */
+export function megaLabel(form: string, name: string): string {
+  const suffix = form.match(/-mega-([a-z])$/)?.[1];
+  return `${isPrimal(form) ? 'PRIMAL' : 'MEGA'} ${name}${suffix ? ` ${suffix.toUpperCase()}` : ''}`;
+}
 
 export const whatWillDo = (name: string) => `What will ${name} do?`;
 
@@ -49,6 +58,7 @@ export function initView(teamA: TeamMember[], teamB: TeamMember[]): BattleView {
     pp: { A: teamA.map(movePp), B: teamB.map(movePp) },
     moveNames: { A: teamA.map(moveNamesOf), B: teamB.map(moveNamesOf) },
     stages: { A: teamA.map(() => ZERO_STAGES), B: teamB.map(() => ZERO_STAGES) },
+    forms: { A: teamA.map(() => null), B: teamB.map(() => null) },
     message: '',
     messageId: 0,
     winner: null,
@@ -72,6 +82,12 @@ export function applyEvent(view: BattleView, event: BattleEvent, names: TeamName
         stages: withSide(view.stages, event.side, event.index, ZERO_STAGES) };
       const name = names[event.side][event.index];
       return say(next, event.side === 'A' ? `Go! ${name}!` : `RIVAL sent out ${name}!`);
+    }
+    case 'mega': {
+      const next = { ...view, forms: withSide(view.forms, event.side, event.index, event.form) };
+      const who = label(names, event.side, event.index);
+      return say(next, isPrimal(event.form) ? `${who}'s Primal Reversion! It reverted to its primal form!`
+        : `${who} has Mega Evolved into ${megaLabel(event.form, names[event.side][event.index])}!`);
     }
     case 'useMove': {
       const slot = view.moveNames[event.side][event.index]?.indexOf(event.move.name) ?? -1;

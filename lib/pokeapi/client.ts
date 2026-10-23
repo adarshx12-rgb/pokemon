@@ -1,4 +1,4 @@
-import type { BattlePokemon } from '@/lib/battle/types';
+import type { BattlePokemon, MegaForm, TypeName } from '@/lib/battle/types';
 import { fetchWithRetry } from '@/lib/http';
 import SNAPSHOT from '@/data/pokedex-snapshot.json';
 import { idFromUrl } from './names';
@@ -15,6 +15,17 @@ const SNAPSHOT_MOVES = SNAPSHOT.moves as unknown as Record<string, SnapshotMove>
 
 // [type, power, accuracy, damageClass, pp, category, target, statChanges]
 type SnapshotMove = [string, number | null, number | null, string, number, string | null, string, [string, number][]];
+
+// [slug, types, [hp, atk, def, spa, spd, spe], front, back, artwork], keyed by the species' default Pokémon.
+type SnapshotMega = [string, string[], [number, number, number, number, number, number], string | null, string | null, string | null];
+const SNAPSHOT_MEGAS = (SNAPSHOT as unknown as { megas?: Record<string, SnapshotMega[]> }).megas ?? {};
+
+/** The Mega Evolutions (and Primal forms) a Pokémon can take in battle, from the bundled snapshot. */
+export function megaForms(name: string): MegaForm[] {
+  return (SNAPSHOT_MEGAS[name] ?? []).map(([slug, types, [hp, atk, def, spa, spd, spe], front, back, artwork]) => ({
+    name: slug, types: types as TypeName[], baseStats: { hp, atk, def, spa, spd, spe }, sprites: { front, back, artwork },
+  }));
+}
 
 // In-process memo on top of Next's fetch cache, so a warm server never refetches a move.
 const moveMemo = new Map<string, Promise<RawMove | null>>();
@@ -62,7 +73,9 @@ export async function fetchPokemon(slug: string): Promise<BattlePokemon | null> 
     const batch = await Promise.all(unknown.slice(i, i + CONCURRENCY).map(getMove));
     for (const m of batch) if (m) moves.push(m);
   }
-  return normalizePokemon(raw, moves);
+  const pokemon = normalizePokemon(raw, moves);
+  const megas = megaForms(pokemon.name);
+  return megas.length ? { ...pokemon, megas } : pokemon;
 }
 
 // Falls back to the bundled list so the Showdown page still renders while PokéAPI is down.

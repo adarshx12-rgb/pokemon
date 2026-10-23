@@ -27,6 +27,14 @@ export interface StatBlock { hp: number; atk: number; def: number; spa: number; 
 
 export interface Sprites { front: string | null; back: string | null; artwork: string | null }
 
+/** A Mega Evolution (or Primal Reversion): new types, base stats and sprites; moves and HP stay. */
+export interface MegaForm {
+  name: string; // PokéAPI slug, e.g. "charizard-mega-x"
+  types: TypeName[];
+  baseStats: StatBlock;
+  sprites: Sprites;
+}
+
 export interface BattlePokemon {
   id: number;
   name: string; // PokéAPI slug
@@ -34,6 +42,7 @@ export interface BattlePokemon {
   baseStats: StatBlock;
   sprites: Sprites;
   movePool: Move[]; // damaging moves only
+  megas?: MegaForm[]; // absent when the species has none (and in data cached before Megas existed)
 }
 
 export interface TeamMember { pokemon: BattlePokemon; moves: Move[] }
@@ -43,6 +52,7 @@ export type Side = 'A' | 'B';
 // In `damage` and `stat` events, side/index identify the affected Pokémon; in every other event, the actor.
 export type BattleEvent =
   | { kind: 'switchIn'; side: Side; index: number; hp: number; maxHp: number }
+  | { kind: 'mega'; side: Side; index: number; form: string }
   | { kind: 'useMove'; side: Side; index: number; move: Move; ppLeft: number }
   | { kind: 'miss'; side: Side; index: number }
   | { kind: 'damage'; side: Side; index: number; amount: number; hpAfter: number; effectiveness: number; crit: boolean }

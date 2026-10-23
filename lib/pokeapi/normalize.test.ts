@@ -82,6 +82,14 @@ describe('stat moves', () => {
     const sd = normalizeMove(statMove('swords-dance', 20, 'user', 'net-good-stats', [[2, 'attack']]));
     expect(sd?.target).toBe('self');
   });
+  it('sends user-targeted variants to self and drops moves the engine cannot place', () => {
+    for (const t of ['user', 'user-and-allies', 'user-or-ally'])
+      expect(normalizeMove(statMove('howl', 40, t, 'net-good-stats', [[1, 'attack']]))?.target).toBe('self');
+    expect(normalizeMove(statMove('aromatic-mist', 20, 'ally', 'net-good-stats', [[1, 'special-defense']]))).toBeNull();
+    expect(normalizeMove(statMove('rototiller', 10, 'all-pokemon', 'net-good-stats', [[1, 'attack']]))).toBeNull();
+    for (const n of ['decorate', 'parting-shot', 'clangorous-soul', 'no-retreat', 'stuff-cheeks', 'geomancy', 'venom-drench', 'captivate'])
+      expect(normalizeMove(statMove(n, 10, 'user', 'net-good-stats', [[1, 'attack']]))).toBeNull();
+  });
   it('drops status moves that do more than change stats', () => {
     expect(normalizeMove(statMove('thunder-wave', 20, 'selected-pokemon', 'ailment', []))).toBeNull();
     expect(normalizeMove(statMove('odd', 20, 'user', null, [[1, 'attack']]))).toBeNull();

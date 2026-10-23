@@ -9,7 +9,7 @@ const cache = new Map<string, Promise<BattlePokemon>>();
 async function fetchPokemon(name: string): Promise<BattlePokemon> {
   let res: Response;
   try {
-    res = await fetch(`/api/pokemon/${encodeURIComponent(name)}?v=2`, { signal: AbortSignal.timeout(TIMEOUT_MS) });
+    res = await fetch(`/api/pokemon/${encodeURIComponent(name)}?v=3`, { signal: AbortSignal.timeout(TIMEOUT_MS) });
   } catch {
     throw new Error('upstream');
   }

@@ -51,7 +51,11 @@ const EXCLUDED_MOVES = new Set([
   'phantom-force', 'shadow-force', 'meteor-beam', 'freeze-shock', 'ice-burn', 'electro-shot',
   'focus-punch', 'dream-eater', 'fake-out', 'first-impression', 'future-sight', 'doom-desire',
   'last-resort', 'belch', 'snore', 'synchronoise', 'burn-up', 'double-shock',
+  // Stat moves with side effects the engine ignores (switch-out, HP cost, ally/field targets, ability or type changes).
+  'parting-shot', 'clangorous-soul', 'no-retreat', 'stuff-cheeks', 'geomancy', 'venom-drench', 'captivate', 'decorate',
 ]);
+const SELF_TARGETS = new Set(['user', 'user-and-allies', 'user-or-ally']);
+const UNPLACEABLE_TARGETS = new Set(['ally', 'all-pokemon']); // no ally or whole-field effect in a 1v1 engine
 
 const STAGE_STATS: Record<string, StageStat> = {
   attack: 'atk', defense: 'def', 'special-attack': 'spa', 'special-defense': 'spd',
@@ -64,6 +68,7 @@ export function normalizeMove(raw: RawMove): Move | null {
   const pp = raw.pp && raw.pp > 0 ? raw.pp : 5;
   if (cls === 'status') {
     const changes = raw.stat_changes ?? [];
+    if (UNPLACEABLE_TARGETS.has(raw.target?.name ?? '')) return null;
     if (raw.meta?.category.name !== 'net-good-stats' || !changes.length || !isType(raw.type.name)) return null;
     const statChanges = [];
     for (const c of changes) {
@@ -73,7 +78,7 @@ export function normalizeMove(raw: RawMove): Move | null {
     }
     return {
       name: raw.name, type: raw.type.name, power: 0, accuracy: raw.accuracy, damageClass: 'status', pp,
-      target: raw.target?.name === 'user' ? 'self' : 'foe', statChanges,
+      target: SELF_TARGETS.has(raw.target?.name ?? '') ? 'self' : 'foe', statChanges,
     };
   }
   if (cls !== 'physical' && cls !== 'special') return null;

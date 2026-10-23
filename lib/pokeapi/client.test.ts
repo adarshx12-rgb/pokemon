@@ -30,6 +30,13 @@ describe('snapshotMove', () => {
 });
 
 describe('fetchPokemon', () => {
+  it('keeps snapshot stat changes and the real target through normalization', async () => {
+    fetchWithRetry.mockResolvedValue(json(200, pikachu(['howl', 'growl'])));
+    const pool = (await fetchPokemon('pikachu'))!.movePool;
+    expect(pool.find(m => m.name === 'howl')).toMatchObject({ target: 'self', statChanges: [{ stat: 'atk', change: 1 }] });
+    expect(pool.find(m => m.name === 'growl')).toMatchObject({ target: 'foe', statChanges: [{ stat: 'atk', change: -1 }] });
+  });
+
   it('needs one request when every move is in the snapshot', async () => {
     fetchWithRetry.mockResolvedValue(json(200, pikachu(['thunderbolt', 'quick-attack', 'growl'])));
     const pokemon = await fetchPokemon('pikachu');

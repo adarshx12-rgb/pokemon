@@ -54,7 +54,7 @@ describe('battle view', () => {
 
   it('describes immunity, misses, faints, and the end', () => {
     expect(run([{ kind: 'damage', side: 'B', index: 0, amount: 0, hpAfter: 153, effectiveness: 0, crit: false }]).message)
-      .toBe("It doesn't affect The foe's AZUMARILL…");
+      .toBe("It doesn't affect the foe's AZUMARILL…");
     expect(run([{ kind: 'miss', side: 'A', index: 1 }]).message).toBe("MR MIME's attack missed!");
     const fainted = run([{ kind: 'faint', side: 'B', index: 0 }]);
     expect(fainted.fainted.B[0]).toBe(true);

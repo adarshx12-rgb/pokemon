@@ -55,8 +55,8 @@ export function initView(teamA: TeamMember[], teamB: TeamMember[]): BattleView {
   };
 }
 
-const label = (names: TeamNames, side: Side, index: number) =>
-  side === 'B' ? `The foe's ${names.B[index]}` : names.A[index];
+const label = (names: TeamNames, side: Side, index: number, mid = false) =>
+  side === 'B' ? `${mid ? 'the' : 'The'} foe's ${names.B[index]}` : names.A[index];
 
 const say = (view: BattleView, message: string): BattleView => ({ ...view, message, messageId: view.messageId + 1 });
 
@@ -84,7 +84,7 @@ export function applyEvent(view: BattleView, event: BattleEvent, names: TeamName
       const next = { ...view, hp: withSide(view.hp, event.side, event.index, event.hpAfter) };
       const parts: string[] = [];
       if (event.crit) parts.push('A critical hit!');
-      if (event.effectiveness === 0) parts.push(`It doesn't affect ${label(names, event.side, event.index)}…`);
+      if (event.effectiveness === 0) parts.push(`It doesn't affect ${label(names, event.side, event.index, true)}…`);
       else if (event.effectiveness > 1) parts.push("It's super effective!");
       else if (event.effectiveness < 1) parts.push("It's not very effective…");
       return parts.length ? say(next, parts.join(' ')) : next;
